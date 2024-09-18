@@ -1,0 +1,302 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--======== CSS ======== -->
+    <link rel="stylesheet" href="{%static "admin_design.css"%}">
+    
+    <!--===== Boxicons CSS ===== -->
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!--===== Chart.js ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!--===== FontAwesome ===== -->
+    
+</head>
+
+<body>
+    <nav class="sidebar close">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                    <img src="assets/dienginside.png" alt="">
+                </span>
+
+                <div class="text logo-text">
+                    <span class="name">InternPal</span>
+                    <span class="profession">Web-based System</span>
+                </div>
+            </div>
+            <hr>
+        </header>
+        
+        <div class="menu-bar">
+            <div class="menu">
+                <div class="avatar_container">
+                    <div class="avatar_content">
+                        <img src="assets/destination-2.jpg" alt="">
+                        <p></p>
+                    </div>
+                    <div class="name_of_admin">
+                        <span>Chris Daniel</span>
+                        <p>Admin</p>
+                    </div>
+                </div>
+                <ul class="menu-links">
+                    <li class="nav-link">
+                        <a href="#" onclick="loadContent('dashboard')">
+                            <i class='bx bx-bar-chart-alt icon'></i>
+                            <span class="text nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="#" onclick="loadContent('intern-transaction')">
+                            <i class='bx bx-transfer icon'></i>
+                            <span class="text nav-text">Intern Transaction</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="#" onclick="loadContent('departments')">
+                            <i class='bx bx-building icon'></i>
+                            <span class="text nav-text">Departments</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="#" onclick="loadContent('internship-dates')">
+                            <i class='bx bx-calendar icon'></i>
+                            <span class="text nav-text">Internship Dates</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="#" onclick="loadContent('account-approval')">
+                            <i class='bx bx-check-circle icon'></i>
+                            <span class="text nav-text">Account Approval</span>
+                        </a>
+                    </li>
+                    <li class="nav-link dropdown-toggle">
+                        <a href="#" onclick="toggleDropdown(this)">
+                            <i class='bx bx-folder icon'></i>
+                            <span class="text nav-text">Internship Procedures</span>
+                            <i class='bx bx-chevron-right dropdown-arrow'></i>
+                        </a>
+                        <ul class="dropdown">
+                            <li class="nav-link">
+                                <a href="#" onclick="loadContent('confirm-internships')">
+                                    <i class='bx bx-check-double icon'></i>
+                                    <span class="text nav-text">Confirm Internships</span>
+                                </a>
+                            </li>
+                            <li class="nav-link">
+                                <a href="#" onclick="loadContent('view-intern')">
+                                    <i class='bx bx-show icon'></i>
+                                    <span class="text nav-text">View Intern</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bottom-content">
+                <li class="nav-link">
+                    <a href="#" onclick="loadContent('profile')">
+                        <i class='bx bx-user icon'></i>
+                        <span class="text nav-text">Profile</span>
+                    </a>
+                </li>
+
+                <li class="nav-link">
+                    <a href="#" onclick="loadContent('logout')">
+                        <i class='bx bx-log-out icon'></i>
+                        <span class="text nav-text">Logout</span>
+                    </a>
+                </li>
+
+                <li class="mode">
+                    <div class="sun-moon">
+                        <i class='bx bx-moon icon moon'></i>
+                        <i class='bx bx-sun icon sun'></i>
+                    </div>
+                    <span class="mode-text text">Dark mode</span>
+
+                    <div class="toggle-switch">
+                        <span class="switch"></span>
+                    </div>
+                </li>
+            </div>
+        </div>
+    </nav>
+
+    <section class="home">
+        <div class="dashboard_header">
+            <h1>Dashboard</h1>
+            <div class="email_icon">
+                <h1>1</h1>
+                <h1>1</h1>
+                <h1>1</h1>
+            </div>
+        </div>
+        <div class="content">
+            <div class="section_charts_and_user">
+                <div class="user_counting_box">
+                    <div class="boxes">
+                        <div class="user_number">
+                            <p>Total Users</p>
+                        </div>
+                        <div class="user_icon">
+                            <i class='bx bx-user icon'></i>
+                            <h1>0</h1>
+                        </div>
+                        <div class="viewDetails">
+                            <p>_</p>
+                            <a href="">View Details</a>
+                        </div>
+                        
+                    </div>
+                    <div class="boxes">
+                        <div class="approved_accounts">
+                            <p>Approved Accounts</p>
+                        </div>
+                        <div class="approved_icon">
+                            <i class='bx bx-check-circle'></i>
+                            <h1>0</h1>
+                        </div>
+                        <div class="viewDetails">
+                            <p>_</p>
+                            <a href="">View Details</a>
+                        </div>
+                        
+                    </div>
+                    <div class="boxes">
+                        <div class="rejected_accounts">
+                            <p>Rejected Accounts</p>
+                        </div>
+                        <div class="rejected_icons">    
+                            <i class='bx bx-x-circle'></i>
+                            <h1>0</h1>
+                        </div>
+                        <div class="viewDetails">
+                            <p>_</p>
+                            <a href="">View Details</a>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="chart_box">
+                    <div class="box_chart"></div>
+                    <div class="pie_chart"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const body = document.querySelector('body'),
+              sidebar = body.querySelector('nav'),
+              modeSwitch = body.querySelector(".toggle-switch"),
+              modeText = body.querySelector(".mode-text");
+
+        modeSwitch.addEventListener("click", () => {
+            body.classList.toggle("dark");
+            modeText.innerText = body.classList.contains("dark") ? "Light mode" : "Dark mode";
+        });
+
+        // Function to load content based on the clicked item
+        function loadContent(section) {
+            const content = document.querySelector('.home .content');
+            let html = '';
+
+            switch(section) {
+                case 'dashboard':
+                    html = `
+                    
+                    <div class="section_charts_and_user">
+                        <div class="user_counting_box">
+                            <div class="boxes">
+                                <div class="user_number">
+                                    <p>Total Users</p>
+                                </div>
+                                <div class="user_icon">
+                                    <i class='bx bx-user icon'></i>
+                                </div>
+                                
+                            </div>
+                            <div class="boxes"></div>
+                            <div class="boxes"></div>
+                        </div>
+                        <div class="chart_box">
+                            <div class="box_chart"></div>
+                            <div class="pie_chart"></div>
+                        </div>
+                    </div>
+                    `;
+                    break;
+                case 'intern-transaction':
+                    html = `
+                        <h2>Intern Transaction</h2>
+                        <p>Manage intern transactions and records here.</p>
+                    `;
+                    break;
+                case 'departments':
+                    html = `
+                        <h2>Departments</h2>
+                        <p>View and manage all the departments in the system.</p>
+                    `;
+                    break;
+                case 'internship-dates':
+                    html = `
+                        <h2>Internship Dates</h2>
+                        <p>Here you can manage the internship schedules.</p>
+                    `;
+                    break;
+                case 'account-approval':
+                    html = `
+                        <h2>Account Approval</h2>
+                        <p>Approve or deny user accounts here.</p>
+                    `;
+                    break;
+                case 'confirm-internships':
+                    html = `
+                        <h2>Confirm Internships</h2>
+                        <p>Manage internship confirmations here.</p>
+                    `;
+                    break;
+                case 'view-intern':
+                    html = `
+                        <h2>View Intern</h2>
+                        <p>View details of the interns here.</p>
+                    `;
+                    break;
+                case 'profile':
+                    html = `
+                        <h2>Profile</h2>
+                        <p>Manage your user profile here.</p>
+                    `;
+                    break;
+                case 'logout':
+                    html = `
+                        <h2>Logout</h2>
+                        <p>You have been logged out.</p>
+                    `;
+                    break;
+                default:
+                    html = `<h2>Dashboard</h2>`;
+                    break;
+            }
+
+            // Update the content section
+            content.innerHTML = html;
+        }
+
+        // Dropdown toggle function
+        function toggleDropdown(dropdown) {
+            dropdown.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

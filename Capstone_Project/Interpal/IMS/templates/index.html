@@ -1,0 +1,575 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+  <link rel="stylesheet" href="{% static 'blob.css' %}">
+  <link rel="stylesheet" href="{% static 'loginForm.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <title>Web Design Mastery | Pathway</title>
+  
+</head>
+<body>
+  <!-- Blob Animition -->
+  <div class="blob_animation">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+  </div>
+  
+  <nav>
+    <div class="nav__logo"><span>I</span>nternPal<span>.</span></div>
+    <ul class="nav__links">
+      <li class="link"><a href="#home">Home</a></li>
+      <li class="link"><a href="#companies">Companies</a></li>
+      <li class="link"><a href="#internships">Internships</a></li>
+      <li class="link"><a href="#gallery">Gallery</a></li>
+      <li class="link"><a href="#about-us">About Us</a></li>
+    </ul>
+
+    </div>
+    <button class="btn" onclick="openModal(event, 'signInModal')">Sign In</button>
+    <button class="btn" onclick="openModal(event, 'signUpModal')">Sign Up</button>
+  </nav>
+
+  <header id="home">
+    <div class="section__container header__container">
+      <div class="header__image">
+        <img src="{% static 'img/header-1.jpg' %}" alt="header">
+        <img src="{% static 'img/header-2.jpg' %}" alt="header">
+      </div>
+      <div class="header__content">
+        <div>
+          <p class="sub__header">Try It Now!!</p>
+          <h1>The Best 😊<br />Web for Looking</h1>
+          <p class="section__subtitle">
+            Embark on your career journey with premier internship opportunities in the job industry.
+            Discover, learn, and thrive with us!
+          </p>
+          <div class="action__btns">
+            <button class="btn">Dive In Now!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sign In Modal -->
+<!-- Sign In Modal -->
+<div id="signInModal" class="modal-overlay" style="display: none;">
+  <div class="modal-container">
+      <button class="close-button" onclick="closeModal('signInModal')">&times;</button>
+      <div class="modal-header">
+          <h1>Sign In</h1>
+          <hr id="line">
+          <p>Welcome back! Please sign in to your account.</p>
+      </div>
+      <form method="POST" action="{% url 'sign_in' %}">
+          {% csrf_token %}
+          <input type="email" name="email" placeholder="Email Address" class="input" required />
+          <input type="password" name="password" placeholder="Password" class="input" required />
+          <button type="submit" class="button">Sign In</button>
+      </form>
+      <p>Don't have an account? <a href="#" onclick="switchModal('signInModal', 'signUpModal')">Sign Up</a></p>
+      <div class="social-icons">
+          <img src="https://openui.fly.dev/openui/google.svg?text=G" alt="Google" />
+          <img src="https://openui.fly.dev/openui/facebook.svg?text=F" alt="Facebook" />
+          <img src="https://openui.fly.dev/openui/apple.svg?text=A" alt="Apple" />
+          <img src="https://openui.fly.dev/openui/twitter.svg?text=T" alt="Twitter" />
+      </div>
+  </div>
+</div>
+
+<!-- Sign Up Modal -->
+<div id="signUpModal" class="modal-overlay" style="display: none;">
+  <div class="modal-container">
+      <button class="close-button" onclick="closeModal('signUpModal')">&times;</button>
+      <div class="modal-header">
+          <h1>Sign Up</h1>
+          <hr id="line">
+          <p>Join us and explore great opportunities!</p>
+      </div>
+
+      <!-- Step 1 -->
+      <div id="step1" class="modal-step">
+          <form method="POST" action="{% url 'sign_up_step_1' %}">
+              {% csrf_token %}
+              <input type="text" name="full_name" placeholder="Last Name, First Name, Middle Initial" class="input" required />
+              <input type="text" name="address" placeholder="Address" class="input" required />
+              <input type="date" name="date_of_birth" class="input" required />
+              <input type="tel" name="phone_number" placeholder="Phone Number (e.g., +63 912 345 6789)" class="input" required />
+              <button type="button" class="button next-button" onclick="nextStep()">Next</button>
+          </form>
+          <p>Already have an account? <a href="#" onclick="switchModal('signUpModal', 'signInModal')">Sign In</a></p>
+          <div class="social-icons">
+              <img src="https://openui.fly.dev/openui/google.svg?text=G" alt="Google" />
+              <img src="https://openui.fly.dev/openui/facebook.svg?text=F" alt="Facebook" />
+              <img src="https://openui.fly.dev/openui/apple.svg?text=A" alt="Apple" />
+              <img src="https://openui.fly.dev/openui/twitter.svg?text=T" alt="Twitter" />
+          </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="step2" class="modal-step" style="display: none;">
+          <form method="POST" action="{% url 'sign_up_step_2' %}">
+              {% csrf_token %}
+              <input type="email" name="email" placeholder="Email Address" class="input" required />
+              <input type="text" name="school_name" placeholder="School Name" class="input" required />
+              <input type="text" name="college" placeholder="College" class="input" required />
+              <input type="text" name="course" placeholder="Course" class="input" required />
+              <div class="modal-buttons">
+                  <button type="button" class="button back-button" onclick="previousStep()">Back</button>
+                  <button type="submit" class="button confirm-button">Confirm</button>
+              </div>
+          </form>
+          <p>Already have an account? <a href="#" onclick="switchModal('signUpModal', 'signInModal')">Sign In</a></p>
+          <div class="social-icons">
+              <img src="https://openui.fly.dev/openui/google.svg?text=G" alt="Google" />
+              <img src="https://openui.fly.dev/openui/facebook.svg?text=F" alt="Facebook" />
+              <img src="https://openui.fly.dev/openui/apple.svg?text=A" alt="Apple" />
+              <img src="https://openui.fly.dev/openui/twitter.svg?text=T" alt="Twitter" />
+          </div>
+      </div>
+  </div>
+</div>
+
+
+
+
+
+  <section class="section__container destination__container" id="companies">
+    <div class="section__header">
+      <div>
+        <h2 class="section__title">Companies</h2>
+        <p class="section__subtitle">
+          Explore your suitable and dream Internships within Palawan. Here you can
+         find your right destination.
+        </p>
+      </div>
+      <div class="destination__nav">
+        <span><i class="ri-arrow-left-s-line"></i></span>
+        <span><i class="ri-arrow-right-s-line"></i></span>
+      </div>
+    </div>
+    <div class="destination__grid">
+      <div class="destination__card">
+        <img src="" alt="destination" />
+        <div class="destination__details">
+          <p class="destination__title">SM</p>
+          <p class="destination__subtitle">Puerto Princesa</p>
+        </div>
+      </div>
+      <div class="destination__card">
+        <img src="" alt="destination" />
+        <div class="destination__details">
+          <p class="destination__title">Robinson</p>
+          <p class="destination__subtitle">Puerto Princesa</p>
+        </div>
+      </div>
+      <div class="destination__card">
+        <img src="" alt="destination" />
+        <div class="destination__details">
+          <p class="destination__title">Ace Medical Hospital</p>
+          <p class="destination__subtitle">Puerto Princesa</p>
+        </div>
+      </div>
+      <div class="destination__card">
+        <img src="" alt="destination" />
+        <div class="destination__details">
+          <p class="destination__title">Sitel</p>
+          <p class="destination__subtitle">Puerto Princesa</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="trip" id="internships">
+    <div class="section__container trip__container">
+      <h2 class="section__title">Explore Companies Internships</h2>
+      <p class="section__subtitle">
+        Explore your suitable and dream job within Palawan. Here you
+        can find your right and suitable companies for your skills to train with.
+      </p>
+      <div class="trip__grid">
+        <div class="trip__card">
+          <img src="" alt="" />
+          <div class="trip__details">
+            <p>SM Puerto Princesa</p>
+            <div class="booking__price">
+              <button class="book__now">Visit</button>
+            </div>
+          </div>
+        </div>
+        <div class="trip__card trip__card--down">
+          <div class="trip__details">
+            <p>Robinson, Palawan</p>
+            <div class="booking__price">
+              <button class="book__now">Visit</button>
+            </div>
+          </div>
+        </div>
+        <div class="trip__card">
+          <div class="trip__details">
+            <p>Sitel, Puerto Princesa City</p>
+             <div class="booking__price">
+              <button class="book__now">Visit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view__all">
+        <button class="btn">View All</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallary" id="gallery">
+    <div class="section__container gallary__container">
+      <div class="image__gallary">
+        <div class="gallary__col">
+          <img src="" alt="gallary" />
+        </div>
+        <div class="gallary__col">
+          <img src="" alt="gallary" />
+          <img src="" alt="gallary" />
+        </div>
+      </div>
+      <div class="gallary__content">
+        <div>
+          <h2 class="section__title">
+            Our trip gallary that will inspire you
+          </h2>
+          <p class="section__subtitle">
+            Explore your suitable and dream internships within Palawan. Here you
+          can find your right destination.
+          </p>
+          <button class="btn">View All</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section__container about__us" id="about-us">
+    <div class="section__headers">
+      <div class="header__contents">
+        <h2 class="section__titles">About Us</h2>
+        <p class="section__subtitles">
+          <button class="btn-learn-more">Learn more</button>
+        </p>
+      </div>
+    </div>
+    <div class="section__contents">
+      <p>
+        InternPal is a dynamic initiative designed to revolutionize the internship landscape in Palawan,
+        providing valuable hands-on experience and networking opportunities essential for career growth.
+        Our platform facilitates seamless connections between aspiring professionals and a wide array of internship opportunities 
+        across various industries. 
+      </p>
+      <p>
+        By bridging the gap between students and organizations, InternPal is committed to fostering collaboration, 
+        empowering the next generation of talent, and driving innovation in the region's workforce development.
+      </p>
+    </div>
+  </section>
+
+  <section class="subscribe">
+    <div class="section__container subscribe__container">
+      <div class="subscribe__content">
+        <h2 class="section__title">Need help? Contact us!</h2>
+        <p class="section__subtitle">
+          Explore your suitable and dream internships within Palawan. Here you
+          can find your right destination.
+      </div>
+      <div class="subscribe__form">
+        <form>
+          <input type="email" placeholder="Your email here" />
+          <button class="btn" type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="section__container footer__container">
+      <div class="footer__col">
+        <h3>InternPal<span>.</span></h3>
+        <p>
+          Explore your suitable and dream internships within Palawan. Here you
+          can find your right destination.
+        </p>
+      </div>
+      <div class="footer__col">
+        <h4>Support</h4>
+        <p><a href="#" onclick="openModal(event, 'termsConditionsModal')">Terms & Conditions</a></p>
+        <p><a href="#" onclick="openModal(event, 'privacyPolicyModal')">Privacy Policy</a></p>
+        <p>Contact Us</p>
+      </div>
+      <div class="footer__col">
+        <h4>Address</h4>
+        <p><span>Address:</span> Sta. Monica, NHA Ville, Puerto Princesa City</p>
+        <p><span>Email:</span>internpal@gmail.com</p>
+        <p><span>Phone:</span>09123456789</p>
+      </div>
+      <div class="footer__col">
+        <h4>Follow Us</h4>
+        <div class="footer__socials">
+          <i class="ri-facebook-fill"></i>
+          <i class="ri-instagram-fill"></i>
+          <i class="ri-twitter-fill"></i>
+          <i class="ri-linkedin-fill"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Privacy Policy Modal -->
+  <div id="privacyPolicyModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('privacyPolicyModal')">&times;</span>
+      <h2>Privacy Policy</h2>
+      <p>Your privacy policy content goes here.</p>
+    </div>
+  </div>
+
+  <!-- Terms & Conditions Modal -->
+  <div id="termsConditionsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('termsConditionsModal')">&times;</span>
+      <h2>Terms & Conditions</h2>
+      <p>Your terms & conditions content goes here.</p>
+    </div>
+  </div>
+
+  <script>
+
+  // Open and close modals
+  function openModal(event, modalId) {
+    event.preventDefault();
+    document.getElementById(modalId).style.display = 'block';
+    document.body.classList.add('blur-background');
+    resetModalSteps();  // Ensure both modals start at step 1
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    document.body.classList.remove('blur-background');
+  }
+  // Close the modal when clicking outside of the modal container
+  window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal-overlay');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+  }
+
+  function switchModal(currentModalId, targetModalId) {
+    document.getElementById(currentModalId).style.display = 'none';
+    document.getElementById(targetModalId).style.display = 'block';
+    resetModalSteps();  // Ensure target modal starts at step 1
+}
+
+function resetModalSteps() {
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'none';
+}
+  function nextStep() {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+}
+
+function previousStep() {
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step1').style.display = 'block';
+}
+
+function openModal(event, modalId) {
+    event.preventDefault();
+    document.getElementById(modalId).style.display = 'block';
+    document.body.classList.add('blur-background');
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'none';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    document.body.classList.remove('blur-background');
+}
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const modalOverlay = document.querySelector('#loginModal');
+    const closeButton = document.querySelector('.close-button');
+
+    // Show the modal
+    setTimeout(() => {
+      modalOverlay.style.display = "block";
+    }, 1000);
+
+    // Close the modal on button click
+    closeButton.addEventListener('click', () => {
+      modalOverlay.style.display = "none";
+    });
+
+    // Close the modal when clicking outside of the modal container
+    modalOverlay.addEventListener('click', (event) => {
+      if (event.target === modalOverlay) {
+        modalOverlay.style.display = "none";
+      }
+    });
+  });
+
+  //ToggleDarkMOde Icon
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const icon = document.querySelector('#modeToggle i');
+    if (document.body.classList.contains('dark-mode')) {
+      icon.classList.replace('ri-sun-line', 'ri-moon-line');
+    } else {
+      icon.classList.replace('ri-moon-line', 'ri-sun-line');
+    }
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const darkModePreference = localStorage.getItem('darkMode');
+    if (darkModePreference === 'enabled') {
+      document.body.classList.add('dark-mode');
+      document.querySelector('#modeToggle i').classList.replace('ri-sun-line', 'ri-moon-line');
+    }
+  });
+
+  document.getElementById('modeToggle').addEventListener('click', toggleDarkMode);
+
+document.addEventListener('DOMContentLoaded', function() {
+
+// Select all links with hashes
+const links = document.querySelectorAll('a[href^="#"]');
+
+for (let link of links) {
+  link.addEventListener('click', function(e) {
+    // Prevent default anchor click behavior
+    e.preventDefault();
+    
+    // Smoothly scroll to the section
+    const targetId = this.getAttribute('href');
+    const targetElement = document.querySelector(targetId);
+    if (targetElement) {
+      window.scrollTo({
+        top: targetElement.offsetTop,
+        behavior: 'smooth'
+      });
+    }
+  });
+}
+});
+
+
+// Animation Effect 
+window.addEventListener('scroll', function() {
+const gallerySection = document.querySelector('.gallary__container');
+const sectionPosition = gallerySection.getBoundingClientRect().top;
+const screenPosition = window.innerHeight / 1.2;
+
+if (sectionPosition < screenPosition) {
+  gallerySection.classList.add('active');
+} else {
+  gallerySection.classList.remove('active');
+}
+});
+
+function toggleMenu() {
+  const navLinks = document.querySelector('.nav__links');
+  navLinks.style.display = navLinks.style.display === 'block' ? 'none' : 'block';
+}
+
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    function switchModal(hideModal, showModal) {
+        document.getElementById(hideModal).style.display = 'none';
+        document.getElementById(showModal).style.display = 'block';
+    }
+
+    function nextStep() {
+        const step1Form = document.getElementById('step1Form');
+        if (step1Form.checkValidity()) {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        } else {
+            alert("Please fill out all fields in Step 1.");
+        }
+    }
+
+    function previousStep() {
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step1').style.display = 'block';
+    }
+
+    // Handle Sign In Submission via AJAX
+    document.getElementById('signInForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(document.getElementById('signInForm'));
+
+        fetch("{% url 'sign_in' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/'; // Redirect to homepage
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
+    // Handle Sign Up Submission via AJAX
+    document.getElementById('step2Form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const step1Data = new FormData(document.getElementById('step1Form'));
+        const step2Data = new FormData(document.getElementById('step2Form'));
+
+        // Combine the form data from both steps
+        for (let [key, value] of step2Data.entries()) {
+            step1Data.append(key, value);
+        }
+
+        // Perform AJAX request to the backend (sign up)
+        fetch("{% url 'sign_up' %}", {
+            method: 'POST',
+            body: step1Data,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/'; // Redirect to homepage or another page
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+  </script>
+</body>
+</html>
