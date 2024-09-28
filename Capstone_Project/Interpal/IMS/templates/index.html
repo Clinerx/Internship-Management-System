@@ -8,7 +8,6 @@
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'styles.css' %}">
   <link rel="stylesheet" href="{% static 'blob.css' %}">
-  <link rel="stylesheet" href="{% static 'loginForm.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
   <title>Web Design Mastery | Pathway</title>
@@ -31,10 +30,11 @@
       <li class="link"><a href="#gallery">Gallery</a></li>
       <li class="link"><a href="#about-us">About Us</a></li>
     </ul>
-
-    </div>
-    <button class="btn" onclick="openModal(event, 'signInModal')">Sign In</button>
-    <button class="btn" onclick="openModal(event, 'signUpModal')">Sign Up</button>
+    <button id="modeToggle" class="mode-toggle-icon">
+      <i class="ri-sun-line"></i>
+    </button>
+    <a href="{% url 'login' %}" class="btn">Sign In</a>
+    <a href="{% url 'register' %}" class="btn">Sign Up</a>
   </nav>
 
   <header id="home">
@@ -58,86 +58,6 @@
       </div>
     </div>
   </header>
-
-  <!-- Sign In Modal -->
-<!-- Sign In Modal -->
-<div id="signInModal" class="modal-overlay" style="display: none;">
-  <div class="modal-container">
-      <button class="close-button" onclick="closeModal('signInModal')">&times;</button>
-      <div class="modal-header">
-          <h1>Sign In</h1>
-          <hr id="line">
-          <p>Welcome back! Please sign in to your account.</p>
-      </div>
-      <form method="POST" action="{% url 'sign_in' %}">
-          {% csrf_token %}
-          <input type="email" name="email" placeholder="Email Address" class="input" required />
-          <input type="password" name="password" placeholder="Password" class="input" required />
-          <button type="submit" class="button">Sign In</button>
-      </form>
-      <p>Don't have an account? <a href="#" onclick="switchModal('signInModal', 'signUpModal')">Sign Up</a></p>
-      <div class="social-icons">
-          <img src="https://openui.fly.dev/openui/google.svg?text=G" alt="Google" />
-          <img src="https://openui.fly.dev/openui/facebook.svg?text=F" alt="Facebook" />
-          <img src="https://openui.fly.dev/openui/apple.svg?text=A" alt="Apple" />
-          <img src="https://openui.fly.dev/openui/twitter.svg?text=T" alt="Twitter" />
-      </div>
-  </div>
-</div>
-
-<!-- Sign Up Modal -->
-<div id="signUpModal" class="modal-overlay" style="display: none;">
-  <div class="modal-container">
-      <button class="close-button" onclick="closeModal('signUpModal')">&times;</button>
-      <div class="modal-header">
-          <h1>Sign Up</h1>
-          <hr id="line">
-          <p>Join us and explore great opportunities!</p>
-      </div>
-
-      <!-- Step 1 -->
-      <div id="step1" class="modal-step">
-          <form method="POST" action="{% url 'sign_up_step_1' %}">
-              {% csrf_token %}
-              <input type="text" name="full_name" placeholder="Last Name, First Name, Middle Initial" class="input" required />
-              <input type="text" name="address" placeholder="Address" class="input" required />
-              <input type="date" name="date_of_birth" class="input" required />
-              <input type="tel" name="phone_number" placeholder="Phone Number (e.g., +63 912 345 6789)" class="input" required />
-              <button type="button" class="button next-button" onclick="nextStep()">Next</button>
-          </form>
-          <p>Already have an account? <a href="#" onclick="switchModal('signUpModal', 'signInModal')">Sign In</a></p>
-          <div class="social-icons">
-              <img src="https://openui.fly.dev/openui/google.svg?text=G" alt="Google" />
-              <img src="https://openui.fly.dev/openui/facebook.svg?text=F" alt="Facebook" />
-              <img src="https://openui.fly.dev/openui/apple.svg?text=A" alt="Apple" />
-              <img src="https://openui.fly.dev/openui/twitter.svg?text=T" alt="Twitter" />
-          </div>
-      </div>
-
-      <!-- Step 2 -->
-      <div id="step2" class="modal-step" style="display: none;">
-          <form method="POST" action="{% url 'sign_up_step_2' %}">
-              {% csrf_token %}
-              <input type="email" name="email" placeholder="Email Address" class="input" required />
-              <input type="text" name="school_name" placeholder="School Name" class="input" required />
-              <input type="text" name="college" placeholder="College" class="input" required />
-              <input type="text" name="course" placeholder="Course" class="input" required />
-              <div class="modal-buttons">
-                  <button type="button" class="button back-button" onclick="previousStep()">Back</button>
-                  <button type="submit" class="button confirm-button">Confirm</button>
-              </div>
-          </form>
-          <p>Already have an account? <a href="#" onclick="switchModal('signUpModal', 'signInModal')">Sign In</a></p>
-          <div class="social-icons">
-              <img src="https://openui.fly.dev/openui/google.svg?text=G" alt="Google" />
-              <img src="https://openui.fly.dev/openui/facebook.svg?text=F" alt="Facebook" />
-              <img src="https://openui.fly.dev/openui/apple.svg?text=A" alt="Apple" />
-              <img src="https://openui.fly.dev/openui/twitter.svg?text=T" alt="Twitter" />
-          </div>
-      </div>
-  </div>
-</div>
-
 
 
 
@@ -201,6 +121,7 @@
           <div class="trip__details">
             <p>SM Puerto Princesa</p>
             <div class="booking__price">
+              <button class="book__now">Apply Now</button>
               <button class="book__now">Visit</button>
             </div>
           </div>
@@ -209,14 +130,17 @@
           <div class="trip__details">
             <p>Robinson, Palawan</p>
             <div class="booking__price">
+              <button class="book__now">Apply Now</button>
               <button class="book__now">Visit</button>
             </div>
           </div>
         </div>
         <div class="trip__card">
+          <img src="" alt="" />
           <div class="trip__details">
             <p>Sitel, Puerto Princesa City</p>
-             <div class="booking__price">
+          c  <div class="booking__price">
+              <button class="book__now">Apply Now</button>
               <button class="book__now">Visit</button>
             </div>
           </div>
@@ -484,92 +408,10 @@ if (sectionPosition < screenPosition) {
 }
 });
 
-function toggleMenu() {
-  const navLinks = document.querySelector('.nav__links');
-  navLinks.style.display = navLinks.style.display === 'block' ? 'none' : 'block';
-}
 
 
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
 
-    function switchModal(hideModal, showModal) {
-        document.getElementById(hideModal).style.display = 'none';
-        document.getElementById(showModal).style.display = 'block';
-    }
 
-    function nextStep() {
-        const step1Form = document.getElementById('step1Form');
-        if (step1Form.checkValidity()) {
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-        } else {
-            alert("Please fill out all fields in Step 1.");
-        }
-    }
-
-    function previousStep() {
-        document.getElementById('step2').style.display = 'none';
-        document.getElementById('step1').style.display = 'block';
-    }
-
-    // Handle Sign In Submission via AJAX
-    document.getElementById('signInForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const formData = new FormData(document.getElementById('signInForm'));
-
-        fetch("{% url 'sign_in' %}", {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '/'; // Redirect to homepage
-            } else {
-                alert("Error: " + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
-
-    // Handle Sign Up Submission via AJAX
-    document.getElementById('step2Form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const step1Data = new FormData(document.getElementById('step1Form'));
-        const step2Data = new FormData(document.getElementById('step2Form'));
-
-        // Combine the form data from both steps
-        for (let [key, value] of step2Data.entries()) {
-            step1Data.append(key, value);
-        }
-
-        // Perform AJAX request to the backend (sign up)
-        fetch("{% url 'sign_up' %}", {
-            method: 'POST',
-            body: step1Data,
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = '/'; // Redirect to homepage or another page
-            } else {
-                alert("Error: " + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
   </script>
 </body>
 </html>
