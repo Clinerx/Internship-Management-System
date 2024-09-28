@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'loginForm.css' %}">
+    <title>OTP Confirmation</title>
+</head>
+<body>
+    <div class="form-container">
+        <h2>OTP Confirmation</h2>
+        <form method="POST" action="{% url 'otp_verify' token %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="otp">Enter OTP:</label>
+                <input type="text" name="otp" id="otp" required placeholder="Enter the OTP you received">
+            </div>
+            <button type="submit" class="btn">Verify OTP</button>
+
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>

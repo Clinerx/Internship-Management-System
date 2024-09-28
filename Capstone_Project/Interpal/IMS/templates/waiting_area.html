@@ -7,25 +7,22 @@
     <link rel="stylesheet" href="{% static 'loginForm.css' %}">
     <title>Waiting for Confirmation</title>
     <script>
-        function checkConfirmation() {
-            // Fetch the status of the confirmation link
-            fetch("{% url 'check_confirmation_status' token %}")
-            .then(response => response.json())
-            .then(data => {
-                if (data.confirmed) {
-                    // Redirect to the password reset form if the token is confirmed
-                    window.location.href = "{% url 'reset_password_confirm' token %}";
-                }
-            })
-            .catch(error => console.error('Error checking confirmation status:', error));
-        }
-
-        // Check every 5 seconds if the confirmation link has been clicked
-        setInterval(checkConfirmation, 5000);
+                // Polling mechanism to automatically check when the token gets confirmed
+            setInterval(() => {
+                fetch("{% url 'check_confirmation_status' token %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.confirmed) {
+                            window.location.href = "{% url 'reset_password_confirm' token %}";
+                        }
+                    });
+            }, 5000); 
     </script>
 </head>
 <body>
     <div class="form-container">
+        <h2>Waiting for Confirmation</h2>
+        <p>Please check your email to confirm your password reset request.</p>
     </div>
 </body>
 </html>

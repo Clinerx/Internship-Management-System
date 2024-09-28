@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
 from .models import UserVisit, CustomUser 
 from django.http import JsonResponse
+import random
 
 User = CustomUser  # Reference your CustomUser model
 
@@ -15,38 +16,27 @@ def request_form(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         try:
-            # Fetch the user by email
             user = CustomUser.objects.get(email=email)
-            # Generate a unique token for password reset
             token = get_random_string(length=32)
             user.reset_token = token
+            user.reset_otp = random.randint(100000, 999999)  # Generate OTP
             user.save()
-            # Build the reset link (with the token)
-            reset_link = request.build_absolute_uri(reverse('reset_password_confirm', args=[token]))
-            # Send the email with the reset link
+
             send_mail(
                 'Password Reset Request',
-                f'Click the link to reset your password: {reset_link}',
-                'your_email@example.com',  # Sender email
-                [email],  # Recipient email
+                f'Dear {user.email},\n\nDid you request a reset password? If not, ignore this email. If yes, please use the following OTP: {user.reset_otp}',
+                'your_email@example.com',
+                [email],
                 fail_silently=False,
             )
-            # Add a success message to confirm email was sent
             messages.success(request, f"A password reset link has been sent to {email}. Please check your inbox.")
-            # Redirect to the waiting area page with the token
-            return redirect('waiting_area', token=token)
+            return redirect('otp_verify', token=token)  # Redirect to OTP confirmation
 
         except CustomUser.DoesNotExist:
-            # Show error if email is not found in the system
             messages.error(request, 'No account found with this email.')
+            
+    return render(request, 'registration/reset_password_form.html')  # Updated path
 
-    # Render the form page if it's not a POST request
-    return render(request, 'reset_password_form.html')
-
-
-# Waiting area view
-def waiting_area(request, token):
-    return render(request, 'waiting_area.html', {'token': token})
 
 
 # Check if the email confirmation link has been clicked (used by the waiting area for real-time updates)
@@ -102,7 +92,6 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
-
 def user_login(request):
     if request.method == 'POST':
         email = request.POST['email']
@@ -112,9 +101,8 @@ def user_login(request):
             login(request, user)
             return redirect('home')
         else:
-            # Display an error message for invalid credentials
             messages.error(request, 'Invalid email or password')
-    return render(request, 'login.html')
+    return render(request, 'registration/login.html')  # Updated path
 
 
 # User Logout
@@ -140,22 +128,39 @@ def delete_user(request, user_id):
     messages.success(request, f'User {user.email} deleted successfully.')
     return redirect('admin_view')  # Redirect to the admin view or wherever appropriate
 
-
 def reset_password_confirm(request, token):
     try:
-        user = User.objects.get(reset_token=token)
+        user = CustomUser.objects.get(reset_token=token)
         if request.method == 'POST':
             new_password = request.POST.get('new_password')
             confirm_password = request.POST.get('confirm_password')
             if new_password == confirm_password:
                 user.set_password(new_password)
-                user.reset_token = ''  # Clear the token after password reset
+                user.reset_token = ''  # Clear the reset token after successful password change
+                user.reset_otp = None  # Ensure OTP is cleared
                 user.save()
                 messages.success(request, 'Your password has been successfully changed!')
                 return redirect('login')
             else:
                 messages.error(request, 'Passwords do not match.')
-        return render(request, 'reset_password_confirm.html', {'token': token})
-    except User.DoesNotExist:
+
+        return render(request, 'registration/reset_password_confirm.html', {'token': token})
+
+    except CustomUser.DoesNotExist:
         messages.error(request, 'Invalid reset token.')
         return redirect('request_password_reset')
+
+
+def otp_verify(request, token):
+    if request.method == 'POST':
+        entered_otp = request.POST.get('otp')
+        try:
+            user = CustomUser.objects.get(reset_token=token)
+            if str(user.reset_otp) == entered_otp:  # Validate OTP
+                return redirect('reset_password_confirm', token=token)  # If OTP is correct, redirect to reset password page
+            else:
+                messages.error(request, 'Invalid OTP entered. Please try again.')
+        except CustomUser.DoesNotExist:
+            messages.error(request, 'Invalid reset token.')
+
+    return render(request, 'registration/otp_confirmation.html', {'token': token})

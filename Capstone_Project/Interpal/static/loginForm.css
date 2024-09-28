@@ -111,15 +111,3 @@ input[type="checkbox"] {
 .sign-up-text a:hover {
   text-decoration: underline;
 }
-.messages {
-  margin-bottom: 15px;
-}
-
-.error {
-  color: red;
-  background-color: #f8d7da;
-  padding: 10px;
-  border: 1px solid red;
-  border-radius: 5px;
-  margin-bottom: 10px;
-}

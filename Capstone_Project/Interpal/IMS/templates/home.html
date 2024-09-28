@@ -6,13 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!----======== CSS ======== -->
+    <!--======== CSS ======== -->
     <link rel="stylesheet" href="{% static 'studentaccount.css' %}">
     
-    <!----===== Boxicons CSS ===== -->
+    <!--===== Boxicons CSS ===== -->
     <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
     
-    <!----===== Chart.js ===== -->
+    <!--===== Chart.js ===== -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
@@ -131,33 +131,6 @@
                 <canvas id="barChart"></canvas>
                 <canvas id="pieChart"></canvas>
             </div>
-        </div>
-
-        <!-- Display Tasks -->
-        <div class="task-section">
-            <h3>Your Tasks</h3>
-            <ul>
-                {% if tasks %}
-                    {% for task in tasks %}
-                        <li>{{ task.title }} - 
-                            {% if task.completed %}Completed{% else %}Not Completed{% endif %}
-                            <a href="{% url 'complete_task' task.id %}">Mark as Complete</a>
-                            <a href="{% url 'delete_task' task.id %}">Delete</a>
-                        </li>
-                    {% empty %}
-                        <li>No tasks yet!</li>
-                    {% endfor %}
-                {% else %}
-                    <p>No tasks found.</p>
-                {% endif %}
-            </ul>
-
-            <h3>Add a New Task</h3>
-            <form method="POST">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Add Task</button>
-            </form>
         </div>
 
         <a href="{% url 'admin_view' %}" class="btn">Check Account</a>

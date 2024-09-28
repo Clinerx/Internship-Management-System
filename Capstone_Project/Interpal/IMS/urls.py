@@ -12,7 +12,7 @@ urlpatterns = [
     path('delete_user/<int:user_id>/', views.delete_user, name='delete_user'),  # Delete user URL
     # Correct name for forgot password link
     path('forgot-password/', views.request_form, name='request_password_reset'),
-    path('waiting-area/<str:token>/', views.waiting_area, name='waiting_area'),
     path('check-confirmation-status/<str:token>/', views.check_confirmation_status, name='check_confirmation_status'),
     path('reset-password/<str:token>/', views.reset_password_confirm, name='reset_password_confirm'),
+    path('otp-verify/<str:token>/', views.otp_verify, name='otp_verify'),
 ]

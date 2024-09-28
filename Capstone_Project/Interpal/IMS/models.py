@@ -44,7 +44,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
-    reset_token = models.CharField(max_length=32, blank=True, null=True)  # Token for password reset
+    reset_token = models.CharField(max_length=32, null=True, blank=True)
+    reset_otp = models.IntegerField(blank=True, null=True)
+
 
 
     objects = CustomUserManager()

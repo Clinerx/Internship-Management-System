@@ -309,7 +309,10 @@ body.dark .home .text{
     color: var(--text-color);
 }
 .counting_user{
-    border: 1px solid black;
-    width: 250px;
+    border: 1px solid rgb(185, 53, 53);
+    width: 550px;
     height: 150px;
+}
+.dashboard_header{
+    display: flex;
 }
