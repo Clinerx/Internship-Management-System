@@ -60,7 +60,7 @@ def generate_otp():
     return str(random.randint(100000, 999999))
 
 # Home page, shows count of registered users
-@login_required(login_url='login')
+# @login_required(login_url='login')
 def home(request):
     user_count = CustomUser.objects.count()  # Count users in CustomUser model
     org_count = Organization.objects.count()  # Count organizations in Organization model
@@ -93,7 +93,7 @@ def organization_login_required(view_func):
     return _wrapped_view
 
 # Organization dashboard
-@organization_login_required
+# @organization_login_required
 def org_dashboard(request):
     return render(request, 'organization_registration_folder/organization_dashboard.html')
 
