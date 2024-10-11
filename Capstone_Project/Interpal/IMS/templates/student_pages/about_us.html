@@ -1,0 +1,18 @@
+{% extends 'student_pages/student_base.html' %}
+
+{% block title %}About Us{% endblock %}
+{% block header %}About Us{% endblock %}
+{% block content %}
+<div class="dashboard_header">
+    <h1>Dashboard</h1>
+    <div class="header_icons">
+        <i class='bx bx-user'></i>
+        <i class='bx bx-envelope'></i>
+        <i class='bx bx-bell'></i>
+        <i class='bx bx-user'></i>
+    </div>
+</div>
+<div class="line_design"><p></p></div>
+    <div class="text">Learn more about us, {{ user.first_name }}!</div>
+    <!-- Add content specific to About Us here -->
+{% endblock %}

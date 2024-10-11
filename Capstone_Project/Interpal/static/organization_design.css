@@ -57,7 +57,6 @@ body.dark{
 }
 .sidebar.close{
     width: 88px;
-    
 }
 
 /* ===== Reusable code - Here ===== */
@@ -286,6 +285,7 @@ body.dark .switch::before{
 .home{
     position: absolute;
     top: 0;
+    top: 0;
     left: 250px;
     height: 100vh;
     width: calc(100% - 250px);
@@ -296,7 +296,7 @@ body.dark .switch::before{
     font-size: 30px;
     font-weight: 500;
     color: var(--text-color);
-    padding: 20px 0;
+    padding: 12px 60px;
 }
 
 .sidebar.close ~ .home{
@@ -359,181 +359,4 @@ body.dark .home .text{
 .charts {
     display: flex;
     justify-content: space-between;
-}
-
-.dashboard_header{
-    display: flex;
-    background-color: #2962ff;
-    height: 65px;
-    padding: 0 10px;
-    color: white;
-    align-items: center;
-    justify-content: space-between ;
-}
-.line_design p{
-    margin-top: 20px;
-    border-bottom: 1px solid #18191a;
-}
-.dashboard_header .header_icons i{
-    padding-left: 30px;
-    color: white;
-}
-.sidebar.close ~ .home {
-    left: 88px;/* Adjust to match the closed sidebar width */
-    width: calc(100% - 88px); /* Adjust to prevent overflow */
-}
-
-
-.dashboard_header .header_icons{
-    display: flex;
-    gap: 40px;
-    font-size: 20px;
-}
-.counting_box, .home .text, .charts-container{
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    margin-left: 10px;
-}
-.counting_box, .charts-container{
-    margin-right: 10px;
-}
-
-.counting_box .counting_user{
-    width: 410px;
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    height: 150px;
-}
-.counting_box {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-/* Full-width left margin for when sidebar is open */
-/* Responsive Design for Tablet and Mobile */
-@media screen and (max-width: 1024px) {
-    .sidebar {
-        width: 200px;
-    }
-
-    .sidebar.close {
-        width: 70px;
-    }
-
-    .home {
-        left: 200px;
-        width: calc(100% - 200px);
-    }
-
-    .sidebar.close ~ .home {
-        left: 70px;
-        width: calc(100% - 70px);
-    }
-
-    /* Adjust Overview Cards and Charts */
-    .dashboard-overview, .charts {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .overview-card {
-        width: 80%;
-        margin-bottom: 20px;
-    }
-
-    .charts-container {
-        width: 100%;
-    }
-
-    .dashboard_header {
-        flex-direction: column;
-        height: auto;
-        padding: 10px;
-        gap: 10px;
-    }
-}
-
-@media screen and (max-width: 768px) {
-    /* Sidebar adjustments for smaller devices */
-    .sidebar {
-        width: 180px;
-    }
-
-    .sidebar.close {
-        width: 60px;
-    }
-
-    .home {
-        left: 180px;
-        width: calc(100% - 180px);
-    }
-
-    .sidebar.close ~ .home {
-        left: 60px;
-        width: calc(100% - 60px);
-    }
-
-    /* Adjust the counting box and overview cards */
-    .counting_box {
-        flex-direction: column;
-    }
-
-    .counting_box .counting_user {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-}
-
-@media screen and (max-width: 480px) {
-    /* Sidebar and layout adjustments for mobile */
-    .sidebar {
-        width: 150px;
-    }
-
-    .sidebar.close {
-        width: 50px;
-    }
-
-    .home {
-        left: 150px;
-        width: calc(100% - 150px);
-    }
-
-    .sidebar.close ~ .home {
-        left: 50px;
-        width: calc(100% - 50px);
-    }
-
-    /* Adjust sidebar items for better usability on mobile */
-    .sidebar li {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .sidebar .text {
-        font-size: 14px;
-    }
-
-    .dashboard-overview, .charts-container, .counting_box {
-        width: 100%;
-        flex-direction: column;
-        padding: 0 10px;
-    }
-
-    .overview-card, .charts-container, .counting_box .counting_user {
-        width: 100%;
-        margin: 10px 0;
-    }
-
-    .dashboard_header {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .dashboard_header .header_icons {
-        justify-content: center;
-        gap: 20px;
-    }
 }

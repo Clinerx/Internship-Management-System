@@ -17,7 +17,7 @@ body {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
+  max-width: 350px;
   width: 100%;
 }
 
@@ -30,11 +30,12 @@ h2 {
 .form-group {
   margin-bottom: 15px;
 }
-
+.form-group label{
+  margin-bottom: 10px;
+}
 label {
   display: block;
   font-size: 14px;
-  margin-bottom: 5px;
   color: #555555;
 }
 
@@ -42,6 +43,7 @@ input[type="email"],
 input[type="password"] {
   width: 100%;
   padding: 10px;
+  
   border: 1px solid #cccccc;
   border-radius: 5px;
   font-size: 14px;
@@ -110,4 +112,31 @@ input[type="checkbox"] {
 
 .sign-up-text a:hover {
   text-decoration: underline;
+}
+
+#formGroup{
+  margin-bottom: 10px;
+}
+#formGroup label{
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+#formGroup select{
+  width: 100%;
+  height: 30px;
+}
+
+#formContainer{
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+
+}
+.messages{
+  width: 2000px;
+  border: 1px solid black;  
 }

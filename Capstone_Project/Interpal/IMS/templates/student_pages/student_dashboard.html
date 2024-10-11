@@ -1,0 +1,51 @@
+{% extends 'student_pages/student_base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard_header">
+    <h1>Dashboard</h1>
+    <div class="header_icons">
+        <i class='bx bx-user'></i>
+        <i class='bx bx-envelope'></i>
+        <i class='bx bx-bell'></i>
+        <i class='bx bx-user'></i>
+    </div>
+</div>
+<div class="line_design"><p></p></div>
+<div class="text">Welcome to your Dashboard, {{ user.first_name }}!</div>
+
+<div class="counting_box">
+    <div class="counting_user">
+        <div class='counting_user_content'>
+            <i class='bx bx-user'></i>
+            <p>Registered Organizations: {{ org_count }}</p>
+            <a href="">View Details</a>
+        </div>
+    </div>
+    <div class="counting_user">
+        <div class='counting_user_content'>
+            <i class='bx bx-user'></i>
+            <p>Registered Students: {{ user_count }}</p>
+            <a href="">View Details</a>
+        </div>
+    </div>
+    <div class="counting_user">
+        <div class='counting_user_content'>
+            <i class='bx bx-user'></i>
+            <p>Internships: {{ internship_count }}</p>
+            <a href="">View Details</a>
+        </div>
+    </div>
+</div>
+
+<div class="charts-container">
+    <h3>Dashboard Charts</h3>
+    <div class="charts">
+        <canvas id="barChart"></canvas>
+        <canvas id="pieChart"></canvas>
+    </div>
+</div>
+
+<a href="{% url 'admin_view' %}" class="btn">Check Account</a>
+{% endblock %}

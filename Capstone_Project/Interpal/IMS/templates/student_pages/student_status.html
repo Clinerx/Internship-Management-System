@@ -1,0 +1,19 @@
+{% extends 'student_pages/student_base.html' %}
+
+{% block title %}Internships Status{% endblock %}
+{% block header %}Internships Status{% endblock %}
+{% block content %}
+<div class="dashboard_header">
+    <h1>Dashboard</h1>
+    <div class="header_icons">
+        <i class='bx bx-user'></i>
+        <i class='bx bx-envelope'></i>
+        <i class='bx bx-bell'></i>
+        <i class='bx bx-user'></i>
+    </div>
+</div>
+<div class="line_design"><p></p></div>
+
+    <div class="text">Check your internship status, {{ user.first_name }}!</div>
+    <!-- Add content specific to Internship Status here -->
+{% endblock %}

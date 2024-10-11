@@ -10,6 +10,8 @@
     
     <h1>Admin Page - User Management</h1>
 
+    <!-- User Table -->
+    <h2>Users</h2>
     <table border="1">
         <tr>
             <th>ID</th>
@@ -34,6 +36,34 @@
         {% empty %}
         <tr>
             <td colspan="5">No users found</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Organization Table -->
+    <h2>Organizations</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Company Name</th>
+            <th>Email</th>
+            <th>Action</th>
+        </tr>
+        {% for organization in organizations %}
+        <tr>
+            <td>{{ organization.id }}</td>
+            <td>{{ organization.company_name }}</td>
+            <td>{{ organization.company_email }}</td>
+            <td>
+                <form action="{% url 'delete_organization' organization.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No organizations found</td>
         </tr>
         {% endfor %}
     </table>

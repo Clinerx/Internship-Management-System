@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Registration</title>
+    <link rel="stylesheet" href="{% static 'loginForm.css' %}">
+</head>
+<body>
+    <div class="registration-container">
+        <h2>Organization Registration</h2>
+        <form action="{% url 'organization_details' %}" method="post">
+            {% csrf_token %}
+
+            <!-- Company Name Field -->
+            <label for="company_name">Company Name:</label>
+            <input type="text" id="company_name" name="company_name" value="{{ company_name }}" required>
+
+            <!-- Employee First Name -->
+            <label for="first_name">Employee First Name:</label>
+            <input type="text" id="first_name" name="first_name" value="{{ first_name }}" required>
+
+            <!-- Employee Last Name -->
+            <label for="last_name">Employee Last Name:</label>
+            <input type="text" id="last_name" name="last_name" value="{{ last_name }}" required>
+
+            <!-- Company Email -->
+            <label for="company_email">Company Email:</label>
+            <input type="email" id="company_email" name="company_email" value="{{ company_email }}" required>
+
+            {% if not otp_confirmed %}
+                <!-- OTP Request Button (Shown before OTP is confirmed) -->
+                <label for="otp">OTP:</label>
+                <input type="text" id="otp" name="otp" value="{{ otp }}">
+                <button type="submit" name="request_otp">Request OTP</button>
+
+                {% if otp_requested %}
+                    <button type="submit" name="confirm_otp">Confirm OTP</button>
+                {% endif %}
+            {% endif %}
+
+            {% if otp_confirmed %}
+                <!-- Shown after OTP is confirmed -->
+                <!-- Create Password -->
+                <label for="password">Create Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <!-- Confirm Password -->
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+
+                <button type="submit" name="register">Register</button>
+            {% endif %}
+        </form>
+
+        <!-- Display error or success messages -->
+        {% if error_message %}
+            <p style="color:red;">{{ error_message }}</p>
+        {% endif %}
+        {% if otp_message %}
+            <p style="color:green;">{{ otp_message }}</p>
+        {% endif %}
+
+        <!-- Already have an account -->
+        <p class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Login here</a>
+        </p>
+    </div>
+</body>
+</html>

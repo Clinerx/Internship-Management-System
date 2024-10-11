@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration</title>
+    {% comment %} <link rel="stylesheet" href="{% static 'loginForm.css' %}"> {% endcomment %}
+</head>
+<body>
+    <div class="form-container">
+        <h2>Student Registration</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="btn">Register</button>
+        </form>
+        <p class="sign-up-text">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    </div>
+</body>
+</html>

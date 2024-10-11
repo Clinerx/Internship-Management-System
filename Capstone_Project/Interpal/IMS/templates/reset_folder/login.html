@@ -9,16 +9,17 @@
     <title>Login</title>
 </head>
 <body>
-    <!-- Blob Animation -->
-    <div class="blob_animation">
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
-    </div>
+    
     <div class="form-container">
         <h2>Sign In</h2>
-
-
+        <!-- Error Messages -->
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
             <div class="form-group">
@@ -37,8 +38,9 @@
                 <a href="{% url 'request_password_reset' %}" class="forgot-password">Forgot password?</a>
             </div>
             <button type="submit" class="btn">Login</button>
-            <p class="sign-up-text">Don't have an account? <a href="{% url 'register' %}">Sign up</a></p>
+            <p class="sign-up-text">Don't have an account? <a href="{% url 'initial_registration' %}">Sign up</a></p>
         </form>
     </div>
 </body>
+
 </html>

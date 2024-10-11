@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration</title>
+    <link rel="stylesheet" href="{% static 'loginForm.css' %}">
+    <link rel="stylesheet" href="{% static 'blob.css' %}">
+</head>
+<body>
+    <!-- Blob Animition -->
+    <div class="blob_animation">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+    </div>
+    <div id="formContainer">
+        <h2>Select Account Type</h2>
+        <form method="POST" action="{% url 'initial_registration' %}">
+            {% csrf_token %}
+            <div id="formGroup">
+                <label for="account_type">I am a:</label>
+                <select name="account_type" id="account_type" required>
+                    <option value="student">Student</option>
+                    <option value="organization">Organization</option>
+                </select>
+            </div>
+            <button type="submit" class="btn">Next</button>
+        </form>
+    </div>
+</body>
+</html>
