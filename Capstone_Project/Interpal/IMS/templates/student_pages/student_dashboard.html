@@ -1,29 +1,37 @@
 {% extends 'student_pages/student_base.html' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Student Dashboard{% endblock %}
 
 {% block content %}
 <div class="dashboard_header">
-    <h1>Dashboard</h1>
     <div class="header_icons">
-        <i class='bx bx-user'></i>
         <i class='bx bx-envelope'></i>
-        <i class='bx bx-bell'></i>
-        <i class='bx bx-user'></i>
+        <div class="chevron_right">
+            <i class='bx bx-bell'></i>
+        </div>
+    </div>
+    <div class="student_avatar_picture">
+        <div class="student_avatar_name">
+            <p class="user_first_name">{{ user.first_name }} {{ user.last_name }}</p>
+            <p class="user_course">{{ user.course }}</p>
+        </div> 
+        <div class="student_img">
+            <img src="" alt="">
+        </div>
     </div>
 </div>
 <div class="line_design"><p></p></div>
 <div class="text">Welcome to your Dashboard, {{ user.first_name }}!</div>
 
 <div class="counting_box">
-    <div class="counting_user">
+    <div class="counting_user" id="org_counting">
         <div class='counting_user_content'>
             <i class='bx bx-user'></i>
             <p>Registered Organizations: {{ org_count }}</p>
             <a href="">View Details</a>
         </div>
     </div>
-    <div class="counting_user">
+    <div class="counting_user" id="user_counting">
         <div class='counting_user_content'>
             <i class='bx bx-user'></i>
             <p>Registered Students: {{ user_count }}</p>
@@ -39,13 +47,100 @@
     </div>
 </div>
 
-<div class="charts-container">
-    <h3>Dashboard Charts</h3>
-    <div class="charts">
-        <canvas id="barChart"></canvas>
-        <canvas id="pieChart"></canvas>
+<section>
+    <div class="charts_section">
+        <div class="charts-container" id="bar_charts">
+            <div class="charts_name">
+                <h3>Dashboard Charts</h3>
+            </div>
+            <div class="charts">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+        <div class="charts-container" id="pie_charts">
+            <div class="charts_name">
+                <h3>Internship Distribution</h3>
+            </div>
+            <div class="charts">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
     </div>
-</div>
+</section>
 
 <a href="{% url 'admin_view' %}" class="btn">Check Account</a>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Fetching data passed from Django view
+    const orgCount = {{ org_count }};
+    const userCount = {{ user_count }};
+    // const internshipCount = {{ internship_count }}; // Uncomment if you have an internship model
+
+    // Bar Chart
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    const barChart = new Chart(barCtx, {
+        type: 'bar', // Change to your preferred chart type
+        data: {
+            labels: ['Organizations', 'Users'], // Update labels as necessary
+            datasets: [{
+                label: '# of Users/Organizations',
+                data: [orgCount, userCount], // Use dynamic data here
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Pie Chart (if you have internship distribution data)
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, {
+        type: 'pie', // Change to your preferred chart type
+        data: {
+            labels: ['Organizations', 'Users'], // Update labels as necessary
+            datasets: [{
+                label: '# of Users/Organizations',
+                data: [orgCount, userCount], // Use dynamic data here
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Internship Distribution'
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
 {% endblock %}

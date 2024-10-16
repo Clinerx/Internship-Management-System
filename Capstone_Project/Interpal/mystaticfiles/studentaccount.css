@@ -58,6 +58,7 @@ body.dark{
 .sidebar.close{
     width: 88px;
     
+    
 }
 
 /* ===== Reusable code - Here ===== */
@@ -291,6 +292,7 @@ body.dark .switch::before{
     width: calc(100% - 250px);
     background-color: var(--body-color);
     transition: var(--tran-05);
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 .home .text{
     font-size: 30px;
@@ -368,7 +370,7 @@ body.dark .home .text{
     padding: 0 10px;
     color: white;
     align-items: center;
-    justify-content: space-between ;
+    justify-content: flex-end;
 }
 .line_design p{
     margin-top: 20px;
@@ -386,25 +388,98 @@ body.dark .home .text{
 
 .dashboard_header .header_icons{
     display: flex;
-    gap: 40px;
     font-size: 20px;
+    gap: 20px;
+    align-items: center;
+    
 }
+.student_avatar_picture {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 27px 0;
+    margin-left: 50px;
+    border-radius: 15px;
+    width: 270px;
+    height: 50px;
+    border: 1px solid white;
+}
+.student_avatar_picture .student_img{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid white;
+    margin-left: 25px;
+}
+.student_avatar_picture .student_avatar_name .user_course{
+    font-size: 12px;
+    text-align: center;
+    
+}
+
 .counting_box, .home .text, .charts-container{
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
-    margin-left: 10px;
+    margin-left: 20px;
 }
-.counting_box, .charts-container{
-    margin-right: 10px;
+.counting_box{
+    margin-right: 20px;
 }
 
 .counting_box .counting_user{
-    width: 410px;
+    width: 400px;
     background-color: #fff;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     height: 150px;
 }
+.charts_section{
+    display: flex;    
+}
+.charts_section #bar_charts{
+    width: 780px;
+    height: 600px;
+}
+.charts_section #pie_charts{
+    width: 600px;
+    margin-right: 20px;
+}
 
-/* Full-width left margin for when sidebar is open */
+.sidebar.close ~ .home #org_counting{
+    width: 450px;
+    transition: var(--tran-03);
+}
+.sidebar.close ~ .home #user_counting{
+    width: 500px;
+    transition: var(--tran-03);
+}
+.sidebar.close ~ .home #bar_charts{
+    width: 900px;
+    transition: var(--tran-03);
+}
+/* Adding padding and responsiveness for charts */
+.charts {
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 20px;
+    gap: 30px; /* Spacing between pie and bar charts */
+}
+
+.charts-container {
+    background-color: #ffffff;
+    border-radius: 15px;
+    display: flex;
+    box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%; /* Ensures it adjusts within container */
+}
+.charts-container .charts #barChart{
+    width: 500px;
+}
+.charts-container .charts #pieChart{
+    width: 300px;
+}
+.charts{
+    border: 1px solid black;
+}

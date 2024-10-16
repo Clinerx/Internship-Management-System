@@ -1,0 +1,39 @@
+{% extends 'organization_pages/organization_base.html' %}
+{% block title %}Organizations Dashboard{% endblock %}
+
+{% block content %}
+<div class="welcome-text">
+    <span>Welcome to your Dashboard, [User's Name]!</span>
+    <div class="search-box">
+     <i class='bx bx-search icon'></i>
+     <input type="text" placeholder="Search...">
+    </div>
+
+    <div class="notification-box">
+        <i class='bx bx-bell icon'></i>
+    </div>
+</div>
+
+<div class="dashboard-overview">
+    <div class="overview-card">
+        <h3 style="color: #fff">Active Internships</h3>
+        <p>5 Internships</p>
+    </div>
+    <div class="overview-card">
+        <h3 style="color: #fff">Pending Applications</h3>
+        <p>12 Applications</p>
+    </div>
+    <div class="overview-card">
+        <h3 style="color: #fff">Scheduled Interviews</h3>
+        <p>3 Interviews</p>
+    </div>
+</div>
+
+<div class="charts-container">
+    <h3>Dashboard Charts</h3>
+    <div class="charts">
+        <canvas id="barChart"></canvas>
+        <canvas id="pieChart"></canvas>
+    </div>
+</div>
+{% endblock content %}

@@ -4,7 +4,6 @@
 {% block header %}Internships Status{% endblock %}
 {% block content %}
 <div class="dashboard_header">
-    <h1>Dashboard</h1>
     <div class="header_icons">
         <i class='bx bx-user'></i>
         <i class='bx bx-envelope'></i>
@@ -14,6 +13,37 @@
 </div>
 <div class="line_design"><p></p></div>
 
-    <div class="text">Check your internship status, {{ user.first_name }}!</div>
-    <!-- Add content specific to Internship Status here -->
+<div class="text">Check your internship status, {{ user.first_name }}!</div>
+
+<div class="internship_table_container">
+    <table class="internship_table">
+        <thead>
+            <tr>
+                <th>Name of Applicant</th>
+                <th>Course</th>
+                <th>Date of Applying</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Example Row 1 -->
+            <tr>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>{{ user.course }}</td>
+                <td>{{ user.date_joined }}</td>
+                <td><span class="status in-progress">In Progress</span></td>
+                <td>
+                    <button class="btn check-status">Check Status</button>
+                    <button class="btn edit">Edit</button>
+                    <button class="btn delete">Delete</button>
+                </td>
+            </tr>
+            <!-- Add more rows as necessary -->
+        </tbody>
+    </table>
+    
+</div>
+
+
 {% endblock %}

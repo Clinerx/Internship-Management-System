@@ -70,7 +70,7 @@ class UserVisit(models.Model):
 
     def __str__(self):
         return str(self.count)
-    
+
 class Organization(models.Model):
     company_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
@@ -78,16 +78,37 @@ class Organization(models.Model):
     company_email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
     date_joined = models.DateTimeField(auto_now_add=True)
-    
     last_login = models.DateTimeField(blank=True, null=True)
 
     def check_password(self, raw_password):
-        # Check the hashed password
         return check_password(raw_password, self.password)
 
     def update_last_login(self):
         self.last_login = timezone.now()
         self.save()
+
     def __str__(self):
         return self.company_name
+
+class Internship(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(default="Internship opportunity with exciting responsibilities and growth potential.")
+    requirements = models.TextField(default="Basic requirements include enthusiasm and a willingness to learn.")
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(default=timezone.now)  # Sets default to the current date when the instance is created
     
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='internships')
+    
+    def __str__(self):
+        return self.title
+
+class Application(models.Model):
+    internship = models.ForeignKey(Internship, on_delete=models.CASCADE, related_name='applications')
+    student_name = models.CharField(max_length=255)
+    student_email = models.EmailField()
+    resume = models.FileField(upload_to='resumes/')
+    date_applied = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.student_name} applied to {self.internship.title}"
+

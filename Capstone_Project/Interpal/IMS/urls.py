@@ -21,8 +21,12 @@ urlpatterns = [
     # path('org_details', views.org_details, name='org_details'),  
     path('organization_details', views.organization_registration, name='organization_details'),
     path('success/', views.success_view, name='success'),  # Add this line if not already present
-    path('organization_dashboard/', views.org_dashboard, name='organization_dashboard'),
     
+    path('organization_dashboard/', views.org_dashboard, name='organization_dashboard'),
+    path('organization_post/', views.organization_post, name='organization_post'),
+    path('organization_interns/', views.organization_interns, name='organization_interns'),
+    path('organization_applicant/', views.organization_applicant, name='organization_applicant'),
+    path('about_us_org/', views.about_us_org, name='about_us_org'),
     
     
     path('home', views.home, name='home'),

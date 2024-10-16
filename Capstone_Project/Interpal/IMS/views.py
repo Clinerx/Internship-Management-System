@@ -13,6 +13,11 @@ from random import randint
 from .forms import CustomUserCreationForm, OrganizationRegistrationForm
 from .models import CustomUser, Organization, UserVisit
 import random
+from django.shortcuts import render
+from .models import CustomUser
+from django.db.models import Count
+from django.utils import timezone
+import json
 
 
 User = CustomUser  # Reference your CustomUser model
@@ -95,7 +100,7 @@ def organization_login_required(view_func):
 # Organization dashboard
 # @organization_login_required
 def org_dashboard(request):
-    return render(request, 'organization_registration_folder/organization_dashboard.html')
+    return render(request, 'organization_pages/organization_dashboard.html')
 
 # Organization registration process
 def organization_registration(request):
@@ -315,4 +320,27 @@ def about_us(request):
     return render(request, 'student_pages/about_us.html')
 
 def student_dashboard(request):
-    return render(request, 'student_pages/student_dashboard.html')
+    # Fetch the counts from the database
+    org_count = Organization.objects.count()  # Count of registered organizations
+    user_count = CustomUser.objects.filter(is_active=True).count()  # Count of registered active students
+    internship_count = 0  # Replace with your logic to count internships if you have a model for them
+
+    context = {
+        'org_count': org_count,
+        'user_count': user_count,
+        # 'internship_count': internship_count,
+        'user': request.user,  # Pass the user object to the template
+    }
+    return render(request, 'student_pages/student_dashboard.html', context)
+
+def organization_post(request):
+    return render(request, 'organization_pages/organization_posting.html')
+
+def organization_interns(request):
+    return render(request, 'organization_pages/organization_interns.html')
+
+def organization_applicant(request):
+    return render(request, 'organization_pages/organization_applicants.html')
+
+def about_us_org(request):
+    return render(request, 'organization_pages/about_us_org.html')
