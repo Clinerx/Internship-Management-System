@@ -1,2 +1,266 @@
 {% extends 'organization_pages/organization_base.html' %}
+{% block title %}Organizations Internships{% endblock %}
 
+{% block content %}
+<div class="dashboard_header">
+    <div class="header_icons">
+        <i class='bx bx-envelope'></i>
+        <div class="chevron_right">
+            <i class='bx bx-bell'></i>
+        </div>
+    </div>
+    <div class="student_avatar_picture">
+        <div class="student_avatar_name">
+            <p class="user_first_name">{{ org.first_name }} {{ org.last_name }}</p>
+            <p class="user_course">{{ org.company_name }}</p>
+        </div> 
+        <div class="student_img">
+            <img src="">
+        </div>
+    </div>
+</div>
+
+<!-- Button to open the modal -->
+<button id="openModalBtn" class="btn btn-primary">Create Internship</button>
+
+<!-- Modal Structure -->
+<div id="postingModal" class="modal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-content">
+        <span class="close" aria-label="Close modal">&times;</span>
+        <h2 id="modalTitle">Posting Internship</h2>
+        <form class="internship-form" method="POST">
+            {% csrf_token %}
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="internshipTitle">{{ form.title.label_tag }}</label>
+                    {{ form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="organizationName">{{ form.organization_name.label_tag }}</label>
+                    {{ form.organization_name }}
+                </div>
+            </div>
+
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="location">{{ form.location.label_tag }}</label>
+                    {{ form.location }}
+                </div>
+                <div class="form-group">
+                    <label for="description">{{ form.description.label_tag }}</label>
+                    {{ form.description }}
+                </div>
+            </div>
+
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="requirements">{{ form.requirements.label_tag }}</label>
+                    {{ form.requirements }}
+                </div>
+                <div class="form-group">
+                    <label for="applicationProcess">{{ form.application_process.label_tag }}</label>
+                    {{ form.application_process }}
+                </div>
+            </div>
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="maxApplicants">{{ form.max_applicants.label_tag }}</label>
+                    {{ form.max_applicants }}
+                </div>
+            </div>
+
+            <div class="form-button">
+                <button type="submit" class="btn btn-primary">Submit Posting</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+ <!-- Pagination controls -->
+ <div class="pagination">
+    <span class="step-links">
+        {% if internships.has_previous %}
+            <a href="?page=1">&laquo; First</a>
+            <a href="?page={{ internships.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ internships.number }} of {{ internships.paginator.num_pages }}
+        </span>
+
+        {% if internships.has_next %}
+            <a href="?page={{ internships.next_page_number }}">Next</a>
+            <a href="?page={{ internships.paginator.num_pages }}">Last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+<hr>
+
+<section class="internship-postings-section">
+    <h2>Posted Internships</h2>
+
+    <div class="table-responsive posting-section">
+        <table class="table table-bordered internship-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Organization</th>
+                    <th>Internship Title</th>
+                    <th>Location</th>
+                    <th>Available Applicants</th>
+                    <th>Posted Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for internship in internships %}
+                    <tr>
+                        <td>{{ start_number|add:forloop.counter }}</td>
+
+                        <!-- Organization Picture and Name -->
+                        <td class="organizationProfile">
+                            <div class="img-card">
+                                <img class="organization-image" src="{{ internship.organization.logo_url }}" alt="Organization Logo">
+                            </div>
+                            <div class="org_image_name">
+                                <p>{{ internship.organization.company_name }}</p>
+                            </div>
+                        </td>
+
+                        <!-- Internship Details -->
+                        <td>{{ internship.title }}</td>
+                        <td>{{ internship.location }}</td>
+                        <th>{{ internship.max_applicants}}</th>
+                        <td>{{ internship.created_at|date:"F d, Y" }}</td>
+
+                        <!-- Edit and Delete Buttons -->
+                        <td class="internship-buttons">
+                            <a href="{% url 'view_internship' internship.id %}" class="btn btn-info">View</a>
+                            <a href="{% url 'edit_internship' internship.id %}" class="btn btn-primary">Edit</a>
+                            <button class="btn btn-danger open-delete-modal" data-id="{{ internship.id }}" data-title="{{ internship.title }}">Delete</button>
+                        </td>
+                        
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No internships available at this time.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+        <!-- Notification Container -->
+    <div id="notification" class="alert alert-success" role="alert" aria-live="assertive" style="display: none;">
+        <div class="notification-icon">
+            <i class="bx bx-check-circle"></i>
+        </div>
+        <div class="notification-message">
+                Internship Posted Successfully!
+        </div>
+    </div>
+
+        <!-- Modal for Delete Confirmation -->
+    <div id="deleteModal" class="modal" role="dialog" aria-labelledby="deleteModalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close" aria-label="Close delete modal">&times;</span>
+            <h2 id="deleteModalTitle">Delete Internship</h2>
+            <p>Are you sure you want to delete the internship <strong id="internshipTitleToDelete"></strong>?</p>
+
+            <form id="deleteForm" method="POST" action="">
+                {% csrf_token %}
+                <div class="button-group">
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    <button type="button" class="btn btn-secondary close-delete-modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</section>
+
+<!-- Styles for Modal -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = document.getElementById("postingModal");
+        var openModalBtn = document.getElementById("openModalBtn");
+        var closeModalBtn = document.querySelector(".close");
+
+        // Open the modal when the button is clicked
+        openModalBtn.onclick = function () {
+            modal.style.display = "flex";
+            modal.setAttribute("aria-hidden", "false");
+        };
+
+        // Close the modal when the 'X' button is clicked
+        closeModalBtn.onclick = function () {
+            modal.style.display = "none";
+            modal.setAttribute("aria-hidden", "true");
+        };
+
+        // Close the modal if user clicks outside of the modal content
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                modal.setAttribute("aria-hidden", "true");
+            }
+        };
+
+        // Show the notification if the internship was posted
+        {% if internship_posted %}
+            var notification = document.getElementById('notification');
+            notification.style.display = 'flex';  // Make notification visible
+            setTimeout(function() {
+                notification.classList.add('show');  // Trigger slide-in animation
+            }, 100); // Delay to ensure it's visible before animating
+
+            // Hide the notification after 3 seconds
+            setTimeout(function() {
+                notification.classList.remove('show');  // Slide it out
+                setTimeout(function() {
+                    notification.style.display = 'none';  // Fully hide after sliding out
+                }, 500); // Wait for the slide-out animation to complete
+            }, 5000);  // Keep it visible for 3 seconds
+        {% endif %}
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Posting modal logic (same as before)
+        
+        // Delete modal logic
+        var deleteModal = document.getElementById("deleteModal");
+        var openDeleteModalBtns = document.querySelectorAll(".open-delete-modal");
+        var closeDeleteModalBtns = document.querySelectorAll(".close, .close-delete-modal");
+        var internshipTitleToDelete = document.getElementById("internshipTitleToDelete");
+        var deleteForm = document.getElementById("deleteForm");
+
+        openDeleteModalBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var internshipId = this.getAttribute('data-id');
+                var internshipTitle = this.getAttribute('data-title');
+                internshipTitleToDelete.textContent = `"${internshipTitle}"`;  // Update the modal content
+                deleteForm.action = `/delete_internship/${internshipId}/`;  // Set the form action dynamically
+                deleteModal.style.display = "flex";  // Show the modal
+            });
+        });
+
+        closeDeleteModalBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                deleteModal.style.display = "none";  // Hide the modal
+            });
+        });
+
+        // Close modal if clicking outside of the modal content
+        window.onclick = function (event) {
+            if (event.target == deleteModal) {
+                deleteModal.style.display = "none";
+            }
+        };
+    });
+</script>
+
+{% endblock content %}

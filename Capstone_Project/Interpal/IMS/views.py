@@ -1,23 +1,28 @@
+import json
+import random
+from functools import wraps
+from random import randint
+import logging
+
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import AnonymousUser
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.utils.crypto import get_random_string
-from django.utils import timezone
-from functools import wraps
-from random import randint
-from .forms import CustomUserCreationForm, OrganizationRegistrationForm
-from .models import CustomUser, Organization, UserVisit
-import random
-from django.shortcuts import render
-from .models import CustomUser
-from django.db.models import Count
-from django.utils import timezone
-import json
+
+from .forms import CustomUserCreationForm, InternshipForm, OrganizationRegistrationForm
+from .models import CustomUser, Internship, Organization, UserVisit
+
 
 
 User = CustomUser  # Reference your CustomUser model
@@ -65,7 +70,7 @@ def generate_otp():
     return str(random.randint(100000, 999999))
 
 # Home page, shows count of registered users
-# @login_required(login_url='login')
+@login_required(login_url='login')
 def home(request):
     user_count = CustomUser.objects.count()  # Count users in CustomUser model
     org_count = Organization.objects.count()  # Count organizations in Organization model
@@ -98,9 +103,6 @@ def organization_login_required(view_func):
     return _wrapped_view
 
 # Organization dashboard
-# @organization_login_required
-def org_dashboard(request):
-    return render(request, 'organization_pages/organization_dashboard.html')
 
 # Organization registration process
 def organization_registration(request):
@@ -262,37 +264,61 @@ def student_register(request):
     return render(request, 'student_registration_folder/student_profile_details.html', {'form': form})
 
 # User login
-
-def user_login(request):
+def student_login(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
+        email = request.POST.get('email', '')  # Get the email from POST data
+        password = request.POST.get('password', '')  # Get the password from POST data
 
         try:
-            # Handle login for CustomUser
+            # Check if the email exists in CustomUser model (which should be for students)
             user = CustomUser.objects.get(email=email)
             user = authenticate(request, email=email, password=password)
+            
             if user is not None:
-                login(request, user)
-                return redirect('home')
+                login(request, user)  # Login the user
+                return redirect('home')  # Redirect to the student dashboard (replace 'home' with the correct path)
             else:
                 messages.error(request, 'Invalid email or password for student account.')
 
         except CustomUser.DoesNotExist:
-            try:
-                # Handle login for Organization
-                organization = Organization.objects.get(company_email=email)
-                if organization.check_password(password):  # Ensure this method is securely implemented
-                    login(request, organization)
-                    request.session['organization_id'] = organization.id
-                    return redirect('organization_dashboard')
-                else:
-                    messages.error(request, 'Invalid email or password for organization account.')
+            messages.error(request, 'No student account found with this email.')
 
-            except Organization.DoesNotExist:
-                messages.error(request, 'No account found with this email.')
+        # Re-render the login form with the entered data and error message
+        return render(request, 'reset_folder/student_login.html', {'email': email})
 
-    return render(request, 'reset_folder/login.html')
+    # If the request is GET, render the student login page
+    return render(request, 'reset_folder/student_login.html')
+
+
+
+def organization_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('company_email', '')
+        password = request.POST.get('password', '')
+
+        # Organization login logic
+        try:
+            organization = Organization.objects.get(company_email=email)
+            if organization.check_password(password):  # Use secure password check
+                # Set session variables for organization login
+                request.session['organization_id'] = organization.id
+                request.session['organization_name'] = organization.company_name
+                return redirect('organization_dashboard')  # Redirect to organization dashboard
+            else:
+                messages.error(request, 'Invalid email or password for organization account.')
+
+        except Organization.DoesNotExist:
+            messages.error(request, 'No organization account found with this email.')
+
+        # If login fails, re-render the form with the entered data
+        return render(
+            request, 
+            'reset_folder/organization_login.html', 
+            {'email': email}  # Pass the email back to the form
+        )
+
+    return render(request, 'reset_folder/organization_login.html')
+
 
 # User logout
 @login_required(login_url='login')
@@ -309,38 +335,214 @@ def visit_tracker(request):
     users = CustomUser.objects.all()
     return render(request, 'admin_folder/admin_view.html', {'visit_count': visit.count, 'users': users})
 
+# * Student Pages
 
-def student_internships(request):
-    return render(request, 'student_pages/student_internships.html')
-
-def student_status(request):
-    return render(request, 'student_pages/student_status.html')
-
-def about_us(request):
-    return render(request, 'student_pages/about_us.html')
-
+@login_required(login_url='login')
 def student_dashboard(request):
-    # Fetch the counts from the database
+    users = CustomUser.objects.all()
+    organizations = Organization.objects.all()
     org_count = Organization.objects.count()  # Count of registered organizations
     user_count = CustomUser.objects.filter(is_active=True).count()  # Count of registered active students
-    internship_count = 0  # Replace with your logic to count internships if you have a model for them
-
     context = {
         'org_count': org_count,
         'user_count': user_count,
-        # 'internship_count': internship_count,
+        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
         'user': request.user,  # Pass the user object to the template
+        'users': users,
+        'organizations': organizations,
     }
     return render(request, 'student_pages/student_dashboard.html', context)
 
+@login_required(login_url='login')
+def student_internships(request):
+    internships = Internship.objects.all().order_by('-created_at')
+    org = Organization.objects.get(id=request.session['organization_id'])
+    context = {
+        'internships': internships,
+        'org': org,
+        'user': request.user,  # Pass user data to the template
+        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
+    }
+    return render(request, 'student_pages/student_internships.html', context)
+
+def student_status(request):
+    context = {
+        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
+    }
+    return render(request, 'student_pages/student_status.html', context)
+
+def about_us(request):
+    context = {
+        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
+    }
+    return render(request, 'student_pages/about_us.html', context)
+
+
+# View for internship detail (Visit)
+def internship_detail(request, id):
+    internship = get_object_or_404(Internship, id=id)
+    context = {
+        'internship': internship,
+        'user': request.user,
+    }
+    return render(request, 'student_pages/internship_detail.html', context)
+
+# View for applying to internship (Apply)
+def internship_apply(request, id):
+    internship = get_object_or_404(Internship, id=id)
+    
+    # Logic to handle application goes here. 
+    # For now, we'll just render a confirmation page.
+    
+    context = {
+        'internship': internship,
+        'user': request.user,
+    }
+    return render(request, 'student_pages/internship_apply.html', context)
+
+
+# ^ organization pages
+
+@organization_login_required
 def organization_post(request):
-    return render(request, 'organization_pages/organization_posting.html')
+    organization = Organization.objects.get(id=request.session['organization_id'])
+    internship_posted = request.session.pop('internship_posted', False)
 
+    if request.method == 'POST':
+        form = InternshipForm(request.POST)
+        if form.is_valid():
+            internship = form.save(commit=False)
+            internship.organization = organization
+            internship.organization_name = organization.company_name
+            internship.save()
+            request.session['internship_posted'] = True
+            return redirect('organization_post')
+    else:
+        form = InternshipForm()
+
+    internships_list = Internship.objects.filter(organization=organization)
+    paginator = Paginator(internships_list, 5)
+    page_number = request.GET.get('page')
+    internships = paginator.get_page(page_number)
+    start_number = (internships.number - 1) * paginator.per_page
+
+    return render(request, 'organization_pages/organization_posting.html', {
+        'form': form,
+        'internships': internships,
+        'org': organization,
+        'internship_posted': internship_posted,
+        'start_number': start_number
+    })
+
+   
+
+@organization_login_required
+def view_internship(request, internship_id):
+    try:
+        # Fetch the internship object based on the provided ID
+        internship = Internship.objects.get(id=internship_id)
+        
+        # Ensure that the internship belongs to the currently logged-in organization
+        if internship.organization.id != request.session['organization_id']:
+            # Return 403 Forbidden if the organization does not own this internship
+            return HttpResponseForbidden("You are not allowed to view this internship.")
+
+    except Internship.DoesNotExist:
+        # If the internship does not exist, show a 404 page
+        return HttpResponseNotFound("Internship not found.")
+    
+    # Render the internship details to a template
+    return render(request, 'organization_pages/organization_view_page.html', {
+        'internship': internship
+    })
+
+    
+@organization_login_required
+def edit_internship(request, internship_id):
+    organization = Organization.objects.get(id=request.session['organization_id'])
+    
+    # Get the specific internship and make sure it belongs to the logged-in organization
+    internship = Internship.objects.get(id=internship_id, organization=organization)
+    
+    if request.method == 'POST':
+        form = InternshipForm(request.POST, instance=internship)
+        if form.is_valid():
+            form.save()  # Save the updated internship
+            return redirect('organization_post')  # Redirect to the organization post view
+    else:
+        form = InternshipForm(instance=internship)  # Load the form with existing internship data
+    
+    return render(request, 'organization_pages/edit_internship.html', {'form': form, 'internship': internship})
+
+@organization_login_required
+def delete_internship(request, internship_id):
+    organization = Organization.objects.get(id=request.session['organization_id'])
+
+    # Get the specific internship and ensure it belongs to the logged-in organization
+    internship = get_object_or_404(Internship, id=internship_id, organization=organization)
+
+    if request.method == 'POST':
+        internship.delete()  # Delete the internship
+        return redirect('organization_post')  # Redirect after deletion
+
+    return render(request, 'organization_pages/delete_internship.html', {'internship': internship})
+
+
+@organization_login_required
 def organization_interns(request):
-    return render(request, 'organization_pages/organization_interns.html')
+    users = CustomUser.objects.all()
+    org = Organization.objects.get(id=request.session['organization_id'])
+    
+    context = {
+        'users': users,
+        'org': org,
+    }
+    return render(request, 'organization_pages/organization_interns.html', context)
 
+@organization_login_required
 def organization_applicant(request):
-    return render(request, 'organization_pages/organization_applicants.html')
+    users = CustomUser.objects.all()
+    org = Organization.objects.get(id=request.session['organization_id'])
+    
+    context = {
+        'users': users,
+        'org': org,
+    }
+    return render(request, 'organization_pages/organization_applicants.html', context)
 
+@organization_login_required
 def about_us_org(request):
     return render(request, 'organization_pages/about_us_org.html')
+
+@organization_login_required
+def org_dashboard(request):
+    # Retrieve the organization ID from the session
+    organization_id = request.session.get('organization_id')
+    
+    if organization_id:
+        # Fetch the organization object using the ID from the session
+        org = Organization.objects.filter(id=organization_id).first()
+
+        # If the organization doesn't exist (for some reason), handle it
+        if not org:
+            messages.error(request, 'Organization not found. Please log in again.')
+            return redirect('login')
+
+        # Fetch additional counts if necessary
+        org_count = Organization.objects.count()
+        user_count = CustomUser.objects.count()  # Replace with your actual user model
+
+        context = {
+            'org': org,
+            'org_count': org_count,
+            'user_count': user_count,
+            'organization_name': org.company_name,  # Optional, passing the organization name
+        }
+
+        return render(request, 'organization_pages/organization_dashboard.html', context)
+
+    else:
+        # If the organization ID is not in the session, redirect to login
+        messages.error(request, 'You must log in to access the dashboard.')
+        return redirect('login')
+    

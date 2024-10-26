@@ -5,10 +5,19 @@
 {% block content %}
 <div class="dashboard_header">
     <div class="header_icons">
-        <i class='bx bx-user'></i>
         <i class='bx bx-envelope'></i>
-        <i class='bx bx-bell'></i>
-        <i class='bx bx-user'></i>
+        <div class="chevron_right">
+            <i class='bx bx-bell'></i>
+        </div>
+    </div>
+    <div class="student_avatar_picture">
+        <div class="student_avatar_name">
+            <p class="user_first_name">{{ user.first_name }} {{ user.last_name }}</p>
+            <p class="user_course">{{ user.course }}</p>
+        </div> 
+        <div class="student_img">
+            <img src="" alt="">
+        </div>
     </div>
 </div>
 <div class="line_design"><p></p></div>

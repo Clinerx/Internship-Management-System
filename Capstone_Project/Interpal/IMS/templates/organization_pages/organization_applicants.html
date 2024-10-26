@@ -1,1 +1,24 @@
 {% extends 'organization_pages/organization_base.html' %}
+{% block title %}Organization Applicants{% endblock title %}Organization Applicants
+{% block content %}
+
+<div class="dashboard_header">
+    <div class="header_icons">
+        <i class='bx bx-envelope'></i>
+        <div class="chevron_right">
+            <i class='bx bx-bell'></i>
+        </div>
+    </div>
+    <div class="student_avatar_picture">
+        <div class="student_avatar_name">
+            <p class="user_first_name">{{org.first_name}} {{org.last_name}}</p>
+            <p class="user_course">{{org.company_name}}</p>
+        </div> 
+        <div class="student_img">
+            <img src="" alt="">
+        </div>
+    </div>  
+</div>
+
+{% endblock content %}
+

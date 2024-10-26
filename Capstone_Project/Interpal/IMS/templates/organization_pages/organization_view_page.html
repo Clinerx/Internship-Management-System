@@ -1,0 +1,18 @@
+{% extends 'organization_pages/organization_base.html' %}
+{% block title %}View Organizations Internships{% endblock %}
+
+
+{% block content %}
+<div class="internship-details">
+    <h2>{{ internship.title }}</h2>
+    
+    <p><strong>Organization:</strong> {{ internship.organization.company_name }}</p>
+    <p><strong>Location:</strong> {{ internship.location }}</p>
+    <p><strong>Description:</strong> {{ internship.description }}</p>
+    <p><strong>Posted Date:</strong> {{ internship.created_at|date:"F d, Y" }}</p>
+
+    <a href="{% url 'edit_internship' internship.id %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'delete_internship' internship.id %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'organization_post' %}" class="btn btn-secondary">Back to Postings</a>
+</div>
+{% endblock %}

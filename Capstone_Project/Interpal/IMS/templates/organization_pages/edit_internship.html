@@ -1,0 +1,45 @@
+{% extends 'organization_pages/organization_base.html' %}
+{% block title %}Edit Internship{% endblock %}
+
+{% block content %}
+<section class="edit-internship-section">
+    <h2>Edit Internship</h2>
+    <div class="edit-internship-form-container">
+        <form class="internship_form" method="POST">
+            {% csrf_token %}
+            <div class="form_column">
+                <div class="form_group">
+                    <label for="internshipTitle">{{ form.title.label_tag }}</label>
+                    {{ form.title }}
+                </div>
+                <div class="form_group">
+                    <label for="location">{{ form.location.label_tag }}</label>
+                    {{ form.location }}
+                </div>
+            </div>
+
+            <div class="form_column">
+                <div class="form_group">
+                    <label for="description">{{ form.description.label_tag }}</label>
+                    {{ form.description }}
+                </div>
+                <div class="form_group">
+                    <label for="requirements">{{ form.requirements.label_tag }}</label>
+                    {{ form.requirements }}
+                </div>
+            </div>
+
+            <div class="form_column">
+                <div class="form_group">
+                    <label for="applicationProcess">{{ form.application_process.label_tag }}</label>
+                    {{ form.application_process }}
+                </div>
+            </div>
+
+            <div class="form_button">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

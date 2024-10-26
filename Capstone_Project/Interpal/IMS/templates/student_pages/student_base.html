@@ -96,6 +96,14 @@
     </section>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const isDarkMode = {{ dark_mode|default:"false" }};
+            if (isDarkMode) {
+                document.body.classList.add("dark");
+                modeText.innerText = "Light mode";
+            }
+        });
+
         const body = document.querySelector('body'),
               sidebar = body.querySelector('nav'),
               toggle = body.querySelector(".toggle"),

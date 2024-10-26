@@ -57,9 +57,11 @@ body.dark{
 }
 .sidebar.close{
     width: 88px;
+    
+    
 }
 
-/* ===== Reusable code - Here ===== */
+/* * ===== Reusable code - Here ===== */
 .sidebar li{
     height: 50px;
     list-style: none;
@@ -99,7 +101,7 @@ body.dark{
 .sidebar.close .text{
     opacity: 0;
 }
-/* =========================== */
+/* * =========================== */
 
 .sidebar header{
     position: relative;
@@ -285,18 +287,18 @@ body.dark .switch::before{
 .home{
     position: absolute;
     top: 0;
-    top: 0;
     left: 250px;
     height: 100vh;
     width: calc(100% - 250px);
     background-color: var(--body-color);
     transition: var(--tran-05);
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 .home .text{
     font-size: 30px;
     font-weight: 500;
     color: var(--text-color);
-    padding: 12px 60px;
+    padding: 20px 0;
 }
 
 .sidebar.close ~ .home{
@@ -360,85 +362,515 @@ body.dark .home .text{
     display: flex;
     justify-content: space-between;
 }
-.home {
-    padding: 20px;
+
+.dashboard_header{
+    display: flex;
+    background-color: #2962ff;
+    height: 65px;
+    padding: 0 10px;
+    color: white;
+    align-items: center;
+    justify-content: flex-end;
 }
-.welcome-text {
+.line_design p{
+    margin-top: 20px;
+    border-bottom: 1px solid #18191a;
+}
+.dashboard_header .header_icons i{
+    padding-left: 30px;
+    color: white;
+}
+.sidebar.close ~ .home {
+    left: 88px;/* Adjust to match the closed sidebar width */
+    width: calc(100% - 88px); /* Adjust to prevent overflow */
+}
+
+
+.dashboard_header .header_icons{
+    display: flex;
+    font-size: 20px;
+    gap: 20px;
+    align-items: center;
+    
+}
+.student_avatar_picture {
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: 27px 0;
+    margin-left: 50px;
+    border-radius: 15px;
+    width: 270px;
+    height: 50px;
+    border: 1px solid white;
+}
+.student_avatar_picture .student_img{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid white;
+    margin-left: 25px;
+}
+.student_avatar_picture .student_avatar_name .user_course{
+    font-size: 12px;
+    text-align: center;
+    
+}
+
+.counting_box, .home .text, .charts-container{
+    display: flex;
     justify-content: space-between;
+    margin-bottom: 10px;
+    margin-left: 20px;
+}
+.counting_box{
+    margin-right: 20px;
+}
+
+.counting_box .counting_user{
+    width: 400px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    height: 150px;
+}
+.charts_section{
+    display: flex;    
+}
+
+.sidebar.close ~ .home #org_counting{
+    width: 450px;
+    transition: var(--tran-03);
+}
+.sidebar.close ~ .home #user_counting{
+    width: 500px;
+    transition: var(--tran-03);
+}
+.sidebar.close ~ .home #bar_charts{
+    width: 900px;
+    transition: var(--tran-03);
+}
+/* Adding padding and responsiveness for charts */
+.charts {
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 20px;
+    gap: 30px; /* Spacing between pie and bar charts */
+}
+.charts_section #pie_charts{
+    margin-right: 20px;
+    width: 605px;
+    
+}
+
+
+.charts-container {
+    background-color: #ffffff;
+    border-radius: 15px;
+    display: flex;
+    box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%; /* Ensures it adjusts within container */
+    
+}
+.charts-container .charts_name #barChart{
+    padding-top: 5%;
+    height: 300px;
+}
+
+.charts-container .charts_name #pieChart{
+    padding-top: 5%;
+}
+.charts_name{
+    width: 100%;
+    text-align: center;
+}
+
+
+
+
+/* * Posting Sections */
+.internship-buttons .btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+}
+
+.internship-buttons .btn-info:hover {
+    background-color: #138496;
+}
+
+
+
+
+/* * Creating Internship Modal */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Allows scrolling if the content is taller than the viewport */
+    background-color: rgba(0, 0, 0, 0.7); /* Darker background with opacity */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px); /* Subtle blur for the background */
+    padding: 20px; /* Adds padding to prevent content from touching the screen edges */
+}
+
+.modal-content {
+    background-color: #fff; /* Clean white background */
+    padding: 30px;
+    border-radius: 15px; /* Rounded corners for a modern look */
+    width: 100%;
+    max-width: 500px; /* Maximum width to fit within smaller screens */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
+    position: relative;
+    margin: auto; /* Center the modal horizontally */
+    animation: slideDown 0.3s ease-in-out; /* Subtle slide-down animation */
+    transition: all 0.3s ease-in-out; /* Smooth transition for visibility */
+    display: flex;
+    flex-direction: column; /* Stack modal content in a column layout */
+}
+
+.close {
+    color: #555; /* Dark gray for a softer look */
+    font-size: 24px;
+    font-weight: bold;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #333; /* Darker on hover for emphasis */
+}
+
+.modal h2 {
+    font-size: 24px;
     margin-bottom: 20px;
-    font-size: 1.5em;
+    color: #333; /* Muted black for the title */
+    font-weight: bold;
+    text-align: center; /* Center the modal title */
+}
+
+.modal-content .form-group {
+    display: flex;
+    flex-direction: column; /* Stack labels and inputs in column */
+}
+
+.modal-content .form-group label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #666; /* Softer color for labels */
+}
+
+.modal-content .form-group input,
+.modal-content .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px; /* Softly rounded inputs */
+    border: 1px solid #ddd; /* Light gray border */
+    background-color: #f9f9f9; /* Slight off-white background */
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.modal-content .form-group input:focus,
+.modal-content .form-group textarea:focus {
+    border-color: #007BFF; /* Highlighted border on focus */
+    outline: none; /* Remove default outline */
+}
+
+.modal-content .form-button {
+    text-align: center;
+}
+
+.modal-content .form-button button {
+    background-color: #007BFF; /* Primary button color */
+    color: #fff;
+    padding: 12px 30px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content .form-button button:hover {
+    background-color: #0056b3; /* Darker on hover */
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
+/* *Notify Posted Internships Design */
+/* Notification Styles */
+#notification {
+    display: none; /* Initially hidden */
+    position: fixed;
+    bottom: 20px;  /* Position from the bottom */
+    right: -300px; /* Start off-screen to the right */
+    background: linear-gradient(145deg, #F9FFF5, #E4F2D8); /* Subtle gradient for 3D effect */
+    color: #333; /* Softer text color */
+    height: 60px;
+    padding: 10px 20px;
+    border-radius: 10px; /* Rounded for a smoother look */
+    display: flex;
+    align-items: center;
+    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.15), 
+                -3px -3px 10px rgba(255, 255, 255, 0.7); /* Enhanced shadow for 3D effect */
+    border: 1px solid #D1E7B5; /* Light beveled border */
+    transition: right 0.5s ease-in-out;
+    z-index: 1000; /* Ensure it's on top of other elements */
+}
+
+/* Class to show the notification */
+#notification.show {
+    right: 20px; /* Slide in position */
+}
+
+/* Notification Icon Styles */
+.notification-icon {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.notification-icon i {
+    font-size: 25px;
+    color: #28a745; /* Green icon for success */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* 3D icon effect */
+}
+
+/* Notification Message Styles */
+.notification-message {
+    font-size: 16px;
+    color: #4F8A10; /* Text color for success message */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* 3D text effect */
+}
+
+/* ! delete_internships design */
+/* Modal Container - The outer box */
+#deleteModal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 999; /* On top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.6); /* Black background with opacity */
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Modal Content Box */
+#deleteModal .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    max-width: 90%;
+    position: relative;
+    text-align: center;
+    animation: modalFadeIn 0.5s ease;
+}
+
+/* Modal Header */
+#deleteModal h2 {
+    margin-top: 0;
     color: #333;
 }
 
-.welcome-text .search-box {
-   display: flex;
-   align-items: center;
-   margin-left: 20px;
+/* Modal Text */
+#deleteModal p {
+    margin: 15px 0;
+    color: #666;
 }
 
-.welcome-text .search-box input {
-   padding: 5px 10px;
-   font-size: 1em;
-   border: 1px solid #ccc;
-   border-radius: 5px;
-   outline: none;
-}
-
-.welcome-text .search-box i {
-   margin-right: 5px;
-   font-size: 1.2em;
-   color: #333;
-}
-.welcome-text .notification-box {
-   display: flex;
-   align-items: center;
-   margin-left: 10px;
-}
-
-.welcome-text .notification-box i {
-   font-size: 1.5em;
-   color: #333;
-   cursor: pointer;
-}
-
-.search-box {
+/* Button Group */
+#deleteModal .button-group {
     display: flex;
-    align-items: center;
-}
-.search-box input {
-    padding: 5px;
-    margin-left: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    justify-content: space-between;
+    margin-top: 20px;
 }
 
-.charts-container {
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+/* Modal Buttons */
+#deleteModal .button-group .btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#deleteModal .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+#deleteModal .btn-danger:hover {
+    background-color: #c82333;
+}
+
+#deleteModal .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+#deleteModal .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Close Button (X icon) */
+#deleteModal .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+#deleteModal .close:hover {
+    color: #333;
+}
+
+/* Fade in animation for modal */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Media query for mobile devices */
+@media (max-width: 600px) {
+    #deleteModal .modal-content {
+        width: 90%;
+    }
+
+    #deleteModal .button-group {
+        flex-direction: column;
+    }
+
+    #deleteModal .btn {
+        margin-bottom: 10px;
+    }
+}
+
+
+
+/* *edit_internship design */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* * Table Design */
+.table-container {
+    width: auto;
+    margin: 0 20px;
     background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.charts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-.charts canvas {
-    max-width: 100%;
-    height: auto;
-    width: 100%;
-    max-height: 200px; /* Adjust this value to fit your needs */
-}
-.charts h3 {
-    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* For responsive design */
     margin-bottom: 20px;
 }
-.dark .charts-container {
-    background-color: #333;
-    border: 1px solid #555;
-    color: #fff;
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+    text-align: left;
+}
+
+.styled-table thead tr {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    text-align: left;
+}
+.styled-table thead tr th{
+    color: black;
+}
+.styled-table th, 
+.styled-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+    color: var(--text-color);
+}
+.styled-table tbody tr td{
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+.styled-table tbody tr {
+    background-color: var(--primary-color-light);
+    transition: background-color 0.3s ease;
+}
+
+.styled-table tbody tr:hover {
+    background-color: var(--primary-color-light);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody td {
+    font-weight: 400;
+}
+
+.delete-btn {
+    background-color: #777be2;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #999ce9;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    .styled-table th, .styled-table td {
+        font-size: 14px;
+    }
 }

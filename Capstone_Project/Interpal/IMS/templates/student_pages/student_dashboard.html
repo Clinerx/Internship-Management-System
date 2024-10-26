@@ -23,6 +23,8 @@
 <div class="line_design"><p></p></div>
 <div class="text">Welcome to your Dashboard, {{ user.first_name }}!</div>
 
+
+
 <div class="counting_box">
     <div class="counting_user" id="org_counting">
         <div class='counting_user_content'>
@@ -38,37 +40,65 @@
             <a href="">View Details</a>
         </div>
     </div>
-    <div class="counting_user">
-        <div class='counting_user_content'>
-            <i class='bx bx-user'></i>
-            <p>Internships: {{ internship_count }}</p>
-            <a href="">View Details</a>
-        </div>
-    </div>
 </div>
 
+<section>
+    <div class="profile_section">
+        <div class="profile_container">
+            <div class="profile_avatar"></div>
+        </div>
+    </div>
+</section>
 <section>
     <div class="charts_section">
         <div class="charts-container" id="bar_charts">
             <div class="charts_name">
-                <h3>Dashboard Charts</h3>
-            </div>
-            <div class="charts">
+                <h3>User Charts</h3>
                 <canvas id="barChart"></canvas>
             </div>
         </div>
         <div class="charts-container" id="pie_charts">
             <div class="charts_name">
                 <h3>Internship Distribution</h3>
-            </div>
-            <div class="charts">
                 <canvas id="pieChart"></canvas>
             </div>
         </div>
     </div>
 </section>
 
-<a href="{% url 'admin_view' %}" class="btn">Check Account</a>
+<div class="user_section">
+    
+<h2>Interns</h2>
+<table border="1">
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Action</th>
+    </tr>
+    
+    {% for user in users %}
+    <tr>
+        <td>{{ user.first_name }}</td>
+        <td>{{ user.last_name }}</td>
+        <td>{{ user.email }}</td>
+       
+        <td>
+            <form action="{% url 'delete_user' user.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">No users found</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+<a href="{% url 'admin_view' %}" class="btn">Check Account</a>q
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -110,7 +140,7 @@
     // Pie Chart (if you have internship distribution data)
     const pieCtx = document.getElementById('pieChart').getContext('2d');
     const pieChart = new Chart(pieCtx, {
-        type: 'pie', // Change to your preferred chart type
+        type: 'polarArea', // Change to your preferred chart type
         data: {
             labels: ['Organizations', 'Users'], // Update labels as necessary
             datasets: [{

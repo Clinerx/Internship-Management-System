@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'loginForm.css' %}">
+    <link rel="stylesheet" href="{% static 'blob.css' %}">
+    <title>Organization Login</title>
+    <style>
+        /* Basic styles for show/hide password functionality */
+        .password-container {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Organization Sign In</h2>
+
+        <!-- Display error messages -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{% url 'organization_login' %}">
+            {% csrf_token %}
+
+            <!-- Email Input -->
+            <div class="form-group">
+                <label for="company_email">Company Email:</label>
+                <input type="email" name="company_email" id="company_email" value="{{ email }}" required placeholder="Enter your company email">
+            </div>
+
+            <!-- Password Input with Show/Hide Toggle -->
+            <div class="form-group password-container">
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password" required placeholder="Enter your password">
+                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="form-options">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember_me" name="remember_me">
+                    <label for="remember_me">Remember me</label>
+                </div>
+                <a href="{% url 'request_password_reset' %}" class="forgot-password">Forgot password?</a>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn">Login</button>
+
+            <!-- Student Sign In Link -->
+            <p class="sign-up-text">
+                Don't have an account? <a href="{% url 'initial_registration' %}">Sign up</a>
+            </p>
+            <p class="sign-up-text">
+                Sign in as a <a href="{% url 'login' %}">Student</a>.
+            </p>
+        </form>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.toggle-password');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = '🙈';  // Change icon to indicate password is visible
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = '👁️';  // Change icon back to indicate password is hidden
+            }
+        }
+    </script>
+</body>
+</html>

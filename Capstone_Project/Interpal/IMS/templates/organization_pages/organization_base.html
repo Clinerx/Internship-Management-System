@@ -1,57 +1,59 @@
-{%load static%}
+{% load static %}
+
 <!DOCTYPE html>
-<!-- Coding by CodingLab | www.codinglabweb.com -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!----======== CSS ======== -->
+    <title>{% block title %}Organization Dashboard{% endblock %}</title>
+
+    <!-- CSS -->
     <link rel="stylesheet" href="{% static 'organization_design.css' %}">
     
-    <!----===== Boxicons CSS ===== -->
+    <!-- Boxicons CSS -->
     <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
     
-    <!----===== Chart.js ===== -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <title>{% block title %}Organization Dashboard{% endblock %}</title>
-    
 </head>
+
 <body>
+    <!-- Hamburger Menu for smaller screens -->
+    <i class='bx bx-menu hamburger-menu'></i>
     <nav class="sidebar">
         <header>
             <div class="image-text">
-                <span class="image"></span>
-
+                <div class="image">
+                    <!-- Profile Picture -->
+                    <img src="{% if request.user.profile_picture %}{{ request.user.profile_picture.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" alt="Profile Picture">
+                </div>
                 <div class="text logo-text">
-                    <span class="name">InternPal</span>
+                    <!-- Organization/Username -->
+                    <span class="name">{{ request.user.organization_name }}</span> <!-- or {{ request.user.get_full_name }} -->
                     <span class="profession">Web-based System</span>
                 </div>
             </div>
-
             <i class='bx bx-chevron-right toggle'></i>
         </header>
-
+    
         <div class="menu-bar">
             <div class="menu">
-
                 <ul class="menu-links">
                     <li class="nav-link">
                         <a href="{% url 'organization_dashboard' %}">
-                            <i class='bx bx-home icon'></i>
+                            <i class='bx bx-bar-chart-alt icon'></i>
                             <span class="text nav-text">Dashboard</span>
                         </a>
                     </li>
-
                     <li class="nav-link">
                         <a href="{% url 'organization_post' %}">
                             <i class='bx bx-message-square-edit icon'></i>
                             <span class="text nav-text">Post</span>
                         </a>
                     </li>
-
+                    
                     <li class="nav-link">
                         <a href="{% url 'organization_interns' %}">
                             <i class='bx bx-group icon'></i>
@@ -59,102 +61,76 @@
                         </a>
                     </li>
                     <li class="nav-link">
-                        <a href="{% url 'organization_applicant'%}">
+                        <a href="{% url 'organization_applicant' %}">
                             <i class='bx bx-folder icon'></i>
                             <span class="text nav-text">Applicants</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{% url 'about_us_org' %}">
+                    <li class="nav-link">
+                        <a href="{% url 'about_us' %}">
                             <i class='bx bx-info-circle icon'></i>
                             <span class="text nav-text">About Us</span>
                         </a>
                     </li>
-                    
                 </ul>
             </div>
-
+    
             <div class="bottom-content">
                 <li>
-                    <a href="{% url 'index' %}">
+                    <a href="{% url 'logout' %}">
                         <i class='bx bx-log-out icon'></i>
                         <span class="text nav-text">Logout</span>
                     </a>
                 </li>
-
                 <li class="mode">
                     <div class="sun-moon">
                         <i class='bx bx-moon icon moon'></i>
                         <i class='bx bx-sun icon sun'></i>
                     </div>
                     <span class="mode-text text">Dark mode</span>
-
                     <div class="toggle-switch">
                         <span class="switch"></span>
                     </div>
                 </li>
-                
             </div>
         </div>
     </nav>
+    
 
     <section class="home">
+        <!-- Page-Specific Content Block -->
         {% block content %}{% endblock %}
     </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const isDarkMode = {{ dark_mode|default:"false" }};
+            if (isDarkMode) {
+                document.body.classList.add("dark");
+                modeText.innerText = "Light mode";
+            }
+        });
+
         const body = document.querySelector('body'),
               sidebar = body.querySelector('nav'),
               toggle = body.querySelector(".toggle"),
+              searchBtn = body.querySelector(".search-box"),
               modeSwitch = body.querySelector(".toggle-switch"),
               modeText = body.querySelector(".mode-text");
 
-        toggle.addEventListener("click" , () => {
+        toggle.addEventListener("click", () => {
             sidebar.classList.toggle("close");
         });
 
-        modeSwitch.addEventListener("click" , () => {
+        searchBtn.addEventListener("click", () => {
+            sidebar.classList.remove("close");
+        });
+
+        modeSwitch.addEventListener("click", () => {
             body.classList.toggle("dark");
-            
-            if(body.classList.contains("dark")) {
-                modeText.innerText = "Light mode";
-            } else {
-                modeText.innerText = "Dark mode";
-            }
+            modeText.innerText = body.classList.contains("dark") ? "Light mode" : "Dark mode";
         });
 
-        // Bar Chart Setup
-        const barChartCtx = document.getElementById('barChart').getContext('2d');
-        const barChart = new Chart(barChartCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Engineering', 'Marketing', 'Design', 'HR', 'Finance'],
-                datasets: [{
-                    label: '# of Applications',
-                    data: [20, 10, 15, 8, 12],
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                }]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-
-        // Pie Chart Setup
-        const pieChartCtx = document.getElementById('pieChart').getContext('2d');
-        const pieChart = new Chart(pieChartCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Engineering', 'Marketing', 'Design'],
-                datasets: [{
-                    data: [10, 20, 30],
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
-                }]
-            }
-        });
     </script>
 </body>
 </html>

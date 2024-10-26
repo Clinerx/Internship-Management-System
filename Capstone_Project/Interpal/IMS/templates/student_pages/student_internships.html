@@ -5,13 +5,60 @@
 {% block content %}
 <div class="dashboard_header">
     <div class="header_icons">
-        <i class='bx bx-user'></i>
         <i class='bx bx-envelope'></i>
-        <i class='bx bx-bell'></i>
-        <i class='bx bx-user'></i>
+        <div class="chevron_right">
+            <i class='bx bx-bell'></i>
+        </div>
+    </div>
+    <div class="student_avatar_picture">
+        <div class="student_avatar_name">
+            <p class="user_first_name">{{ user.first_name }} {{ user.last_name }}</p>
+            <p class="user_course">{{ user.course }}</p>
+        </div> 
+        <div class="student_img">
+            <img src="" alt="">
+        </div>
     </div>
 </div>
 <div class="line_design"><p></p></div>
-    <div class="text">Welcome to the Internships page, {{ user.first_name }}!</div>
-    <!-- Add content specific to Internships here -->
+<div class="text">Welcome to the Internships page, {{ user.first_name }}!</div>
+
+<!-- Internships Listing -->
+<section class="internship-postings-section">
+    <h2>Available Internships</h2>
+    <div class="internship-postings-container">
+        {% for internship in internships %}
+            <div class="internship-posting card">
+                <!-- Container for Organization Picture -->
+                <div class="organizationProfile">
+                    <div class="img-card">
+                        <img src="" alt="">
+                        
+                    </div>
+                    <div class="org_image_name">
+                        <p>{{ internship.organization.company_name }}</p>
+                    </div>
+                </div>
+                
+
+                <!-- Container for Internship Details -->
+                <div class="card-body">
+                    <h3 class="card-title">{{ internship.title }}</h3>
+                    <p><strong>Organization:</strong> {{ internship.organization.company_name }}</p>
+                    <p><strong>Location:</strong> {{ internship.location }}</p>
+                    <p><small class="text-muted">Posted on: {{ internship.created_at|date:"F d, Y" }}</small></p>
+
+                    <!-- Edit and Delete buttons -->
+                    <div class="internship-buttons">
+                        <a href="{% url 'internship_detail' internship.id %}" class="btn btn-secondary">View</a>
+                        <a href="{% url 'internship_apply' internship.id %}" class="btn btn-danger">Apply</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>No internships available at this time.</p>
+        {% endfor %}
+    </div>
+</section>
+
 {% endblock %}

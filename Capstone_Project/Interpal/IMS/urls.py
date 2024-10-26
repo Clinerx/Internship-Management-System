@@ -5,7 +5,8 @@ urlpatterns = [
     path('', views.index, name='index'),  # Create a simple home view
     
     path('student_register/', views.student_register, name='student_register'),
-    path('login/', views.user_login, name='login'),
+    path('login/', views.student_login, name='login'),
+    path('organization_login', views.organization_login, name='organization_login'),
     path('logout/', views.user_logout, name='logout'),
     path('index', views.index, name='index'),
     path('admin_view/', views.admin_users, name='admin_view'),  # Admin view for listing users
@@ -26,12 +27,22 @@ urlpatterns = [
     path('organization_post/', views.organization_post, name='organization_post'),
     path('organization_interns/', views.organization_interns, name='organization_interns'),
     path('organization_applicant/', views.organization_applicant, name='organization_applicant'),
-    path('about_us_org/', views.about_us_org, name='about_us_org'),
+    path('post/edit/<int:internship_id>/', views.edit_internship, name='edit_internship'),
+    path('delete_internship/<int:internship_id>/', views.delete_internship, name='delete_internship'),
+     path('internship/<int:internship_id>/', views.view_internship, name='view_internship'),
+    # path('organization_applicant/', views.organization_applicant, name='organization_applicant'),
+    # path('about_us_org/', views.about_us_org, name='about_us_org'),
     
     
-    path('home', views.home, name='home'),
+    path('home/', views.home, name='home'),
     path('student_internships/', views.student_internships, name='student_internships'),
     path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
     path('student_status/', views.student_status, name='student_status'),
     path('about_us/', views.about_us, name='about_us'),
+    
+    path('student_internships/<int:id>/', views.internship_detail, name='internship_detail'),
+    path('student_internships/<int:id>/apply/', views.internship_apply, name='internship_apply'),
+    
+    
+    
 ]

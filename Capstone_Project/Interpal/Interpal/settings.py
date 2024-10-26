@@ -149,3 +149,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'psuinterpal@gmail.com'  
 EMAIL_HOST_PASSWORD = 'yjjw tsxg wqfm gkkv'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default session engine
+
+SESSION_COOKIE_AGE = 1209600  # Two weeks by default
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False

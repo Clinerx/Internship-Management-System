@@ -1,0 +1,14 @@
+{% extends 'student_pages/student_base.html' %}
+
+{% block title %}Apply for Internship{% endblock %}
+{% block content %}
+<div class="internship-apply">
+    <h2>Apply for {{ internship.title }}</h2>
+    <p>Thank you for your interest in applying to {{ internship.organization_name }}.</p>
+    
+    <!-- You can add a form or application steps here -->
+
+    <p>Your application has been submitted.</p>
+    <button><a href="{% url 'student_internships' %}">Apply More</a></button>
+</div>
+{% endblock %}

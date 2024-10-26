@@ -49,7 +49,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     reset_token = models.CharField(max_length=32, null=True, blank=True)
     reset_otp = models.IntegerField(blank=True, null=True)
 
-
+    # One-to-one relationship with Organization (optional)
+    organization = models.OneToOneField(
+        'Organization', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='user'  # Reverse relation name
+    )
 
     objects = CustomUserManager()
 
@@ -65,13 +72,43 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def has_module_perms(self, app_label):
         return True
 
+
 class UserVisit(models.Model):
     count = models.IntegerField(default=0)
 
     def __str__(self):
         return str(self.count)
 
+class OrganizationManager(BaseUserManager):
+    def create_user(self, email, first_name, last_name, company_name, password=None):
+        if not email:
+            raise ValueError("The Email field is required")
+        organization = self.model(
+            email=self.normalize_email(email),
+            first_name=first_name,
+            last_name=last_name,
+            company_name=company_name,
+        )
+        organization.set_password(password)
+        organization.save(using=self._db)
+        return organization
+
+    def create_superuser(self, email, first_name, last_name, company_name, password=None):
+        organization = self.create_user(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            company_name=company_name,
+            password=password
+        )
+        organization.is_admin = True
+        organization.is_staff = True
+        organization.is_superuser = True
+        organization.save(using=self._db)
+        return organization
+
 class Organization(models.Model):
+    
     company_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -79,6 +116,14 @@ class Organization(models.Model):
     password = models.CharField(max_length=255)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+
+    objects = OrganizationManager()
+
+    USERNAME_FIELD = 'company_email'
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'company_name']
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
@@ -90,25 +135,24 @@ class Organization(models.Model):
     def __str__(self):
         return self.company_name
 
+
 class Internship(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField(default="Internship opportunity with exciting responsibilities and growth potential.")
-    requirements = models.TextField(default="Basic requirements include enthusiasm and a willingness to learn.")
-    start_date = models.DateField(default=timezone.now)
-    end_date = models.DateField(default=timezone.now)  # Sets default to the current date when the instance is created
-    
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='internships')
-    
+    title = models.CharField(max_length=200, null=True)
+    organization = models.ForeignKey(
+        Organization, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='internships'
+    )
+    location = models.CharField(max_length=200, null=True)
+    description = models.TextField()
+    requirements = models.TextField()
+    application_process = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    max_applicants = models.PositiveIntegerField(default=1) 
+
     def __str__(self):
         return self.title
 
-class Application(models.Model):
-    internship = models.ForeignKey(Internship, on_delete=models.CASCADE, related_name='applications')
-    student_name = models.CharField(max_length=255)
-    student_email = models.EmailField()
-    resume = models.FileField(upload_to='resumes/')
-    date_applied = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.student_name} applied to {self.internship.title}"
-
+    def get_applications(self):
+        return self.applications.all()

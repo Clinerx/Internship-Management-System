@@ -1,0 +1,16 @@
+{% extends 'student_pages/student_base.html' %}
+
+{% block title %}Internship Details{% endblock %}
+{% block content %}
+<div class="internship-details">
+    <h2>{{ internship.title }}</h2>
+    <p><strong>Organization:</strong> {{ internship.organization_name }}</p>
+    <p><strong>Location:</strong> {{ internship.location }}</p>
+    <p><strong>Description:</strong> {{ internship.description }}</p>
+    <p><strong>Requirements:</strong> {{ internship.requirements }}</p>
+    <p><strong>Application Process:</strong> {{ internship.application_process }}</p>
+    <p><small class="text-muted">Posted on: {{ internship.created_at|date:"F d, Y" }}</small></p>
+
+    <a href="{% url 'internship_apply' internship.id %}" class="btn btn-primary">Apply Now</a>
+</div>
+{% endblock %}
