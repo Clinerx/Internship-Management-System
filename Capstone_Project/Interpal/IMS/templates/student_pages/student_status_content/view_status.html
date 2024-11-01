@@ -1,0 +1,96 @@
+{% extends 'student_pages/student_base.html' %}
+
+{% block title %}Application Status{% endblock %}
+{% block header %}Application Status{% endblock %}
+{% block content %}
+<div class="status-container">
+    <h2>Application Status for {{ application.internship.title }}</h2>
+    
+    <!-- Stepper -->
+    <div class="stepper">
+        {% for stage in stages %}
+            <div class="step {% if stage == status_details.status %}current{% elif stage in status_details.completed_stages %}completed{% endif %}">
+                <div class="step-number">{{ forloop.counter }}</div>
+                <div class="step-title">{{ stage }}</div>
+            </div>
+            {% if not forloop.last %}
+                <div class="step-separator {% if stage in status_details.completed_stages %}completed{% endif %}"></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    <div class="status-details">
+        <p><strong>Current Status:</strong> {{ status_details.status }}</p>
+        <p><strong>Review Stage:</strong> {{ status_details.review_stage }}</p>
+        <p><strong>Date of Submission:</strong> {{ status_details.submission_date|date:"F d, Y" }}</p>
+        <p><strong>Comments:</strong> {{ status_details.comments }}</p>
+    </div>
+
+    <a href="{% url 'student_status' %}" class="btn back-btn">Back to Internships</a>
+</div>
+
+<style>
+    .status-container {
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        max-width: 600px;
+        margin: auto;
+        text-align: center;
+    }
+    .stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    .step {
+        text-align: center;
+        width: 20%;
+        position: relative;
+    }
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #ddd;
+        color: #fff;
+        line-height: 30px;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    .current .step-number {
+        background-color: #007bff;
+    }
+    .completed .step-number, .completed .step-separator {
+        background-color: #28a745;
+    }
+    .step-title {
+        font-size: 0.9rem;
+        color: #333;
+    }
+    .step-separator {
+        width: 20%;
+        height: 2px;
+        background-color: #ddd;
+    }
+    .status-details p {
+        font-size: 1rem;
+        color: #333;
+    }
+    .btn.back-btn {
+        margin-top: 20px;
+        display: inline-block;
+        padding: 10px 20px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+</style>
+
+{% endblock %}

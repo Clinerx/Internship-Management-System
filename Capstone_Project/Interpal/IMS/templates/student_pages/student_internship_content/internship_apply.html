@@ -1,0 +1,63 @@
+{% extends 'student_pages/student_base.html' %}
+{% block title %}Internship Application{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body">
+            <!-- Header -->
+            <h2 class="card-title text-center text-primary mb-4">Apply for Internship</h2>
+
+            <!-- Application Form -->
+            <form method="POST" class="d-flex justify-content-center">
+                {% csrf_token %}
+                <button type="submit" 
+                        class="btn btn-primary btn-lg px-5"
+                        {% if already_applied %}disabled{% endif %}>
+                    Submit Application
+                </button>
+            </form>
+
+            <!-- Status Message -->
+            {% if already_applied %}
+                <div class="alert alert-info text-center mt-4 mb-0" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    You have already applied for this internship.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .container {
+        max-width: 600px;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 2rem;
+    }
+    .card-title {
+        font-weight: 700;
+        color: #007bff;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        font-size: 1.2rem;
+    }
+    .btn-primary:disabled {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Custom JavaScript can be added here if needed
+</script>
+{% endblock %}

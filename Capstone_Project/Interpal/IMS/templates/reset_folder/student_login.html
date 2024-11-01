@@ -25,15 +25,6 @@
     <div class="form-container">
         <h2>Student Sign In</h2>
 
-        <!-- Display error messages -->
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert {{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
         <!-- Login Form -->
         <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}

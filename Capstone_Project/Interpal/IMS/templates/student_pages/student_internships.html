@@ -1,8 +1,9 @@
 {% extends 'student_pages/student_base.html' %}
 
-{% block title %}Organizations Internships{% endblock %}
+{% block title %}Student || Organizations Internships{% endblock %}
 {% block header %}Internships{% endblock %}
 {% block content %}
+
 <div class="dashboard_header">
     <div class="header_icons">
         <i class='bx bx-envelope'></i>
@@ -10,45 +11,47 @@
             <i class='bx bx-bell'></i>
         </div>
     </div>
-    <div class="student_avatar_picture">
-        <div class="student_avatar_name">
-            <p class="user_first_name">{{ user.first_name }} {{ user.last_name }}</p>
-            <p class="user_course">{{ user.course }}</p>
-        </div> 
-        <div class="student_img">
-            <img src="" alt="">
-        </div>
-    </div>
 </div>
+
 <div class="line_design"><p></p></div>
-<div class="text">Welcome to the Internships page, {{ user.first_name }}!</div>
+<!-- Search Bar -->
+<div class="search-bar-container">
+    <input type="text" id="search-bar" placeholder="Search for internships..." oninput="filterInternships()">
+</div>
+
+<!-- Pagination Top -->
+<div class="pagination-container">
+    {% if internships.has_previous %}
+        <a href="?page=1" class="pagination-link">&laquo; First</a>
+        <a href="?page={{ internships.previous_page_number }}" class="pagination-link">Previous</a>
+    {% endif %}
+    <span>Page {{ internships.number }} of {{ internships.paginator.num_pages }}</span>
+    {% if internships.has_next %}
+        <a href="?page={{ internships.next_page_number }}" class="pagination-link">Next</a>
+        <a href="?page={{ internships.paginator.num_pages }}" class="pagination-link">Last &raquo;</a>
+    {% endif %}
+</div>
 
 <!-- Internships Listing -->
 <section class="internship-postings-section">
     <h2>Available Internships</h2>
-    <div class="internship-postings-container">
+    <div class="internship-postings-container" id="internship-listings">
         {% for internship in internships %}
             <div class="internship-posting card">
-                <!-- Container for Organization Picture -->
                 <div class="organizationProfile">
                     <div class="img-card">
                         <img src="" alt="">
-                        
                     </div>
                     <div class="org_image_name">
                         <p>{{ internship.organization.company_name }}</p>
                     </div>
                 </div>
-                
-
-                <!-- Container for Internship Details -->
                 <div class="card-body">
                     <h3 class="card-title">{{ internship.title }}</h3>
                     <p><strong>Organization:</strong> {{ internship.organization.company_name }}</p>
                     <p><strong>Location:</strong> {{ internship.location }}</p>
+                    <p><strong>Available Applicants: </strong> {{internship.max_applicants}}</p>
                     <p><small class="text-muted">Posted on: {{ internship.created_at|date:"F d, Y" }}</small></p>
-
-                    <!-- Edit and Delete buttons -->
                     <div class="internship-buttons">
                         <a href="{% url 'internship_detail' internship.id %}" class="btn btn-secondary">View</a>
                         <a href="{% url 'internship_apply' internship.id %}" class="btn btn-danger">Apply</a>
@@ -60,5 +63,203 @@
         {% endfor %}
     </div>
 </section>
+
+<!-- Pagination Bottom -->
+<div class="pagination-container">
+    {% if internships.has_previous %}
+        <a href="?page=1" class="pagination-link">&laquo; First</a>
+        <a href="?page={{ internships.previous_page_number }}" class="pagination-link">Previous</a>
+    {% endif %}
+    <span>Page {{ internships.number }} of {{ internships.paginator.num_pages }}</span>
+    {% if internships.has_next %}
+        <a href="?page={{ internships.next_page_number }}" class="pagination-link">Next</a>
+        <a href="?page={{ internships.paginator.num_pages }}" class="pagination-link">Last &raquo;</a>
+    {% endif %}
+</div>
+
+<!-- Notification Container -->
+<div id="notification" class="alert alert-success" role="alert" aria-live="assertive" style="display: none;">
+    <div class="notification-icon">
+        <i class="bx bx-check-circle"></i>
+    </div>
+    <div class="notification-message">
+        Application Submitted Successfully!
+    </div>
+</div>
+
+<style>
+    /* General Styles */
+    .dashboard_header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .search-bar-container {
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    #search-bar {
+        padding: 8px;
+        width: 80%;
+        max-width: 500px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    /* Pagination Styles */
+    .pagination-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .pagination-link {
+        margin: 0 5px;
+        padding: 8px 12px;
+        color: #007bff;
+        text-decoration: none;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+
+    .pagination-link:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    /* Internship Section Styles */
+    .internship-postings-section {
+        padding: 20px;
+    }
+
+    .internship-postings-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .internship-posting {
+        flex: 1 1 calc(33% - 20px);
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+
+    .internship-posting:hover {
+        transform: translateY(-5px);
+    }
+
+    .organizationProfile {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .img-card {
+        margin-right: 15px;
+    }
+
+    .img-card img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .internship-buttons {
+        margin-top: 10px;
+    }
+
+    .btn {
+        margin-right: 10px;
+    }
+
+    /* Notification Styles */
+    #notification {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        position: fixed;
+        bottom: 20px;
+        right: -300px;
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        background-color: #d4edda;
+        color: #155724;
+        border-radius: 5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: right 0.5s ease;
+        max-width: 300px;
+    }
+    #notification.show {
+        right: 20px;
+    }
+    .notification-icon {
+        font-size: 20px;
+        margin-right: 10px;
+    }
+    @media (max-width: 768px) {
+        .internship-posting {
+            flex: 1 1 100%;
+        }
+
+        .search-bar-container input {
+            width: 95%;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if application was submitted
+        {% if application_submitted %}
+            if (!localStorage.getItem('notificationShown')) {
+                var notification = document.getElementById('notification');
+                notification.style.display = 'flex';
+                setTimeout(function() {
+                    notification.classList.add('show');
+                }, 100);
+
+                setTimeout(function() {
+                    notification.classList.remove('show');
+                    setTimeout(function() {
+                        notification.style.display = 'none';
+                    }, 500);
+                }, 5000);
+
+                localStorage.setItem('notificationShown', 'true');
+            }
+        {% else %}
+            localStorage.removeItem('notificationShown');
+        {% endif %}
+    });
+
+    // Internship Filter Functionality
+    function filterInternships() {
+        var input, filter, cards, title, i;
+        input = document.getElementById("search-bar");
+        filter = input.value.toUpperCase();
+        cards = document.getElementsByClassName("internship-posting");
+        
+        for (i = 0; i < cards.length; i++) {
+            title = cards[i].getElementsByClassName("card-title")[0];
+            if (title) {
+                if (title.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }       
+        }
+    }
+</script>
 
 {% endblock %}

@@ -156,3 +156,53 @@ class Internship(models.Model):
 
     def get_applications(self):
         return self.applications.all()
+    
+class Application(models.Model):
+    STATUS_CHOICES = [
+        ('Applied', 'Applied'),
+        ('In Review', 'In Review'),
+        ('Interview Scheduled', 'Interview Scheduled'),
+        ('Offer Extended', 'Offer Extended'),
+        ('Completed', 'Completed')
+    ]
+
+    internship = models.ForeignKey(
+        'Internship',
+        on_delete=models.CASCADE,
+        related_name='applications'
+    )
+    organization = models.ForeignKey(
+        'Organization',
+        on_delete=models.CASCADE,
+        related_name='applications'
+    )
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='applications',
+        null=True
+    )
+    student_first_name = models.CharField(max_length=255, null=True)
+    student_last_name = models.CharField(max_length=255, null=True)
+    student_college = models.CharField(max_length=255, null=True)
+    student_course = models.CharField(max_length=255, null=True)
+    resume = models.FileField(upload_to='resumes/', blank=True, null=True)
+    cover_letter = models.TextField(blank=True, null=True)
+    applied_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Applied')
+    
+    # New fields for review stage and comments
+    review_stage = models.CharField(max_length=100, default="Under Review")  # Track the review stage
+    comments = models.TextField(blank=True, null=True)  # Allow for any comments on the application
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only set on creation
+            self.organization = self.internship.organization
+            self.student_first_name = self.student.first_name
+            self.student_last_name = self.student.last_name
+            self.student_college = self.student.college
+            self.student_course = self.student.course
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.student_first_name} {self.student_last_name} - {self.internship.title}"

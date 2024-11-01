@@ -1,0 +1,74 @@
+{% extends 'student_pages/student_base.html' %}
+
+{% block title %}Check Application Status{% endblock %}
+{% block content %}
+
+<div class="check-status-container">
+    <h2>Application Status for {{ application.internship.title }}</h2>
+    <p>Organization: {{ application.internship.organization.company_name }}</p>
+    
+    <!-- Roadmap -->
+    <div class="roadmap">
+        {% for stage in roadmap_stages %}
+            <div class="roadmap-stage {% if forloop.counter0 <= current_index %}completed{% endif %}">
+                {{ stage }}
+            </div>
+            {% if not forloop.last %}
+                <div class="roadmap-line {% if forloop.counter0 < current_index %}completed{% endif %}"></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Status details -->
+    <p class="current-status">Current Status: <strong>{{ application.status }}</strong></p>
+</div>
+
+{% endblock %}
+
+<style>
+    .check-status-container {
+        margin: 30px auto;
+        max-width: 600px;
+        text-align: center;
+    }
+
+    .roadmap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+
+    .roadmap-stage {
+        padding: 10px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        flex: 1;
+        background-color: #f7f7f7;
+        position: relative;
+        font-size: 0.9em;
+    }
+
+    .roadmap-stage.completed {
+        border-color: #4CAF50;
+        background-color: #e0ffe0;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .roadmap-line {
+        width: 20px;
+        height: 5px;
+        background-color: #ccc;
+    }
+
+    .roadmap-line.completed {
+        background-color: #4CAF50;
+    }
+
+    .current-status {
+        font-size: 1.2em;
+        margin-top: 20px;
+    }
+</style>

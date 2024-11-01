@@ -1,11 +1,10 @@
-import json
 import random
 from functools import wraps
 from random import randint
-import logging
 
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.models import AnonymousUser
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.contrib.auth import authenticate, login, logout
@@ -16,12 +15,15 @@ from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.db.models.functions import ExtractMonth
+from django.db.models import Q
+from django.utils.timezone import now
 from django.utils import timezone
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.utils.crypto import get_random_string
 
-from .forms import CustomUserCreationForm, InternshipForm, OrganizationRegistrationForm
-from .models import CustomUser, Internship, Organization, UserVisit
+from .forms import CustomUserCreationForm, InternshipForm
+from .models import CustomUser, Internship, Organization, UserVisit, Application
 
 
 
@@ -263,7 +265,6 @@ def student_register(request):
         form = CustomUserCreationForm()
     return render(request, 'student_registration_folder/student_profile_details.html', {'form': form})
 
-# User login
 def student_login(request):
     if request.method == 'POST':
         email = request.POST.get('email', '')  # Get the email from POST data
@@ -276,7 +277,7 @@ def student_login(request):
             
             if user is not None:
                 login(request, user)  # Login the user
-                return redirect('home')  # Redirect to the student dashboard (replace 'home' with the correct path)
+                return redirect('student_dashboard')  # Redirect to the student dashboard (replace 'student_dashboard' with the correct path)
             else:
                 messages.error(request, 'Invalid email or password for student account.')
 
@@ -288,6 +289,7 @@ def student_login(request):
 
     # If the request is GET, render the student login page
     return render(request, 'reset_folder/student_login.html')
+
 
 
 
@@ -335,48 +337,86 @@ def visit_tracker(request):
     users = CustomUser.objects.all()
     return render(request, 'admin_folder/admin_view.html', {'visit_count': visit.count, 'users': users})
 
-# * Student Pages
+
+# * Student Pages =============================
 
 @login_required(login_url='login')
 def student_dashboard(request):
+    # Basic counts
     users = CustomUser.objects.all()
     organizations = Organization.objects.all()
-    org_count = Organization.objects.count()  # Count of registered organizations
-    user_count = CustomUser.objects.filter(is_active=True).count()  # Count of registered active students
+    org_count = Organization.objects.count()
+    user_count = CustomUser.objects.filter(is_active=True).count()
+    
+    # Monthly registration data for the current year
+    current_year = now().year
+    
+    org_data = (
+        Organization.objects
+        .filter(date_joined__year=current_year)
+        .annotate(month=ExtractMonth('date_joined'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+    
+    user_data = (
+        CustomUser.objects
+        .filter(date_joined__year=current_year)
+        .annotate(month=ExtractMonth('date_joined'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Prepare monthly data arrays
+    org_counts = [0] * 12
+    user_counts = [0] * 12
+    for item in org_data:
+        org_counts[item['month'] - 1] = item['count']
+    for item in user_data:
+        user_counts[item['month'] - 1] = item['count']
+
+    # Context for template rendering
     context = {
         'org_count': org_count,
         'user_count': user_count,
-        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
-        'user': request.user,  # Pass the user object to the template
+        'dark_mode': request.session.get('dark_mode', False),
+        'user': request.user,
         'users': users,
         'organizations': organizations,
+        'org_counts': org_counts,  # Monthly data for organizations
+        'user_counts': user_counts,  # Monthly data for users
     }
+    
     return render(request, 'student_pages/student_dashboard.html', context)
+# * <<<<<<<============================================>>>> 
+# ^ Student Internship
 
 @login_required(login_url='login')
 def student_internships(request):
-    internships = Internship.objects.all().order_by('-created_at')
-    org = Organization.objects.get(id=request.session['organization_id'])
+    internships_list = Internship.objects.all().order_by('-created_at')
+    paginator = Paginator(internships_list, 9)  # Display 6 internships per page
+    page_number = request.GET.get('page')
+    internships = paginator.get_page(page_number)
+    
+    organization_id = request.session.get('organization_id')
+    org = None
+
+    if organization_id:
+        org = get_object_or_404(Organization, id=organization_id)
+
+    # Check for the application submission notification flag
+    application_submitted = request.session.pop('application_submitted', False)  # Retrieve and clear flag
+
     context = {
-        'internships': internships,
+        'internships': internships,  # Pass the paginated internships
         'org': org,
-        'user': request.user,  # Pass user data to the template
-        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
+        'user': request.user,
+        'dark_mode': request.session.get('dark_mode', False),
+        'application_submitted': application_submitted  # Pass flag to template
     }
     return render(request, 'student_pages/student_internships.html', context)
-
-def student_status(request):
-    context = {
-        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
-    }
-    return render(request, 'student_pages/student_status.html', context)
-
-def about_us(request):
-    context = {
-        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
-    }
-    return render(request, 'student_pages/about_us.html', context)
-
 
 # View for internship detail (Visit)
 def internship_detail(request, id):
@@ -385,27 +425,120 @@ def internship_detail(request, id):
         'internship': internship,
         'user': request.user,
     }
-    return render(request, 'student_pages/internship_detail.html', context)
+    return render(request, 'student_pages/student_internship_content/internship_detail.html', context)
 
-# View for applying to internship (Apply)
-def internship_apply(request, id):
-    internship = get_object_or_404(Internship, id=id)
-    
-    # Logic to handle application goes here. 
-    # For now, we'll just render a confirmation page.
-    
+
+
+
+# * <<<<<<<============================================>>>> 
+# ^ Student Status Content
+
+@login_required(login_url='login')
+def internship_apply(request, internship_id):
+    internship = get_object_or_404(Internship, id=internship_id)
+
+    # Check if application exists or was recently deleted
+    already_applied = Application.objects.filter(internship=internship, student=request.user).exists()
+    if request.session.get('application_deleted'):
+        already_applied = False
+        del request.session['application_deleted']  # Clear the flag after checking
+
+    if request.method == 'POST' and not already_applied:
+        Application.objects.create(
+            internship=internship,
+            organization=internship.organization,
+            student=request.user,
+        )
+        request.session['application_submitted'] = True
+        return redirect('student_internships')
+
     context = {
         'internship': internship,
-        'user': request.user,
+        'already_applied': already_applied
     }
-    return render(request, 'student_pages/internship_apply.html', context)
+    return render(request, 'student_pages/student_internship_content/internship_apply.html', context)
+
+@login_required(login_url='login')
+def student_status(request):
+    search_query = request.GET.get('search', '')
+    applications = Application.objects.filter(student=request.user).select_related('internship', 'internship__organization')
+
+    if search_query:
+        applications = applications.filter(
+            Q(internship__title__icontains=search_query) |
+            Q(internship__organization__company_name__icontains=search_query)
+        )
+
+    paginator = Paginator(applications, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'dark_mode': request.session.get('dark_mode', False),
+        'applications': page_obj,
+        'user': request.user,
+        'search_query': search_query,
+    }
+    return render(request, 'student_pages/student_status_content/student_status.html', context)
 
 
-# ^ organization pages
+
+
+def delete_application_confirm(request, application_id):
+    # Get the application object; restrict access to the current student's applications only
+    application = get_object_or_404(Application, id=application_id, student=request.user)
+    
+    if request.method == 'POST':
+        # Delete the application if the form is submitted
+        application.delete()
+        messages.success(request, "Your application has been successfully deleted.")
+        return redirect('student_status')  # Redirect back to the student's status page
+    
+    # Render the confirmation template if request method is GET
+    return render(request, 'student_pages/student_status_content/delete_application_confirm.html', {'application': application})
+
+
+
+def view_status(request, application_id):
+    application = get_object_or_404(Application, id=application_id)
+    status_details = {
+        "status": application.status,
+        "review_stage": "Review Stage Info Here",  # Adjust as necessary
+        "submission_date": application.applied_at,
+        "comments": "Comments Here",  # Adjust as necessary
+        "completed_stages": ["Applied", "In Review"]  # Example completed stages
+    }
+    stages = ["Applied", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
+    context = {
+        'application': application,
+        'status_details': status_details,
+        'stages': stages
+    }
+    return render(request, 'student_pages/student_status_content/view_status.html', context)
+
+
+# * <<<<<<<============================================>>>> 
+# ^ Student About Us
+
+def about_us(request):
+    context = {
+        'dark_mode': request.session.get('dark_mode', False),  # Include dark_mode in the context
+    }
+    return render(request, 'student_pages/about_us.html', context)
+
+# * <<<<<<<============================================>>>> 
+# ^ organization pages ============================
 
 @organization_login_required
 def organization_post(request):
-    organization = Organization.objects.get(id=request.session['organization_id'])
+    # Check if 'organization_id' is in session
+    organization_id = request.session.get('organization_id')
+    if not organization_id:
+        messages.error(request, "No organization is currently logged in.")
+        return redirect('login')  # Redirect to login or an appropriate page
+
+    # Fetch the organization object
+    organization = Organization.objects.get(id=organization_id)
     internship_posted = request.session.pop('internship_posted', False)
 
     if request.method == 'POST':
@@ -433,6 +566,7 @@ def organization_post(request):
         'internship_posted': internship_posted,
         'start_number': start_number
     })
+
 
    
 
@@ -490,26 +624,55 @@ def delete_internship(request, internship_id):
 
 @organization_login_required
 def organization_interns(request):
+    # Check if 'organization_id' is in session
+    organization_id = request.session.get('organization_id')
+    if not organization_id:
+        messages.error(request, "No organization is currently logged in.")
+        return redirect('login')
+
+    # Fetch organization and related users
     users = CustomUser.objects.all()
-    org = Organization.objects.get(id=request.session['organization_id'])
-    
+    org = Organization.objects.get(id=organization_id)
+
     context = {
         'users': users,
         'org': org,
     }
     return render(request, 'organization_pages/organization_interns.html', context)
 
+# * ================ Application =========================
+
 @organization_login_required
 def organization_applicant(request):
-    users = CustomUser.objects.all()
     org = Organization.objects.get(id=request.session['organization_id'])
     
+    # Fetch applications related to this organization
+    applications = Application.objects.filter(organization=org).select_related('internship', 'student')
+
     context = {
-        'users': users,
+        'applications': applications,
         'org': org,
     }
     return render(request, 'organization_pages/organization_applicants.html', context)
 
+@organization_login_required
+def view_application(request, application_id):
+    application = Application.objects.get(id=application_id, organization_id=request.session['organization_id'])
+    context = {'application': application}
+    return render(request, 'organization_pages/view_application.html', context)
+
+@organization_login_required
+def delete_application(request, application_id):
+    try:
+        application = Application.objects.get(id=application_id, organization_id=request.session['organization_id'])
+        application.delete()
+        messages.success(request, "Application deleted successfully.")
+    except Application.DoesNotExist:
+        messages.error(request, "Application not found or you don't have permission to delete it.")
+    return redirect('organization_applicant')
+
+
+# * ================ Application =========================
 @organization_login_required
 def about_us_org(request):
     return render(request, 'organization_pages/about_us_org.html')
@@ -545,4 +708,20 @@ def org_dashboard(request):
         # If the organization ID is not in the session, redirect to login
         messages.error(request, 'You must log in to access the dashboard.')
         return redirect('login')
-    
+
+
+
+
+# * Ajax Functions
+def get_applications(request):
+    applications = Application.objects.all()  # Fetch the applications
+    data = [{
+        'student_name': f"{app.student.first_name} {app.student.last_name}",
+        'internship_title': app.internship.title,
+        'course': app.student.course,
+        'college': app.student.college,
+        'applied_on': app.applied_at.strftime("%B %d, %Y"),
+        'application_id': app.id,
+    } for app in applications]
+
+    return JsonResponse(data, safe=False)

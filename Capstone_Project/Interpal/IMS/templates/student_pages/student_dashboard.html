@@ -1,176 +1,284 @@
 {% extends 'student_pages/student_base.html' %}
 
-{% block title %}Student Dashboard{% endblock %}
+{% block title %}Student || Dashboard{% endblock %}
 
 {% block content %}
-<div class="dashboard_header">
-    <div class="header_icons">
-        <i class='bx bx-envelope'></i>
-        <div class="chevron_right">
-            <i class='bx bx-bell'></i>
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="row dashboard-header align-items-center justify-content-between mb-4 p-3 shadow rounded bg-white">
+        <div class="col-6 d-flex justify-content-start align-items-center">
+            <i class='bx bx-envelope me-3 fs-3 text-primary'></i>
+            <i class='bx bx-bell fs-3 text-secondary'></i>
+        </div>
+        <div class="col-6 d-flex justify-content-end align-items-center">
+            <div class="text-end me-3">
+                <p class="fw-bold mb-0">{{ user.first_name }} {{ user.last_name }}</p>
+                <p class="small text-muted">{{ user.course }}</p>
+            </div>
+            <img src="{% if user.avatar %}{{ user.avatar.url }}{% else %}/static/images/default-avatar.png{% endif %}" alt="Student Avatar" class="avatar-img">
         </div>
     </div>
-    <div class="student_avatar_picture">
-        <div class="student_avatar_name">
-            <p class="user_first_name">{{ user.first_name }} {{ user.last_name }}</p>
-            <p class="user_course">{{ user.course }}</p>
-        </div> 
-        <div class="student_img">
-            <img src="" alt="">
-        </div>
-    </div>
-</div>
-<div class="line_design"><p></p></div>
-<div class="text">Welcome to your Dashboard, {{ user.first_name }}!</div>
 
-
-
-<div class="counting_box">
-    <div class="counting_user" id="org_counting">
-        <div class='counting_user_content'>
-            <i class='bx bx-user'></i>
-            <p>Registered Organizations: {{ org_count }}</p>
-            <a href="">View Details</a>
-        </div>
+    <!-- Welcome Message -->
+    <div class="text-center my-4">
+        <h2 class="fw-bold text-primary">Welcome to your Dashboard, {{ user.first_name }}!</h2>
     </div>
-    <div class="counting_user" id="user_counting">
-        <div class='counting_user_content'>
-            <i class='bx bx-user'></i>
-            <p>Registered Students: {{ user_count }}</p>
-            <a href="">View Details</a>
-        </div>
-    </div>
-</div>
 
-<section>
-    <div class="profile_section">
-        <div class="profile_container">
-            <div class="profile_avatar"></div>
-        </div>
-    </div>
-</section>
-<section>
-    <div class="charts_section">
-        <div class="charts-container" id="bar_charts">
-            <div class="charts_name">
-                <h3>User Charts</h3>
-                <canvas id="barChart"></canvas>
+    <!-- Count Boxes -->
+    <div class="row text-center my-4 g-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="counting-box p-4 border-0 shadow-sm bg-white rounded-lg h-100">
+                <i class='bx bx-building-house fs-1 text-primary mb-3'></i>
+                <p class="fs-5 mb-1">Registered Organizations</p>
+                <p class="display-6 fw-bold text-primary">{{ org_count }}</p>
+                <a href="" class="btn btn-outline-primary btn-sm mt-2">View Details</a>
             </div>
         </div>
-        <div class="charts-container" id="pie_charts">
-            <div class="charts_name">
-                <h3>Internship Distribution</h3>
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="counting-box p-4 border-0 shadow-sm bg-white rounded-lg h-100">
+                <i class='bx bx-user fs-1 text-primary mb-3'></i>
+                <p class="fs-5 mb-1">Registered Students</p>
+                <p class="display-6 fw-bold text-primary">{{ user_count }}</p>
+                <a href="" class="btn btn-outline-primary btn-sm mt-2">View Details</a>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 ">
+            <div class="counting-box p-4 border-0 shadow-sm bg-white rounded-lg h-100">
+                <i class='bx bx-user fs-1 text-primary mb-3'></i>
+                <p class="fs-5 mb-1">Available Internships</p>
+                <p class="display-6 fw-bold text-primary">{{ internship_count }}</p>
+                <a href="" class="btn btn-outline-primary btn-sm mt-2">View Details</a>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Profile Section -->
+    <section class="mb-5">
+        <div class="card profile-card shadow rounded-lg border-0">
+            <div class="row g-0">
+                <div class="col-md-4 profile-avatar">
+                    <img src="{% if user.avatar %}{{ user.avatar.url }}{% else %}/static/images/default-avatar.png{% endif %}" alt="Profile Picture" class="img-fluid">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h4 class="text-primary">{{ user.first_name }} {{ user.last_name }}</h4>
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                        <p><strong>Course:</strong> {{ user.course }}</p>
+                        <p><strong>Phone:</strong> {{ user.phone }}</p>
+                        <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#editProfileModal">Edit Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="row my-5 g-4">
+        <div class="col-lg-6">
+            <div class="chart-box border-0 shadow-sm bg-white rounded-lg h-100 p-4">
+                <h5 class="text-center mb-3">User Registrations</h5>
+                <canvas id="dateBarChart"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-box border-0 shadow-sm bg-white rounded-lg h-100 p-4">
+                <h5 class="text-center mb-3">Internship Distribution</h5>
                 <canvas id="pieChart"></canvas>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<div class="user_section">
-    
-<h2>Interns</h2>
-<table border="1">
-    <tr>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Email</th>
-        <th>Action</th>
-    </tr>
-    
-    {% for user in users %}
-    <tr>
-        <td>{{ user.first_name }}</td>
-        <td>{{ user.last_name }}</td>
-        <td>{{ user.email }}</td>
-       
-        <td>
-            <form action="{% url 'delete_user' user.id %}" method="POST">
-                {% csrf_token %}
-                <button type="submit">Delete</button>
-            </form>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="5">No users found</td>
-    </tr>
-    {% endfor %}
-</table>
+    <!-- Recommendations Section -->
+    <section class="recommendation-section p-4 rounded shadow-sm bg-white">
+        <h4 class="fw-bold">Recommendations for You</h4>
+        <ul class="list-unstyled mt-3">
+            <li class="p-2 border-bottom">Explore internships related to your field of study.</li>
+            <li class="p-2 border-bottom">Join study groups to enhance your learning experience.</li>
+            <li class="p-2">Attend workshops for skill development.</li>
+        </ul>
+    </section>
 </div>
 
-<a href="{% url 'admin_view' %}" class="btn">Check Account</a>q
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Profile</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group mb-3">
+                        <label>First Name</label>
+                        <input type="text" class="form-control" value="{{ user.first_name }}">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Last Name</label>
+                        <input type="text" class="form-control" value="{{ user.last_name }}">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Email</label>
+                        <input type="email" class="form-control" value="{{ user.email }}">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Phone</label>
+                        <input type="text" class="form-control" value="{{ user.phone }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Fetching data passed from Django view
-    const orgCount = {{ org_count }};
-    const userCount = {{ user_count }};
-    // const internshipCount = {{ internship_count }}; // Uncomment if you have an internship model
+    document.addEventListener('DOMContentLoaded', () => {
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-    // Bar Chart
-    const barCtx = document.getElementById('barChart').getContext('2d');
-    const barChart = new Chart(barCtx, {
-        type: 'bar', // Change to your preferred chart type
-        data: {
-            labels: ['Organizations', 'Users'], // Update labels as necessary
-            datasets: [{
-                label: '# of Users/Organizations',
-                data: [orgCount, userCount], // Use dynamic data here
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(255, 99, 132, 0.2)',
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 99, 132, 1)',
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+        // Organization and user counts passed from Django view
+        const orgRegistrationData = {{ org_counts | safe }};
+        const userRegistrationData = {{ user_counts | safe }};
 
-    // Pie Chart (if you have internship distribution data)
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    const pieChart = new Chart(pieCtx, {
-        type: 'polarArea', // Change to your preferred chart type
-        data: {
-            labels: ['Organizations', 'Users'], // Update labels as necessary
-            datasets: [{
-                label: '# of Users/Organizations',
-                data: [orgCount, userCount], // Use dynamic data here
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(255, 99, 132, 0.2)',
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 99, 132, 1)',
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
+        // Bar Chart with 3D Effect
+        const barCtx = document.getElementById('dateBarChart').getContext('2d');
+        const dateBarChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Organizations',
+                        data: orgRegistrationData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: '#4BC0C0',
+                        borderWidth: 2,
+                        borderSkipped: false,
+                        hoverBackgroundColor: 'rgba(75, 192, 192, 1)',
+                        barThickness: 20,
+                        shadowOffsetX: 5,
+                        shadowOffsetY: 5,
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    },
+                    {
+                        label: 'Users',
+                        data: userRegistrationData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: '#FF6384',
+                        borderWidth: 2,
+                        borderSkipped: false,
+                        hoverBackgroundColor: 'rgba(255, 99, 132, 1)',
+                        barThickness: 20,
+                        shadowOffsetX: 5,
+                        shadowOffsetY: 5,
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 },
-                title: {
-                    display: true,
-                    text: 'Internship Distribution'
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        bodyColor: '#fff',
+                        borderColor: '#333',
+                        borderWidth: 1
+                    }
                 }
             }
-        }
+        });
+
+        // Polar Area Chart with 3D Effect
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(pieCtx, {
+            type: 'polarArea',
+            data: {
+                labels: ['Organizations', 'Users'],
+                datasets: [{
+                    data: [orgRegistrationData.reduce((a, b) => a + b, 0), userRegistrationData.reduce((a, b) => a + b, 0)],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(255, 99, 132, 0.8)'
+                    ],
+                    hoverBackgroundColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    shadowOffsetX: 4,
+                    shadowOffsetY: 4,
+                    shadowBlur: 8,
+                    shadowColor: 'rgba(0, 0, 0, 0.4)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Internship Distribution'
+                    }
+                }
+            }
+        });
     });
 </script>
 
 {% endblock %}
+
+<style>
+    .avatar-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+    .dashboard-header { background: #ffffff; border-radius: 12px; margin-top: 100px; }
+    .counting-box {
+        background: #f9fafb;
+        border: 1px solid #e3e3e3;
+        transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .counting-box:hover { transform: scale(1.05); }
+    .profile-card, .chart-box { border: none; background-color: #ffffff; }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .user-info {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .profile-avatar img { width: 100%; height: auto; }
+        .dashboard-header { flex-direction: column; }
+        .recommendation-section, .chart-box { padding: 1rem; }
+    }
+
+    @media (max-width: 576px) {
+        .avatar-img { width: 40px; height: 40px; }
+        .dashboard-header { padding: 1rem; text-align: center; }
+        .counting-box { padding: 1rem; }
+        .counting-box i { font-size: 1.5rem; }
+        .counting-box p { font-size: 1rem; }
+    }
+</style>
+
+</style>
+
 {% endblock %}

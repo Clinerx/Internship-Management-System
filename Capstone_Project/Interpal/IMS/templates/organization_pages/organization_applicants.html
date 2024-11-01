@@ -1,5 +1,5 @@
 {% extends 'organization_pages/organization_base.html' %}
-{% block title %}Organization Applicants{% endblock title %}Organization Applicants
+{% block title %}Organization || Applicants{% endblock title %}Organization Applicants
 {% block content %}
 
 <div class="dashboard_header">
@@ -20,5 +20,35 @@
     </div>  
 </div>
 
-{% endblock content %}
+<div class="line_design"><p></p></div>
 
+<section class="application-list">
+    <h2>Applicants for Your Internships</h2>
+    <div class="application-container">
+        {% for application in applications %}
+            <div class="application-card">
+                <h3>{{ application.student.first_name }} {{ application.student.last_name }}</h3>
+                <p><strong>Internship Title:</strong> {{ application.internship.title }}</p>
+                <p><strong>Course:</strong> {{ application.student.course }}</p>
+                <p><strong>College:</strong> {{ application.student.college }}</p>
+                <p><strong>Applied On:</strong> {{ application.applied_at|date:"F d, Y" }}</p>
+
+                <div class="applicant-actions">
+                    <a href="{% url 'view_application' application.id %}" class="btn btn-primary">View</a>
+                    <a href="{% url 'delete_application' application.id %}" class="btn btn-danger" 
+                       onclick="return confirm('Are you sure you want to delete this application?');">Delete</a>
+                </div>
+            </div>
+        {% empty %}
+            <p>No applications available at this time.</p>
+        {% endfor %}
+    </div>
+</section>
+<script>
+    
+    setInterval(() => {
+        window.location.reload();
+    }, 10000); //
+</script>
+
+{% endblock content %}

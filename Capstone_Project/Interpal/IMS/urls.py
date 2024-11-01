@@ -29,20 +29,40 @@ urlpatterns = [
     path('organization_applicant/', views.organization_applicant, name='organization_applicant'),
     path('post/edit/<int:internship_id>/', views.edit_internship, name='edit_internship'),
     path('delete_internship/<int:internship_id>/', views.delete_internship, name='delete_internship'),
-     path('internship/<int:internship_id>/', views.view_internship, name='view_internship'),
+    path('internship/<int:internship_id>/', views.view_internship, name='view_internship'),
+    path('organization/applications/<int:application_id>/view/', views.view_application, name='view_application'),
+    path('organization/applications/<int:application_id>/delete/', views.delete_application, name='delete_application'), 
     # path('organization_applicant/', views.organization_applicant, name='organization_applicant'),
-    # path('about_us_org/', views.about_us_org, name='about_us_org'),
     
-    
-    path('home/', views.home, name='home'),
-    path('student_internships/', views.student_internships, name='student_internships'),
-    path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
-    path('student_status/', views.student_status, name='student_status'),
+    path('about_us_org/', views.about_us_org, name='about_us_org'),
     path('about_us/', views.about_us, name='about_us'),
     
-    path('student_internships/<int:id>/', views.internship_detail, name='internship_detail'),
-    path('student_internships/<int:id>/apply/', views.internship_apply, name='internship_apply'),
+    # * <<<<====================>>>>
+    # ^ Student Dashboard
+     
+    path('home/', views.home, name='home'),
+    path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
     
+    # * <<<<====================>>>>
+    # ^ Student Status
+    
+    path('student_status/', views.student_status, name='student_status'),
+    path('delete_application/<int:application_id>/', views.delete_application_confirm, name='delete_application_confirm'),
+    path('internships/view_status/<int:application_id>/', views.view_status, name='view_status'),
+
+    
+    # * <<<<====================>>>>
+    # ^ Student Internship
+    
+    path('student_internships/', views.student_internships, name='student_internships'),
+    path('student_internships/<int:internship_id>/apply/', views.internship_apply, name='internship_apply'),
+    path('student_internships/<int:id>/', views.internship_detail, name='internship_detail'),
+    # * <<<<====================>>>>
+    
+    
+    # * <<<<====================>>>>
+    # ^ Ajax URL
+    path('get-applications/', views.get_applications, name='get_applications'),
     
     
 ]

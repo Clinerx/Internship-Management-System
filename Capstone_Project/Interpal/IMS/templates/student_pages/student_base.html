@@ -5,124 +5,453 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>{% block title %}Student Dashboard{% endblock %}</title>
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="{% static 'studentaccount.css' %}">
-    <link rel="stylesheet" href="{% static 'student_status.css' %}">
     
-    <!-- Boxicons CSS -->
-    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'blob.css' %}">
 </head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+    body, html {
+        min-height: 100vh;
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+    }
+
+    .content-wrapper {
+        flex: 1; /* Takes available space, pushes footer to the bottom if there's no content */
+        display: flex;
+        flex-direction: column;
+        padding-top: 70px; /* Adjust for fixed navbar */
+    }
+
+    footer {
+        background-color: #5161ce;
+        color: white;
+        text-align: center;
+        padding: 15px 0;
+        width: 100%;
+        margin-top: auto;
+    }
+
+       
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    i {
+        margin-right: 10px;
+    }
+    /*----------bootstrap-navbar-css------------*/
+    .navbar-logo {
+        padding: 15px 0 15px 0;
+        color: #fff;
+    }
+    .navbar-mainbg {
+        background-color: #5161ce;
+        padding: 0px;
+    }
+    #navbarSupportedContent {
+        overflow: hidden;
+        position: relative;
+    }
+    #navbarSupportedContent ul {
+        padding: 0px;
+        margin: 0px;
+    }
+    #navbarSupportedContent ul li a i {
+        margin-right: 10px;
+    }
+    #navbarSupportedContent li {
+        list-style-type: none;
+        float: left;
+    }
+    #navbarSupportedContent ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 15px;
+        display: block;
+        padding: 20px 20px;
+        transition-duration: 0.6s;
+        transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        position: relative;
+    }
+    #navbarSupportedContent > ul > li.active > a {
+        color: #5161ce;
+        background-color: transparent;
+        transition: all 0.7s;
+    }
+    #navbarSupportedContent a:not(:only-child):after {
+        content: "\f105";
+        position: absolute;
+        right: 20px;
+        top: 10px;
+        font-size: 14px;
+        font-family: "Font Awesome 5 Free";
+        display: inline-block;
+        padding-right: 3px;
+        vertical-align: middle;
+        font-weight: 900;
+        transition: 0.5s;
+    }
+    #navbarSupportedContent .active > a:not(:only-child):after {
+        transform: rotate(90deg);
+    }
+    .hori-selector {
+        display: inline-block;
+        position: absolute;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        transition-duration: 0.7s;
+        transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        background-color: #fff;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        margin-top: 10px;
+    }
+    .hori-selector .right,
+    .hori-selector .left {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        background-color: #fff;
+        bottom: 10px;
+    }
+    .hori-selector .right {
+        right: -25px;
+    }
+    .hori-selector .left {
+        left: -25px;
+    }
+    .hori-selector .right:before,
+    .hori-selector .left:before {
+        content: '';
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #5161ce;
+    }
+    .hori-selector .right:before {
+        bottom: 0;
+        right: -25px;
+    }
+    .hori-selector .left:before {
+        bottom: 0;
+        left: -25px;
+    }
+    
+    @media(min-width: 992px) {
+        .navbar-expand-custom {
+            -ms-flex-flow: row nowrap;
+            flex-flow: row nowrap;
+            -ms-flex-pack: start;
+            justify-content: flex-start;
+        }
+        .navbar-expand-custom .navbar-nav {
+            -ms-flex-direction: row;
+            flex-direction: row;
+        }
+        .navbar-expand-custom .navbar-toggler {
+            display: none;
+        }
+        .navbar-expand-custom .navbar-collapse {
+            display: -ms-flexbox!important;
+            display: flex!important;
+            -ms-flex-preferred-size: auto;
+            flex-basis: auto;
+        }
+        footer p {
+            font-size: 14px;
+        }
+    }
+    
+    @media (max-width: 991px) {
+        #navbarSupportedContent ul li a {
+            padding: 12px 30px;
+        }
+        .hori-selector {
+            margin-top: 0px;
+            margin-left: 10px;
+            border-radius: 0;
+            border-top-left-radius: 25px;
+            border-bottom-left-radius: 25px;
+        }
+        .hori-selector .left,
+        .hori-selector .right {
+            right: 10px;
+        }
+        .hori-selector .left {
+            top: -25px;
+            left: auto;
+        }
+        .hori-selector .right {
+            bottom: -25px;
+        }
+        .hori-selector .left:before {
+            left: -25px;
+            top: -25px;
+        }
+        .hori-selector .right:before {
+            bottom: -25px;
+            left: -25px;
+        }
+    }
+
+
+    /* Notification Icon Styles */
+    .notification-icon {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #5161ce;
+        color: white;
+        font-size: 24px;
+        padding: 15px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Notification Modal Styles */
+    .notification-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1001;
+    }
+
+    .notification-modal {
+        background-color: white;
+        width: 300px;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .notification-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+    }
+
+    .notification-modal-header h5 {
+        margin: 0;
+    }
+
+    .notification-modal-body {
+        margin-top: 15px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .notification-modal-body ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .notification-modal-body ul li {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .img_icon img {
+        max-width: 100%; /* Ensures the image is responsive */
+        height: auto; /* Maintains the aspect ratio */
+        object-fit: contain; /* Ensures the entire image fits within the container */
+        width: 80px; /* Set a specific width if needed */
+        filter: brightness(250%) drop-shadow(4px 0 0 rgba(0, 0, 0, 0.6)); /* Combined filters */
+        height: 80px; /* Set a specific height if needed */
+        
+    }
+    
+    
+
+    
+</style>
 
 <body>
-    <!-- Hamburger Menu for smaller screens -->
-    <i class='bx bx-menu hamburger-menu'></i>
-    <nav class="sidebar">
-        <header>
-            <div class="image-text">
-                <span class="image"></span>
-                <div class="text logo-text">
-                    <span class="name">InternPal</span>
-                    <span class="profession">Web-based System</span>
-                </div>
-            </div>
-            <i class='bx bx-chevron-right toggle'></i>
-        </header>
-
-        <div class="menu-bar">
-            <div class="menu">
-                <li class="search-box">
-                    <i class='bx bx-search icon'></i>
-                    <input type="text" placeholder="Search...">
+    <!-- Blob Animation -->
+    <div class="blob_animation">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+    </div>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-custom navbar-mainbg fixed-top"> 
+        <div class="img_icon">
+           <img src="{% static 'img/dienginside.png' %}" alt="Logo" class="navbar-logo-img">            
+        </div>
+        <a class="navbar-brand navbar-logo" href="{% url 'student_dashboard' %}" >InternPal</a>
+       
+        
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fas fa-bars text-white"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'student_dashboard' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'student_dashboard' %}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
                 </li>
-
-                <ul class="menu-links">
-                    <li class="nav-link">
-                        <a href="{% url 'student_dashboard' %}">
-                            <i class='bx bx-bar-chart-alt icon'></i>
-                            <span class="text nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-link">
-                        <a href="{% url 'student_internships' %}">
-                            <i class='bx bx-briefcase icon'></i>
-                            <span class="text nav-text">Internships</span>
-                        </a>
-                    </li>
-                    <li class="nav-link">
-                        <a href="{% url 'student_status' %}">
-                            <i class='bx bx-check-circle icon'></i>
-                            <span class="text nav-text">Internships Status</span>
-                        </a>
-                    </li>
-                    <li class="nav-link">
-                        <a href="{% url 'about_us' %}">
-                            <i class='bx bx-info-circle icon'></i>
-                            <span class="text nav-text">About Us</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="bottom-content">
-                <li>
-                    <a href="{% url 'logout' %}">
-                        <i class='bx bx-log-out icon'></i>
-                        <span class="text nav-text">Logout</span>
-                    </a>
+                <li class="nav-item {% if request.resolver_match.url_name == 'student_internships' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'student_internships' %}"><i class="far fa-address-book"></i>Internships</a>
                 </li>
-                <li class="mode">
-                    <div class="sun-moon">
-                        <i class='bx bx-moon icon moon'></i>
-                        <i class='bx bx-sun icon sun'></i>
-                    </div>
-                    <span class="mode-text text">Dark mode</span>
-                    <div class="toggle-switch">
-                        <span class="switch"></span>
-                    </div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'student_status' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'student_status' %}"><i class="far fa-clone"></i>Status</a>
                 </li>
-            </div>
+                <li class="nav-item {% if request.resolver_match.url_name == 'about_us' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'about_us' %}"><i class="fas fa-info-circle"></i>About Us</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                </li>
+            </ul>
         </div>
     </nav>
 
-    <section class="home">
-        <!-- Page-Specific Content Block -->
+    <!-- Main Content -->
+    <section class="home container">
         {% block content %}{% endblock %}
     </section>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const isDarkMode = {{ dark_mode|default:"false" }};
-            if (isDarkMode) {
-                document.body.classList.add("dark");
-                modeText.innerText = "Light mode";
-            }
-        });
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal">
+            <div class="modal-header">Confirm Logout</div>
+            <div class="modal-body">Are you sure you want to logout?</div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <a href="{% url 'logout' %}" class="btn btn-logout">Logout</a>
+            </div>
+        </div>
+    </div>
 
-        const body = document.querySelector('body'),
-              sidebar = body.querySelector('nav'),
-              toggle = body.querySelector(".toggle"),
-              searchBtn = body.querySelector(".search-box"),
-              modeSwitch = body.querySelector(".toggle-switch"),
-              modeText = body.querySelector(".mode-text");
+    <div class="notification-icon" onclick="openNotificationModal()">
+        <i class="fas fa-bell"></i>
+    </div>
 
-        toggle.addEventListener("click", () => {
-            sidebar.classList.toggle("close");
-        });
+    <!-- Notification Modal -->
+    <div class="notification-modal-overlay" id="notificationModal">
+        <div class="notification-modal">
+            <div class="notification-modal-header">
+                <h5>Notifications</h5>
+                <button onclick="closeNotificationModal()">Close</button>
+            </div>
+            <div class="notification-modal-body">
+                <ul>
+                    <li>Notification 1: Details here...</li>
+                    <li>Notification 2: Details here...</li>
+                    <li>Notification 3: Details here...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
-        searchBtn.addEventListener("click", () => {
-            sidebar.classList.remove("close");
-        });
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 InternPal. All rights reserved.</p>
+        {% comment %} <p><a href="{% url 'privacy_policy' %}" class="text-white">Privacy Policy</a> | <a href="{% url 'terms_of_service' %}" class="text-white">Terms of Service</a></p> {% endcomment %}
+    </footer>
 
-        modeSwitch.addEventListener("click", () => {
-            body.classList.toggle("dark");
-            modeText.innerText = body.classList.contains("dark") ? "Light mode" : "Dark mode";
-        });
-    </script>
 </body>
+
+
+   <!-- Bootstrap JS and dependencies -->
+   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+   <script>
+    // Responsive navbar active animation
+function test() {
+    var tabsNewAnim = $('#navbarSupportedContent');
+    var activeItemNewAnim = tabsNewAnim.find('.active');
+    var activeWidthNewAnimHeight = activeItemNewAnim.innerHeight();
+    var activeWidthNewAnimWidth = activeItemNewAnim.innerWidth();
+    var itemPosNewAnimTop = activeItemNewAnim.position();
+    var itemPosNewAnimLeft = activeItemNewAnim.position();
+    
+    $(".hori-selector").css({
+        "top": itemPosNewAnimTop.top + "px", 
+        "left": itemPosNewAnimLeft.left + "px",
+        "height": activeWidthNewAnimHeight + "px",
+        "width": activeWidthNewAnimWidth + "px"
+    });
+}
+
+$(document).ready(function(){
+    setTimeout(function() { test(); });
+});
+
+// Call the test function when window resizes
+$(window).on('resize', function(){
+    setTimeout(function() { test(); }, 500);
+});
+
+// Update selector position on collapse events
+$('#navbarSupportedContent').on('shown.bs.collapse', function() {
+    setTimeout(function() { test(); }, 300);
+});
+
+// Add active class on another page linked
+jQuery(document).ready(function($){
+    var path = window.location.pathname.split("/").pop();
+    if (path == '') {
+        path = 'index.html';
+    }
+    var target = $('#navbarSupportedContent ul li a[href="'+path+'"]');
+    target.parent().addClass('active');
+});
+
+// Optional: Call this function when the page loads to set the active class
+$(window).on('load', function() {
+    addActiveClassOnLoad();
+});
+
+function addActiveClassOnLoad() {
+    var current = location.pathname;
+    $('#navbarSupportedContent ul li a').each(function(){
+        var $this = $(this);
+        if ($this.attr('href').indexOf(current) !== -1) {
+            $this.parent().addClass('active');
+            $this.parents('.menu-submenu').addClass('show-dropdown');
+            $this.parents('.menu-submenu').parent().addClass('active');
+        } else {
+            $this.parent().removeClass('active');
+        }
+    });
+}
+
+
+function openNotificationModal() {
+// Open Notification Modal
+    document.getElementById("notificationModal").style.display = "flex";
+}
+
+// Close Notification Modal
+function closeNotificationModal() {
+    document.getElementById("notificationModal").style.display = "none";
+}
+</script>
 </html>
+    

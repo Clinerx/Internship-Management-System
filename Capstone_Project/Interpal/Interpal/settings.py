@@ -42,8 +42,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'IMS',
+    'cloudinary',
+    'cloudinary_storage',
     
 ]
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'deez4pmue',
+    'API_KEY': '728528323716887',
+    'API_SECRET': 'zWwaiPlrHfxRxCRPmSYFkid7nEs',
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+MEDIA_URL = '/media/'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
