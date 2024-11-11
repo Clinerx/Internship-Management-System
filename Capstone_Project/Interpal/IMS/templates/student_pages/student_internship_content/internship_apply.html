@@ -2,40 +2,60 @@
 {% block title %}Internship Application{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+    
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body">
             <!-- Header -->
             <h2 class="card-title text-center text-primary mb-4">Apply for Internship</h2>
 
+            <!-- Internship Details -->
+            <div class="internship-info mb-4">
+                <h3 class="text-center">{{ internship.title }}</h3>
+                <p><strong>Location:</strong> {{ internship.location }}</p>
+                <p><strong>Description:</strong> {{ internship.description }}</p>
+                <p><strong>Requirements:</strong> {{ internship.requirements }}</p>
+                <p><strong>Application Process:</strong> {{ internship.application_process }}</p>
+                <p><small class="text-muted">Posted on: {{ internship.created_at|date:"F d, Y" }}</small></p>
+            </div>
+
             <!-- Application Form -->
-            <form method="POST" class="d-flex justify-content-center">
+            <form method="POST" enctype="multipart/form-data" class="d-flex flex-column align-items-center">
                 {% csrf_token %}
+                
+                <!-- Resume Upload -->
+                <div class="mb-3 w-75">
+                    <label for="resume" class="form-label">Upload Resume (PDF or Text File)</label>
+                    <input type="file" name="resume" id="resume" accept=".pdf, .txt" class="form-control" required>
+                </div>
+
+                <!-- Application Letter Upload -->
+                <div class="mb-3 w-75">
+                    <label for="application_letter" class="form-label">Upload Application Letter (PDF or Text File)</label>
+                    <input type="file" name="application_letter" id="application_letter" accept=".pdf, .txt" class="form-control" required>
+                </div>
+
+                <!-- Submit Button -->
                 <button type="submit" 
-                        class="btn btn-primary btn-lg px-5"
+                        class="btn btn-primary btn-lg px-5 mt-3"
+                        id="submitBtn"
                         {% if already_applied %}disabled{% endif %}>
                     Submit Application
                 </button>
-            </form>
 
-            <!-- Status Message -->
-            {% if already_applied %}
-                <div class="alert alert-info text-center mt-4 mb-0" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    You have already applied for this internship.
-                </div>
-            {% endif %}
+                <!-- Status Message -->
+                {% if already_applied %}
+                    <div class="alert alert-info text-center mt-4 mb-0" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        You have already applied for this internship.
+                    </div>
+                {% endif %}
+            </form>
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block styles %}
 <style>
-    .container {
-        max-width: 600px;
-    }
     .card {
+        margin-top: 100px;
         background: #ffffff;
         border-radius: 12px;
         padding: 2rem;
@@ -43,6 +63,10 @@
     .card-title {
         font-weight: 700;
         color: #007bff;
+    }
+    .internship-info h3 {
+        font-weight: bold;
+        color: #0a2a5f;
     }
     .btn-primary {
         background-color: #007bff;
@@ -53,11 +77,32 @@
         background-color: #6c757d;
         border-color: #6c757d;
     }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
 </style>
-{% endblock %}
 
-{% block scripts %}
 <script>
-    // Custom JavaScript can be added here if needed
+    document.addEventListener('DOMContentLoaded', function () {
+        const resumeInput = document.getElementById('resume');
+        const applicationLetterInput = document.getElementById('application_letter');
+        const submitButton = document.getElementById('submitBtn');
+
+        function checkInputs() {
+            if (resumeInput.files.length > 0 && applicationLetterInput.files.length > 0) {
+                submitButton.disabled = false;
+            } else {
+                submitButton.disabled = true;
+            }
+        }
+
+        // Initial check in case inputs are pre-filled
+        checkInputs();
+
+        // Event listeners for file input changes
+        resumeInput.addEventListener('change', checkInputs);
+        applicationLetterInput.addEventListener('change', checkInputs);
+    });
 </script>
 {% endblock %}

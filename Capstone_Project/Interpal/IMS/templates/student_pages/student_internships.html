@@ -35,33 +35,39 @@
 <!-- Internships Listing -->
 <section class="internship-postings-section">
     <h2>Available Internships</h2>
-    <div class="internship-postings-container" id="internship-listings">
-        {% for internship in internships %}
-            <div class="internship-posting card">
-                <div class="organizationProfile">
-                    <div class="img-card">
-                        <img src="" alt="">
+        <div class="internship-postings-container" id="internship-listings">
+            {% for internship in internships %}
+                <div class="internship-posting card {% if internship.max_applicants == 0 %}inactive-card{% endif %}">
+                    <div class="organizationProfile">
+                        <div class="img-card">
+                            <img src="" alt="">
+                        </div>
+                        <div class="org_image_name">
+                            <p>{{ internship.organization.company_name }}</p>
+                        </div>
                     </div>
-                    <div class="org_image_name">
-                        <p>{{ internship.organization.company_name }}</p>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ internship.title }}</h3>
+                        <p><strong>Organization:</strong> {{ internship.organization.company_name }}</p>
+                        <p><strong>Location:</strong> {{ internship.location }}</p>
+                        <p><strong>Available Applicants: </strong> {{ internship.max_applicants }}</p>
+                        <p><small class="text-muted">Posted on: {{ internship.created_at|date:"F d, Y" }}</small></p>
+                        <div class="internship-buttons">       
+                            <a href="{% url 'internship_detail' internship.id %}" class="btn btn-secondary">View Details</a>
+                            <a href="{% url 'internship_apply' internship.id %}" class="btn btn-danger">Apply</a>
+                            {% if internship.id in applied_internship_ids %}
+                                <div class="text-success" style="display: flex; align-items: center; gap: 20px; padding-top: 15px;" >
+                                    <p class="text-success">o</p>
+                                    <p class="text-success">You have already applied for this internship.</p>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <h3 class="card-title">{{ internship.title }}</h3>
-                    <p><strong>Organization:</strong> {{ internship.organization.company_name }}</p>
-                    <p><strong>Location:</strong> {{ internship.location }}</p>
-                    <p><strong>Available Applicants: </strong> {{internship.max_applicants}}</p>
-                    <p><small class="text-muted">Posted on: {{ internship.created_at|date:"F d, Y" }}</small></p>
-                    <div class="internship-buttons">
-                        <a href="{% url 'internship_detail' internship.id %}" class="btn btn-secondary">View</a>
-                        <a href="{% url 'internship_apply' internship.id %}" class="btn btn-danger">Apply</a>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <p>No internships available at this time.</p>
-        {% endfor %}
-    </div>
+            {% empty %}
+                <p>No internships available at this time.</p>
+            {% endfor %}
+        </div>
 </section>
 
 <!-- Pagination Bottom -->
@@ -88,6 +94,20 @@
 </div>
 
 <style>
+
+    /* Styles to dim the card and disable interactivity */
+    .inactive-card {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .disabled {
+        cursor: not-allowed;
+        color: #999;
+        background-color: #ddd;
+        border-color: #ddd;
+    }
+    
     /* General Styles */
     .dashboard_header {
         display: flex;

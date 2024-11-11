@@ -12,7 +12,6 @@ urlpatterns = [
     path('admin_view/', views.admin_users, name='admin_view'),  # Admin view for listing users
     path('delete_user/<int:user_id>/', views.delete_user, name='delete_user'),  # Delete user URL
     path('admin/delete_organization/<int:organization_id>/', views.delete_organization, name='delete_organization'),
-    path('admin', views.admin, name='admin'),
     # Correct name for forgot password link
     path('forgot-password/', views.request_form, name='request_password_reset'),
     path('check-confirmation-status/<str:token>/', views.check_confirmation_status, name='check_confirmation_status'),
@@ -36,6 +35,7 @@ urlpatterns = [
     
     path('about_us_org/', views.about_us_org, name='about_us_org'),
     path('about_us/', views.about_us, name='about_us'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
     
     # * <<<<====================>>>>
     # ^ Student Dashboard
@@ -47,7 +47,8 @@ urlpatterns = [
     # ^ Student Status
     
     path('student_status/', views.student_status, name='student_status'),
-    path('delete_application/<int:application_id>/', views.delete_application_confirm, name='delete_application_confirm'),
+    path('delete_application/<int:application_id>/', views.delete_applications, name='delete_application_confirm'),
+    path('delete_applications/', views.delete_applications, name='delete_selected_applications'),
     path('internships/view_status/<int:application_id>/', views.view_status, name='view_status'),
 
     
@@ -63,6 +64,29 @@ urlpatterns = [
     # * <<<<====================>>>>
     # ^ Ajax URL
     path('get-applications/', views.get_applications, name='get_applications'),
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    path('admin/login/', views.admin_login, name='admin_login'),
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin/student/<int:id>/view/', views.admin_view_student, name='admin_view_student'),
+    path('admin/student/<int:id>/edit/', views.admin_edit_student, name='admin_edit_student'),
+    path('admin/student/<int:id>/delete/', views.admin_delete_student, name='admin_delete_student'),
+    
+    
+    path('admin/organization/<int:id>/view/',views.admin_view_organization, name='admin_view_organization'),
+    path('admin/organization/<int:id>/edit/', views.admin_edit_organization, name='admin_edit_organization'),
+    path('admin/organization/<int:id>/delete/', views.admin_delete_organization, name='admin_delete_organization'),
     
     
 ]

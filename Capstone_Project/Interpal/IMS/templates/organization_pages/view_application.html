@@ -1,0 +1,30 @@
+<div class="stepper">
+    {% for stage in stages %}
+        <div class="step {% if stage in status_details.completed_stages %}completed{% endif %}">
+            <span>{{ stage }}</span>
+            {% if stage != stages|last %}<span class="step-separator"></span>{% endif %}
+        </div>
+    {% endfor %}
+</div>
+<style>
+    .stepper {
+        display: flex;
+        align-items: center;
+    }
+    
+    .step {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+    }
+    
+    .step.completed {
+        color: green;
+    }
+    
+    .step-separator {
+        width: 20px;
+        height: 2px;
+        background-color: gray;
+    }
+</style>

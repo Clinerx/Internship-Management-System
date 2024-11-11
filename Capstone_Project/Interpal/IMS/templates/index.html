@@ -33,8 +33,8 @@
     <button id="modeToggle" class="mode-toggle-icon">
       <i class="ri-sun-line"></i>
     </button>
-    <a href="{% url 'login' %}" class="btn" target="#">Sign In</a>
-    <a href="{% url 'initial_registration' %}" class="btn" target="#">Sign Up</a>
+    <a href="{% url 'login' %}" class="btn" target="#">Login</a>
+    <a href="{% url 'initial_registration' %}" class="btn" target="#">Register</a>
     
   </nav>
 
@@ -294,61 +294,6 @@ function closeModal(modalId) {
     });
   }
 
-  function switchModal(currentModalId, targetModalId) {
-    document.getElementById(currentModalId).style.display = 'none';
-    document.getElementById(targetModalId).style.display = 'block';
-    resetModalSteps();  // Ensure target modal starts at step 1
-}
-
-function resetModalSteps() {
-    document.getElementById('step1').style.display = 'block';
-    document.getElementById('step2').style.display = 'none';
-}
-  function nextStep() {
-    document.getElementById('step1').style.display = 'none';
-    document.getElementById('step2').style.display = 'block';
-}
-
-function previousStep() {
-    document.getElementById('step2').style.display = 'none';
-    document.getElementById('step1').style.display = 'block';
-}
-
-function openModal(event, modalId) {
-    event.preventDefault();
-    document.getElementById(modalId).style.display = 'block';
-    document.body.classList.add('blur-background');
-    document.getElementById('step1').style.display = 'block';
-    document.getElementById('step2').style.display = 'none';
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-    document.body.classList.remove('blur-background');
-}
-
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const modalOverlay = document.querySelector('#loginModal');
-    const closeButton = document.querySelector('.close-button');
-
-    // Show the modal
-    setTimeout(() => {
-      modalOverlay.style.display = "block";
-    }, 1000);
-
-    // Close the modal on button click
-    closeButton.addEventListener('click', () => {
-      modalOverlay.style.display = "none";
-    });
-
-    // Close the modal when clicking outside of the modal container
-    modalOverlay.addEventListener('click', (event) => {
-      if (event.target === modalOverlay) {
-        modalOverlay.style.display = "none";
-      }
-    });
-  });
 
   //ToggleDarkMOde Icon
   function toggleDarkMode() {

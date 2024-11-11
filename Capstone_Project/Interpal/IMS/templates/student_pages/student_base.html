@@ -5,15 +5,40 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>{% block title %}Student Dashboard{% endblock %}</title>
     
     <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'blob.css' %}">
 </head>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    :root {
+        --primary-color: #3685fb;
+        --primary-color-dark: #2f73d9;
+        --secondary-color: #fafcff;
+        --text-dark: #0d213f;
+        --text-light: #767268;
+        --extra-light: #ffffff;
+        --max-width: 1200px;
+      
+        /* Dark mode colors */
+        --dark-background: #0c0c0c;
+        --dark-secondary: #1f1f1f;
+        --dark-accent: #242424;
+        --dark-text: #e0e0e0;
+        --dark-text-light: #b3b3b3;
+        --dark-primary: #3a8ef6;
+        --dark-primary-dark: #2b6db2;
+        --dark-gradient: linear-gradient(145deg, #1c1c1c, #2a2a2a);
+      }
 
     body, html {
         min-height: 100vh;
@@ -31,15 +56,124 @@
     }
 
     footer {
-        background-color: #5161ce;
+        background-color: #0d213f;
         color: white;
-        text-align: center;
-        padding: 15px 0;
         width: 100%;
         margin-top: auto;
     }
-
-       
+    
+    .footer__container {
+        display: grid;
+        padding: 50px 100px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5rem;
+        color: var(--secondary-color);
+    }
+    
+    .footer__col h3  {
+        font-size: 25px; /* Reduced font size for header */
+        font-weight: 600;
+        color: white;
+        margin-bottom: 1.5rem; /* Reduced margin */
+    }
+    
+    .footer__col h3 span {
+        color: var(--primary-color);
+    }
+    
+    .footer__col p {
+        font-size: 0.75rem; /* Smaller font size for paragraphs */
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    
+    .footer__col p:hover {
+        color: var(--primary-color);
+    }
+    
+    .footer__col p span {
+        font-weight: 600;
+    }
+    
+    .footer__col h4 {
+        font-size: 0.9rem; /* Smaller font size for subheading */
+        font-weight: 600;
+        margin-bottom: 1.5rem; /* Reduced margin */
+    }
+    
+    .footer__col a {
+        color: white;
+        text-decoration: none;
+    }
+    
+    .footer__col a:hover {
+        color: var(--primary-color);
+    }
+    
+    .footer__bar {
+        max-width: var(--max-width);
+        margin: auto;
+        padding: 0.5rem;
+        text-align: center;
+        font-size: 0.75rem; /* Smaller font size for footer bar */
+        color: var(--secondary-color);
+        border-top: 1px solid var(--text-light);
+    }
+    
+    /* Responsive Footer for mobile and tablet devices */
+    @media (max-width: 1024px) { /* Tablet */
+        .footer__container {
+            grid-template-columns: repeat(2, 1fr); /* 2 columns on tablet */
+            gap: 2rem; /* Reduced gap */
+        }
+    
+        .footer__col h3 {
+            font-size: 1.1rem; /* Smaller header on tablet */
+            margin-bottom: 1.2rem;
+        }
+    
+        .footer__col p {
+            font-size: 0.8rem; /* Smaller paragraph text */
+            margin-bottom: 0.8rem;
+        }
+    
+        .footer__col h4 {
+            font-size: 0.8rem; /* Smaller subheading font */
+            margin-bottom: 1.2rem;
+        }
+    
+        .footer__bar {
+            font-size: 0.7rem; /* Smaller text for footer bar */
+        }
+    }
+    
+    @media (max-width: 768px) { /* Mobile */
+        .footer__container {
+            grid-template-columns: 1fr; /* Stack columns on mobile */
+            gap: 1.5rem; /* Reduced gap */
+        }
+    
+        .footer__col h3 {
+            font-size: 1rem; /* Even smaller header on mobile */
+            margin-bottom: 1rem;
+        }
+    
+        .footer__col p {
+            font-size: 0.7rem; /* Smaller text for paragraphs on mobile */
+            margin-bottom: 0.5rem;
+        }
+    
+        .footer__col h4 {
+            font-size: 0.75rem; /* Even smaller subheading on mobile */
+            margin-bottom: 1rem;
+        }
+    
+        .footer__bar {
+            font-size: 0.6rem; /* Smaller footer text on mobile */
+        }
+    }
+    
 
     * {
         margin: 0;
@@ -52,10 +186,18 @@
     /*----------bootstrap-navbar-css------------*/
     .navbar-logo {
         padding: 15px 0 15px 0;
-        color: #fff;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #0d213f;
+        cursor: pointer;
+    }
+    .navbar-logo span{
+        color: #3685fb;
+
     }
     .navbar-mainbg {
-        background-color: #5161ce;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: #fafcff;
         padding: 0px;
     }
     #navbarSupportedContent {
@@ -74,7 +216,7 @@
         float: left;
     }
     #navbarSupportedContent ul li a {
-        color: white;
+        color: #0d213f;
         text-decoration: none;
         font-size: 15px;
         display: block;
@@ -84,7 +226,7 @@
         position: relative;
     }
     #navbarSupportedContent > ul > li.active > a {
-        color: #5161ce;
+        color: white;
         background-color: transparent;
         transition: all 0.7s;
     }
@@ -112,7 +254,7 @@
         left: 0px;
         transition-duration: 0.7s;
         transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        background-color: #fff;
+        background-color: var( --primary-color);
         border-top-left-radius: 15px;
         border-top-right-radius: 15px;
         margin-top: 10px;
@@ -122,7 +264,7 @@
         position: absolute;
         width: 25px;
         height: 25px;
-        background-color: #fff;
+        background-color: #3685fb;
         bottom: 10px;
     }
     .hori-selector .right {
@@ -138,7 +280,7 @@
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background-color: #5161ce;
+        background-color: white;
     }
     .hori-selector .right:before {
         bottom: 0;
@@ -150,6 +292,11 @@
     }
     
     @media(min-width: 992px) {
+        .custom-navbar {
+            margin: 0; /* Remove margin on mobile */
+            border-radius: 0; /* Optional: remove border-radius on mobile for a flush fit */
+        }
+        
         .navbar-expand-custom {
             -ms-flex-flow: row nowrap;
             flex-flow: row nowrap;
@@ -175,6 +322,7 @@
     }
     
     @media (max-width: 991px) {
+        
         #navbarSupportedContent ul li a {
             padding: 12px 30px;
         }
@@ -279,15 +427,20 @@
         object-fit: contain; /* Ensures the entire image fits within the container */
         width: 80px; /* Set a specific width if needed */
         filter: brightness(250%) drop-shadow(4px 0 0 rgba(0, 0, 0, 0.6)); /* Combined filters */
-        height: 80px; /* Set a specific height if needed */
+        height: 10%; 
         
     }
     
-    
-
+    .custom-navbar {
+        margin: 20px;
+        margin-inline: 5% ;
+        padding: 7px;
+        border-radius: 10px; /* Adjust as desired */
+    }
     
 </style>
 
+{% if user.is_authenticated %}
 <body>
     <!-- Blob Animation -->
     <div class="blob_animation">
@@ -296,17 +449,16 @@
         <div class="blob blob3"></div>
     </div>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-custom navbar-mainbg fixed-top"> 
+    <nav class="navbar navbar-expand-custom navbar-mainbg fixed-top custom-navbar">
         <div class="img_icon">
            <img src="{% static 'img/dienginside.png' %}" alt="Logo" class="navbar-logo-img">            
         </div>
-        <a class="navbar-brand navbar-logo" href="{% url 'student_dashboard' %}" >InternPal</a>
-       
-        
-        
+        <a class="navbar-brand navbar-logo" href="{% url 'student_dashboard' %}" ><span>I</span>nternPal<span>.</span></a>
+    
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <i class="fas fa-bars text-white"></i>
+            <i class="fas fa-bars " style=" color: #0d213f"></i>
         </button>
+    
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
                 <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
@@ -317,20 +469,38 @@
                     <a class="nav-link" href="{% url 'student_internships' %}"><i class="far fa-address-book"></i>Internships</a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'student_status' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'student_status' %}"><i class="far fa-clone"></i>Status</a>
+                    <a class="nav-link" href="{% url 'student_status' %}"><i class="far fa-clone"></i>Internship Status</a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'about_us' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'about_us' %}"><i class="fas fa-info-circle"></i>About Us</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                    <a class="nav-link" id="logout" href="#" onclick="openLogoutModal()" style=" background-color: #3685fb; border-radius: 10px; color: #fff; margin-left: 20px;"><i class="fas fa-sign-out-alt"></i>Logout</a>
                 </li>
             </ul>
         </div>
     </nav>
-
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to logout?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Main Content -->
-    <section class="home container">
+    <section class="home container-fluid" style="margin-top: 100px; ">
         {% block content %}{% endblock %}
     </section>
 
@@ -367,14 +537,72 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2024 InternPal. All rights reserved.</p>
-        {% comment %} <p><a href="{% url 'privacy_policy' %}" class="text-white">Privacy Policy</a> | <a href="{% url 'terms_of_service' %}" class="text-white">Terms of Service</a></p> {% endcomment %}
+    <footer class="footer">
+        <div class="footer__container">
+            <!-- Logo and Description -->
+            <div class="footer__col">
+                <h3>InternPal<span>.</span></h3>
+                <p>Explore your dream internships within Palawan. Find your right destination here.</p>
+            </div>
+    
+            <!-- Support Links -->
+            <div class="footer__col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#" onclick="openModal(event, 'termsConditionsModal')">Terms & Conditions</a></li>
+                    <li><a href="#" onclick="openModal(event, 'privacyPolicyModal')">Privacy Policy</a></li>
+                    <li><a href="mailto:psuinterpal@gmail.com">Contact Us</a></li>
+                </ul>
+            </div>
+    
+            <!-- Address -->
+            <div class="footer__col">
+                <h4>Address</h4>
+                <p><span>Location:</span> Sta. Monica, NHA Ville, Puerto Princesa City</p>
+                <p><span>Email:</span> <a href="mailto:psuinterpal@gmail.com">psuinterpal@gmail.com</a></p>
+                <p><span>Phone:</span> <a href="tel:+639123456789">09123456789</a></p>
+            </div>
+    
+            <!-- Social Media Links -->
+            <div class="footer__col">
+                <h4>Follow Us</h4>
+                <div class="footer-socials">
+                    <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer__bar">
+            <p>&copy; 2024 InternPal. All rights reserved.</p>
+        </div>
     </footer>
+    
+
+       <!-- Privacy Policy Modal -->
+  <div id="privacyPolicyModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('privacyPolicyModal')">&times;</span>
+      <h2>Privacy Policy</h2>
+      <p>Your privacy policy content goes here.</p>
+    </div>
+  </div>
+
+  <!-- Terms & Conditions Modal -->
+  <div id="termsConditionsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('termsConditionsModal')">&times;</span>
+      <h2>Terms & Conditions</h2>
+      <p>Your terms & conditions content goes here.</p>
+    </div>
+  </div>
+
 
 </body>
-
+{% else %}
+    <script>window.location.href = "{% url 'login' %}";</script>
+{% endif %}
 
    <!-- Bootstrap JS and dependencies -->
    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -382,6 +610,31 @@
    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
    <script>
+      // Open and close modals
+  function openModal(event, modalId) {
+    event.preventDefault();
+    document.getElementById(modalId).style.display = 'block';
+    document.body.classList.add('blur-background');
+    resetModalSteps();  // Ensure both modals start at step 1
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    document.body.classList.remove('blur-background');
+  }
+  // Close the modal when clicking outside of the modal container
+  window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal-overlay');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+  }
+     // Open Logout Modal
+     function openLogoutModal() {
+        $('#logoutModal').modal('show');
+    }
     // Responsive navbar active animation
 function test() {
     var tabsNewAnim = $('#navbarSupportedContent');

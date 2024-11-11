@@ -2,47 +2,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{% static 'loginForm.css' %}">
     <link rel="stylesheet" href="{% static 'blob.css' %}">
     <title>Student Login</title>
-    <style>
-        /* Basic styles for show/hide password functionality */
-        .password-container {
-            position: relative;
-        }
-        .toggle-password {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-        }
-    </style>
 </head>
-<body>
-    <div class="form-container">
-        <h2>Student Sign In</h2>
 
-        <!-- Login Form -->
+<body>
+
+<div class="blob_animation">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+</div>
+
+<div class="main-container">
+    <!-- Background Image Container -->
+    <div class="background-image-container slide-in-background"></div>
+    
+    <!-- Form Container with slide-in animation -->
+    <div class="form-container slide-in-form">
+        <h2>Student Sign In</h2>
         <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
-
-            <!-- Email Input -->
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" name="email" id="email" value="{{ email }}" required placeholder="Enter your email">
+                <input type="email" name="email" id="email" value="{{ email }}" required placeholder="Enter your email" autocomplete="username">
             </div>
 
-            <!-- Password Input with Show/Hide Toggle -->
             <div class="form-group password-container">
                 <label for="password">Password:</label>
-                <input type="password" name="password" id="password" required placeholder="Enter your password">
-                <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                <div class="input-with-icon">
+                    <input type="password" name="password" id="password" required placeholder="Enter your password" autocomplete="current-password">
+                    <span class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
             </div>
 
-            <!-- Remember Me & Forgot Password -->
             <div class="form-options">
                 <div class="remember-me">
                     <input type="checkbox" id="remember_me" name="remember_me">
@@ -51,10 +49,7 @@
                 <a href="{% url 'request_password_reset' %}" class="forgot-password">Forgot password?</a>
             </div>
 
-            <!-- Submit Button -->
             <button type="submit" class="btn">Login</button>
-
-            <!-- Organization Sign In Link -->
             <p class="sign-up-text">
                 Don't have an account? <a href="{% url 'initial_registration' %}">Sign up</a>
             </p>
@@ -63,20 +58,259 @@
             </p>
         </form>
     </div>
+    <div id="notification-container"></div>
+    <!-- Right Side Container with slide-in animation -->
+    <div class="right-side-container slide-in-right">
+        <div class="img-container">
+            <img src="{% static 'img/header-1.jpg' %}" alt="Logo" class="navbar-logo-img">            
+        </div>
+    </div>
+</div>
 
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.querySelector('.toggle-password');
+    
+        <script>
+            function togglePassword() {
+                const passwordInput = document.getElementById('password');
+                const toggleIcon = document.querySelector('.toggle-password i');
+            
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.classList.replace('fa-eye', 'fa-eye-slash'); // Show 'eye-slash' icon
+                    passwordInput.classList.add('input-password-visible'); // Add the CSS class for visibility
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.classList.replace('fa-eye-slash', 'fa-eye'); // Revert to 'eye' icon
+                    passwordInput.classList.remove('input-password-visible'); // Remove the CSS class
+                }
+            }
 
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.textContent = '🙈';  // Change icon to indicate password is visible
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.textContent = '👁️';  // Change icon back to indicate password is hidden
+            function showNotification(message, type, redirect = false) {
+                const container = document.getElementById('notification-container');
+                const alert = document.createElement('div');
+            
+                alert.classList.add('message-alert', type);
+                alert.style.backgroundColor = type === 'error' ? '#ff4c4c' : '#4CAF50';
+                alert.innerHTML = `<p>${message}</p>`;
+            
+                container.appendChild(alert);
+                container.style.display = 'block';
+            
+                // Automatically hide the alert after 5 seconds
+                setTimeout(() => {
+                    alert.style.opacity = '1';  // Fade-out effect
+                    setTimeout(() => {
+                        container.removeChild(alert);
+                        // Redirect after the message is hidden if `redirect` is true
+                        if (redirect) {
+                            window.location.href = "{% url 'student_dashboard' %}";
+                        }
+                    }, 500);  // Remove after fade-out
+                }, 2000);  // 5-second duration
+            }
+            
+            // Handle notifications on page load
+            window.onload = function() {
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if 'error' in message.tags %}
+                            showNotification("{{ message }}", "error");
+                        {% else %}
+                            // Trigger sAuccess notification with redirect after 5 seconds
+                            showNotification("{{ message }}", "success", true);
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            };
+            
+            // Remove duplicate notifications
+            document.addEventListener("DOMContentLoaded", function() {
+                const notificationContainer = document.getElementById("notification-container");
+                if (notificationContainer.children.length > 1) {
+                    // Remove all previous notifications if more than one exists
+                    while (notificationContainer.children.length > 1) {
+                        notificationContainer.removeChild(notificationContainer.lastChild);
+                    }
+                }
+            });
+                    // Check and manage animation state with sessionStorage
+                        // Check and manage animation state with sessionStorage
+            document.addEventListener("DOMContentLoaded", function() {
+                // Check if the animation has already been run in the session
+                if (sessionStorage.getItem("animationPlayed") === "true") {
+                    // If animation already played and user is not logged in, remove animation classes
+                    document.querySelector(".form-container").classList.remove("slide-in-form");
+                    document.querySelector(".right-side-container").classList.remove("slide-in-right");
+                    document.querySelector(".background-image-container").classList.remove("slide-in-background");
+                } else {
+                    // Set session flag if this is the first load and user is not logged in
+                    sessionStorage.setItem("animationPlayed", "true");
+                    // You can also use sessionStorage.setItem("loggedIn", "false") after successful login
+                }
+            });    
+
+        </script>
+    </body>
+    
+    <style>
+        #notification-container {
+            position: fixed;
+            bottom: 20px; /* Place it 20px from the bottom */
+            right: 20px; /* Start position to the right */
+            z-index: 1000;
+            width: 300px;
+            display: none;
+        }
+        
+        /* Message box styling */
+        .message-alert {
+            background-color: #ff4c4c; /* Red background for error */
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease-out; /* Apply animation */
+        }
+        
+        /* Slide-in animation from right to left */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
             }
         }
-    </script>
-</body>
+        
+        /* Optional: Close button style */
+        .message-alert .close-btn {
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            float: right;
+            font-size: 20px;
+        }
+        /* Main container for layout */
+        .main-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* Slide-in animation for containers */
+        @keyframes slideIn {
+            from {
+                transform: translateX(-50%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(50%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideInBackground {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    
+        .slide-in-form {
+            animation: slideIn 0.8s ease-out;
+        }
+    
+        .slide-in-right {
+            animation: slideInRight 0.8s ease-out;
+        }
+    
+        .slide-in-background {
+            animation: slideInBackground 1s ease-out;
+        }
+    
+        
+        /* Background Image Container behind the form */
+        .background-image-container {
+            position: absolute;
+            top: 85px;
+            left: 25%;
+            border-radius: 20px;
+            width: 60%;
+            height: 80%;
+            border: 1px solid 919191;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white ;
+            z-index: 0;
+        }
+        
+        /* Form container styling */
+        .form-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 350px;
+            width: 100%
+            position: relative;
+            z-index: 100;
+            left: -50px;
+        }
+        
+        /* Right Side Container */
+        .right-side-container {
+            position: relative;
+            left: 30px;
+            top: 10px;
+            z-index: 2;
+            width: 40em;
+            padding: 30px;
+            height: 90vh;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        /* Image Container */
+        .right-side-container .img-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            overflow: hidden; /* Ensures the image fits within the container's rounded corners */
+        }
+        
+        /* Image Styling */
+        .right-side-container .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the image fills the container without distortion */
+            border-radius: 10px; /* Optional: to match the container's rounded corners */
+            image-rendering: crisp-edges; /* For non-scaling blur */
+            image-rendering: -webkit-optimize-contrast; /* Enhance for Webkit browsers */
+    
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .form-container, .right-side-container {
+                margin: 10px 0;
+                max-width: 100%;
+            }
+        }
+
+    </style>
 </html>

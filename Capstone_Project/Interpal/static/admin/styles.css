@@ -110,18 +110,6 @@ nav {
   width: 100%;
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  font-size: 1rem;
-  color: var(--extra-light);
-  background-color: var(--primary-color);
-  border-radius: 5rem;
-  cursor: pointer;
-  transition: 0.3s;
-
-}
-
 .btn:hover {
   background-color: var(--primary-color-dark);
 }
@@ -161,17 +149,7 @@ header {
   color: var(--text-dark);
   max-width: calc(var(--max-width) / 2);
 }
-.btn {
-  padding: 0.75rem 1.5rem;
-  outline: none;
-  border: none;
-  font-size: 1rem;
-  color: var(--extra-light);
-  background-color: var(--primary-color);
-  border-radius: 5rem;
-  cursor: pointer;
-  transition: 0.3s;
-}
+
 .btn:not(:last-child) {
   margin-right: 1rem; /* Adjust spacing between buttons */
 }

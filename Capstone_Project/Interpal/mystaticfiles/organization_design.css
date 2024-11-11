@@ -457,11 +457,7 @@ body.dark .home .text{
     padding: 20px;
     gap: 30px; /* Spacing between pie and bar charts */
 }
-.charts_section #pie_charts{
-    margin-right: 20px;
-    width: 605px;
-    
-}
+
 
 
 .charts-container {
@@ -475,7 +471,6 @@ body.dark .home .text{
 }
 .charts-container .charts_name #barChart{
     padding-top: 5%;
-    height: 300px;
 }
 
 .charts-container .charts_name #pieChart{

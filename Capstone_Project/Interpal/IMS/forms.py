@@ -1,16 +1,23 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
+
 from .models import Organization, Internship
 
-
 class CustomUserCreationForm(UserCreationForm):
+    cor_picture = forms.ImageField(required=False, label="Upload COR")
+
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'address', 'date_of_birth', 'phone_number', 'email', 'school_name', 'college', 'course']
+        fields = [
+            'first_name', 'last_name', 'address', 'date_of_birth',
+            'phone_number', 'email', 'school_name', 'college', 'course', 'cor_picture'
+        ]
         widgets = {
-            'password': forms.PasswordInput(),
+            'password1': forms.PasswordInput(attrs={'placeholder': 'Enter Password'}),
+            'password2': forms.PasswordInput(attrs={'placeholder': 'Confirm Password'}),
         }
+        
     
 class OrganizationRegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -43,3 +50,10 @@ class InternshipForm(forms.ModelForm):
         self.fields['description'].widget.attrs['placeholder'] = 'e.g., Assist in software development...'
         self.fields['requirements'].widget.attrs['placeholder'] = 'e.g., Python, teamwork, communication skills'
         self.fields['application_process'].widget.attrs['placeholder'] = 'e.g., Send resume and cover letter to email@example.com'
+        
+        
+        
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['profile_picture', 'first_name', 'last_name', 'email', 'phone_number', 'address', 'course', 'college']

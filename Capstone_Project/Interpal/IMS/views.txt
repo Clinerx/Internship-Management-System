@@ -1,12 +1,14 @@
-import json
 import random
 from functools import wraps
 from random import randint
-import logging
 
+from django.views.decorators.cache import cache_control
+from django.db.models.functions import TruncMonth
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.models import AnonymousUser
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
@@ -15,11 +17,17 @@ from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.db.models.functions import ExtractMonth
+from django.db.models import Q
+from django.utils.timezone import now
 from django.utils import timezone
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.utils.crypto import get_random_string
 
-from .forms import CustomUserCreationForm, InternshipForm, OrganizationRegistrationForm
-from .models import CustomUser, Internship, Organization, UserVisit
+from collections import defaultdict
+
+from .forms import CustomUserCreationForm, InternshipForm
+from .models import CustomUser, Internship, Organization, UserVisit, Application
 
 
 
@@ -441,3 +449,59 @@ def student_internships(request):
 def organization_post(request):
     return render(request, 'organization_pages/organization_posting.html')
 
+
+
+
+
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
+@organization_login_required
+def org_dashboard(request):
+    organization_id = request.session.get('organization_id')
+    
+    if organization_id:
+        org = Organization.objects.filter(id=organization_id).first()
+        internships = Internship.objects.all()
+        
+        if not org:
+            messages.error(request, 'Organization not found. Please log in again.')
+            return redirect('login')
+        
+        # Monthly internship counts and organizations posting them
+        monthly_data = (Internship.objects
+                        .annotate(month=TruncMonth('created_at'))
+                        .values('month', 'organization__company_name')
+                        .annotate(count=Count('id'))
+                        .order_by('month'))
+
+        # Prepare data for the chart
+        months = []
+        internship_counts = []
+        org_names_by_month = defaultdict(list)
+        
+        for entry in monthly_data:
+            month_str = entry['month'].strftime('%B')
+            if month_str not in months:
+                months.append(month_str)
+                internship_counts.append(entry['count'])
+            else:
+                internship_counts[months.index(month_str)] += entry['count']
+            
+            org_names_by_month[month_str].append(entry['organization__company_name'])
+        
+        org_count = Organization.objects.count()
+        user_count = CustomUser.objects.count()
+
+        context = {
+            'org': org,
+            'org_count': org_count,
+            'user_count': user_count,
+            'organization_name': org.company_name,
+            'months': months,
+            'internship_counts': internship_counts,
+            'org_names_by_month': dict(org_names_by_month),  # Convert defaultdict to dict for JSON serialization
+        }
+
+        return render(request, 'organization_pages/organization_dashboard.html', context)
+    else:
+        messages.error(request, 'You must log in to access the dashboard.')
+        return redirect('login')

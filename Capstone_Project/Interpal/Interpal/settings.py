@@ -11,7 +11,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import logging
+# settings.py
+import cloudinary.uploader
+import cloudinary.api
+import cloudinary
+import logging, os
+from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -46,12 +51,14 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     
 ]
+load_dotenv()
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'deez4pmue',
-    'API_KEY': '728528323716887',
-    'API_SECRET': 'zWwaiPlrHfxRxCRPmSYFkid7nEs',
-}
+# Cloudinary configuration
+cloudinary.config(
+  cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+  api_key=os.getenv('CLOUDINARY_API_KEY'),
+  api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
@@ -66,6 +73,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'IMS.middleware.NoCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'Interpal.urls'
@@ -163,6 +171,3 @@ EMAIL_HOST_PASSWORD = 'yjjw tsxg wqfm gkkv'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default session engine
-
-SESSION_COOKIE_AGE = 1209600  # Two weeks by default
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False

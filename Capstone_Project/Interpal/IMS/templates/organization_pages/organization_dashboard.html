@@ -42,7 +42,7 @@
     <div class="counting_user">
         <div class='counting_user_content'>
             <i class='bx bx-user'></i>
-            <p>Internships: {{ internship_count }}</p>
+            <p>Applicants: {{ student_applicants }}</p>
             <a href="">View Details</a>
         </div>
     </div>
@@ -63,10 +63,10 @@
                 <canvas id="barChart"></canvas>
             </div>
         </div>
-        <div class="charts-container" id="pie_charts">
+        <div class="charts-container" id="line_charts">
             <div class="charts_name">
                 <h3>Internship Distribution</h3>
-                <canvas id="pieChart"></canvas>
+                <canvas id="lineChart"></canvas>
             </div>
         </div>
     </div>
@@ -110,41 +110,71 @@
             }
         }
     });
+    // Fetch data from Django
+    const organizationData = {{ organization_data|safe }};
+    const months = {{ month_labels|safe }};  // Consistent month labels for x-axis
 
-    // Pie Chart (if you have internship distribution data)
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    const pieChart = new Chart(pieCtx, {
-        type: 'polarArea', // Change to your preferred chart type
+    // Prepare datasets for each organization
+    const datasets = Object.keys(organizationData).map(orgName => {
+        return {
+            label: orgName,
+            data: organizationData[orgName].counts,
+            fill: false,
+            borderColor: getRandomColor(),
+            backgroundColor: getRandomColor(0.2),
+            borderWidth: 2,
+            tension: 0.4,
+            pointBackgroundColor: getRandomColor(),
+            pointBorderColor: getRandomColor(),
+        };
+    });
+
+    // Utility function to generate random colors for each organization line
+    function getRandomColor(alpha = 1) {
+        const r = Math.floor(Math.random() * 255);
+        const g = Math.floor(Math.random() * 255);
+        const b = Math.floor(Math.random() * 255);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // Initialize Line Chart
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const lineChart = new Chart(lineCtx, {
+        type: 'line',
         data: {
-            labels: ['Organizations', 'Users'], // Update labels as necessary
-            datasets: [{
-                label: '# of Users/Organizations',
-                data: [orgCount, userCount], // Use dynamic data here
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(255, 99, 132, 0.2)',
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 99, 132, 1)',
-                ],
-                borderWidth: 1
-            }]
+            labels: months,  // Dynamic month labels for x-axis
+            datasets: datasets  // All organization datasets
         },
         options: {
             responsive: true,
             plugins: {
                 legend: {
+                    display: true,
                     position: 'top',
                 },
                 title: {
                     display: true,
-                    text: 'Internship Distribution'
+                    text: 'Internships Posted Per Organization Each Month'
+                },
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Month'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Internships Posted'
+                    }
                 }
             }
         }
     });
-</script>
 
+</script>
 {% endblock %}
 {% endblock %}

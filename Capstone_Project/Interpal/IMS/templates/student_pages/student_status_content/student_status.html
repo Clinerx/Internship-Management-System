@@ -3,325 +3,300 @@
 {% block title %}Student || Internships Status{% endblock %}
 {% block header %}Internships Status{% endblock %}
 {% block content %}
-<div class="dashboard_header">
-    <div class="header_icons">
-        <i class='bx bx-envelope'></i>
-        <div class="chevron_right">
-            <i class='bx bx-bell'></i>
-        </div>
+
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h2>Check your internship status, <span class="user-name">{{ user.first_name }}</span>!</h2>
     </div>
-</div>
-<div class="line_design"><p></p></div>
 
-<div class="text">Check your internship status, <span class="user-name">{{ user.first_name }}</span>!</div>
+    <!-- Search Form -->
+    <form method="GET" class="search-form">
+        <input type="text" class="form-control me-2" name="search" placeholder="Search by Internship Title..." value="{{ search_query }}" style="max-width: 300px;">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
 
-<!-- Search Form -->
-<form method="GET" class="search-form">
-    <input type="text" name="search" placeholder="Search by Internship Title..." value="{{ search_query }}">
-    <button type="submit">Search</button>
-</form>
-
-<!-- Notification Containers -->
-<div id="notification" class="alert alert-success" role="alert" style="display: none;">
-    <div class="notification-icon">
-        <i class="bx bx-check-circle"></i>
+    <!-- Notifications -->
+    <div id="notification" class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">
+        <i class="bx bx-check-circle"></i> Application deleted successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <div class="notification-message">
-        Application deleted successfully!
-    </div>
-</div>
 
-<div id="general-notification" class="alert alert-success" role="alert" style="display: none;">
-    <div class="notification-icon">
-        <i class="bx bx-check-circle"></i>
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center mb-3">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if applications.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1&search={{ search_query }}">&laquo; first</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ applications.previous_page_number }}&search={{ search_query }}">previous</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">Page {{ applications.number }} of {{ applications.paginator.num_pages }}</span></li>
+                {% if applications.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ applications.next_page_number }}&search={{ search_query }}">next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ applications.paginator.num_pages }}&search={{ search_query }}">last &raquo;</a></li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
-    <div class="notification-message">
-        {% if messages %}
-            {% for message in messages %}
-                {{ message }}
-            {% endfor %}
-        {% endif %}
-    </div>
-</div>
-<!-- Pagination Controls -->
-<div class="pagination">
-    <span class="step-links">
-        {% if applications.has_previous %}
-            <a href="?page=1&search={{ search_query }}">&laquo; first</a>
-            <a href="?page={{ applications.previous_page_number }}&search={{ search_query }}">previous</a>
-        {% endif %}
 
-        <span class="current">
-            Page {{ applications.number }} of {{ applications.paginator.num_pages }}.
-        </span>
-
-        {% if applications.has_next %}
-            <a href="?page={{ applications.next_page_number }}&search={{ search_query }}">next</a>
-            <a href="?page={{ applications.paginator.num_pages }}&search={{ search_query }}">last &raquo;</a>
-        {% endif %}
-    </span>
-</div>
-<div class="internship_table_container">
-    <table class="internship_table">
-        <thead>
-            <tr>
-                <th>Name of Applicant</th>
-                <th>College</th>
-                <th>Course</th>
-                <th>Internship Title</th>
-                <th>Organization</th>
-                <th>Date of Applying</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for application in applications %}
-                <tr>
-                    <td>{{ user.first_name }} {{ user.last_name }}</td>
-                    <td>{{ user.college }}</td>
-                    <td>{{ user.course }}</td>
-                    <td>{{ application.internship.title }}</td>
-                    <td>{{ application.internship.organization.company_name }}</td>
-                    <td>{{ application.applied_at|date:"F d, Y" }}</td> <!-- Adjusted field if necessary -->
-                    <td>
-                        {% if application.status %}
-                            <span class="status {{ application.status|lower }}">{{ application.status }}</span>
-                        {% else %}
-                            <span class="status in-progress">In Progress</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'delete_application_confirm' application.id %}" class="btn delete-btn">
-                            <i class="bx bx-trash"></i> Delete Application
-                        </a>
-                        <a href="{% url 'view_status' application.id %}" class="btn view-status-btn">
-                            <i class="bx bx-info-circle"></i> View Status
-                        </a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="8">No applications submitted yet.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
+    <!-- Internship Table -->
+    <form method="POST" action="{% url 'delete_selected_applications' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger mb-3 delete-selected-btn" style="display: none;">Delete Selected</button>
         
-    </table>
-
-    
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-primary">
+                    <tr>
+                        <th scope="col"><input type="checkbox" id="select-all"></th>
+                        <th scope="col">Internship Title</th>
+                        <th scope="col">Organization</th>
+                        <th scope="col">Date of Applying</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                    <tr>
+                        <td><input type="checkbox" class="application-checkbox" name="application_ids" value="{{ application.id }}"></td>
+                        <td>{{ application.internship.title }}</td>
+                        <td>{{ application.internship.organization.company_name }}</td>
+                        <td>{{ application.applied_at|date:"F d, Y" }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if application.status == 'Approved' %}bg-success
+                                {% elif application.status == 'Rejected' %}bg-danger
+                                {% else %}bg-warning{% endif %}">
+                                {{ application.status|default:"In Progress" }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'delete_application_confirm' application.id %}" class="btn btn-sm btn-danger">
+                                <i class="bx bx-trash"></i> Delete
+                            </a>
+                            <a href="{% url 'view_status' application.id %}" class="btn btn-sm btn-info">
+                                <i class="bx bx-info-circle"></i> View Status
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No applications submitted yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
 </div>
 
 <style>
-    /* General Styles */
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8f9fa;
-        color: #333;
+    /* General Body Styling */
+.container{
+    margin-bottom: 200px;
+}
+body {
+    font-family: 'Poppins', sans-serif;
+    color: #2b2b2b;
+    font-size: 15px;
+    background-color: #f7f8fa;
+}
+
+.container h2 {
+    color: #4e73df;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Search Form Styles */
+.search-form {
+    display: flex;
+    justify-content: right;
+    margin-bottom: 25px;
+}
+.search-form input {
+    padding: 12px;
+    width: 100%;
+    height: 50px;
+    max-width: 300px;
+    border-radius: 8px;
+    border: 1px solid #d1d3e2;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.search-form input:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 8px rgba(78, 115, 223, 0.3);
+    outline: none;
+}
+.search-form button {
+    padding: 12px 18px;
+    background-color: #4e73df;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.search-form button:hover {
+    background-color: #375ac9;
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+}
+.page-item .page-link {
+    color: #4e73df;
+    border-radius: 8px;
+    margin: 0 2px;
+    border: none;
+    transition: background-color 0.3s;
+}
+.page-item .page-link:hover, .page-item.active .page-link {
+    background-color: #4e73df;
+    color: white;
+}
+
+/* Table Styling */
+.table-responsive {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+}
+.table {
+    margin: 0;
+    border-collapse: collapse;
+}
+.table th, .table td {
+    padding: 12px;
+    vertical-align: middle;
+    text-align: center;
+    font-weight: 500;
+}
+.table thead {
+    background-color: #4e73df;
+    color: white;
+}
+.table tbody tr:nth-child(odd) {
+    background-color: #f7f8fa;
+}
+.table tbody tr:hover {
+    background-color: #e2e6ea;
+}
+
+/* Status Badge Colors */
+.badge.bg-success { background-color: #1cc88a; }
+.badge.bg-danger { background-color: #e74a3b; }
+.badge.bg-warning { background-color: #f6c23e; color: #2b2b2b; }
+
+.badge {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+}
+
+/* Button Styles */
+.btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+.btn-info {
+    background-color: #36b9cc;
+    color: white;
+    transition: background-color 0.3s;
+}
+.btn-info:hover {
+    background-color: #2a9ab8;
+}
+.btn-danger {
+    background-color: #e74a3b;
+    color: white;
+    transition: background-color 0.3s;
+}
+.btn-danger:hover {
+    background-color: #c7382e;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container h2 {
+        font-size: 1.5rem;
     }
 
-    .dashboard_header {
-        padding: 20px;
-        background-color: #007bff;
-        color: white;
-    }
-
-    .text {
-        font-size: 20px;
-        font-weight: bold;
-        margin: 20px 0;
-        text-align: center;
-    }
-
-    .user-name {
-        color: #ffcc00;
-    }
-
-    /* Search Form Styles */
     .search-form {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
+        flex-direction: column;
+        align-items: center;
     }
+    
     .search-form input {
-        padding: 10px;
-        width: 300px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        margin-right: 10px;
-        transition: border-color 0.3s;
-    }
-    .search-form input:focus {
-        border-color: #007bff;
-        outline: none;
-    }
-    .search-form button {
-        padding: 10px 15px;
-        border: none;
-        border-radius: 5px;
-        background-color: #007bff;
-        color: white;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    .search-form button:hover {
-        background-color: #0056b3;
+        width: 100%;
+        margin-bottom: 10px;
     }
 
-    /* Table Styles */
-    .internship_table_container {
-        margin-top: 20px;
+    .search-form button {
+        width: 85%;
+        margin-top: 10px;
+    }
+
+    .table-responsive {
         overflow-x: auto;
     }
-    .internship_table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-        font-size: 16px;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .internship_table thead {
-        background-color: #007bff;
-        color: white;
-        text-transform: uppercase;
-    }
-    .internship_table th,
-    .internship_table td {
-        padding: 15px;
-        text-align: center;
-    }
-    .internship_table tbody tr {
-        border-bottom: 1px solid #e0e0e0;
-        transition: background-color 0.2s;
-    }
-    .internship_table tbody tr:hover {
-        background-color: #f4f8fb;
-    }
-    .internship_table tbody .status {
-        padding: 5px 10px;
-        border-radius: 15px;
-        font-weight: 600;
-        font-size: 14px;
-        display: inline-block;
+
+    .table th, .table td {
+        font-size: 11px;
     }
 
-    /* Status Colors */
-    .internship_table tbody .status.approved {
-        background-color: #28a745;
-        color: #fff;
-    }
-    .internship_table tbody .status.in-progress {
-        background-color: #ffc107;
-        color: #fff;
-    }
-    .internship_table tbody .status.rejected {
-        background-color: #dc3545;
-        color: #fff;
-    }
-
-    /* Button Styles */
-    .btn {
-        padding: 8px 12px;
-        border-radius: 5px;
-        font-size: 14px;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        transition: transform 0.3s;
-    }
-    .btn:hover {
-        transform: scale(1.05);
-    }
-    .delete-btn {
-        background-color: #dc3545;
-        color: white;
-        margin-right: 5px;
-    }
-    .view-status-btn {
-        background-color: #007bff;
-        color: white;
-    }
-    .delete-btn i,
-    .view-status-btn i {
-        margin-right: 5px;
-    }
-
-    /* Pagination Styles */
     .pagination {
-        margin-top: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .pagination .step-links a {
-        margin: 0 5px;
-        padding: 8px 12px;
-        border-radius: 5px;
-        background-color: #007bff;
-        color: white;
-        text-decoration: none;
-        transition: background-color 0.3s;
-    }
-    .pagination .step-links a:hover {
-        background-color: #0056b3;
-    }
-    .pagination .current {
-        margin: 0 5px;
-        padding: 8px 12px;
-        font-weight: bold;
-        color: #333;
+        flex-direction: column;
     }
 
-    /* Notification Styles */
-    .alert {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        border-radius: 5px;
-        margin: 20px auto;
-        width: 90%;
-        max-width: 600px;
-        position: relative;
-        animation: fadeIn 0.5s, fadeOut 0.5s 2.5s forwards;
+    .btn {
+        font-size: 12px;
     }
-    .notification-icon {
-        margin-right: 10px;
-        font-size: 24px;
-        color: #28a745;
-    }
-    .notification-message {
-        font-size: 16px;
-    }
+}
 
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
 </style>
 
 <script>
-    // Show notifications if any
     window.onload = function() {
         const notification = document.getElementById('notification');
         const generalNotification = document.getElementById('general-notification');
-
-        // Show specific notification (e.g., application deletion)
+    
         {% if notification %}
             notification.style.display = 'flex';
         {% endif %}
-
-        // Show general notification if messages exist
+    
         {% if messages %}
             generalNotification.style.display = 'flex';
         {% endif %}
     };
-</script>
 
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectAllCheckbox = document.getElementById('select-all');
+        const checkboxes = document.querySelectorAll('.application-checkbox');
+        const deleteSelectedButton = document.querySelector('.delete-selected-btn');
+    
+        function toggleDeleteButton() {
+            // Show the delete button if any checkbox is checked
+            deleteSelectedButton.style.display = Array.from(checkboxes).some(checkbox => checkbox.checked) ? 'block' : 'none';
+        }
+    
+        // Toggle checkboxes when "Select All" is clicked
+        selectAllCheckbox.addEventListener('change', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            toggleDeleteButton();
+        });
+    
+        // Toggle the delete button when individual checkboxes are clicked
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', toggleDeleteButton);
+        })
+    });
+</script>
 {% endblock %}

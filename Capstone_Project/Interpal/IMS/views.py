@@ -2,6 +2,8 @@ import random
 from functools import wraps
 from random import randint
 
+from django.views.decorators.cache import cache_control
+from django.db.models.functions import TruncMonth
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
@@ -16,22 +18,23 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.db.models.functions import ExtractMonth
+import cloudinary.uploader
 from django.db.models import Q
 from django.utils.timezone import now
 from django.utils import timezone
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.utils.crypto import get_random_string
 
-from .forms import CustomUserCreationForm, InternshipForm
+from collections import defaultdict
+
+from .forms import CustomUserCreationForm, InternshipForm, ProfileForm
 from .models import CustomUser, Internship, Organization, UserVisit, Application
 
 
 
 User = CustomUser  # Reference your CustomUser model
 
-# Admin view to list all users
-def admin(request):
-    return render(request, 'admin_folder/admin2.html')
+
 
 def admin_users(request):
     users = CustomUser.objects.all()
@@ -248,46 +251,64 @@ def success_view(request):
 # Student registration
 def student_register(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            # Save the user
+            user = form.save()
+
+            # Upload profile picture to Cloudinary if available
+            profile_picture = form.cleaned_data.get('profile_picture')
+            if profile_picture:
+                upload_result = cloudinary.uploader.upload(profile_picture, folder="student_profiles/")
+                user.profile.image_url = upload_result.get('secure_url')
+                user.profile.save()
+
+            # Increment visit count
             visit, created = UserVisit.objects.get_or_create(id=1)
             visit.count += 1
             visit.save()
 
+            # Authenticate and log the user in
             email = form.cleaned_data.get('email')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(email=email, password=raw_password)
             login(request, user)
             messages.success(request, f'Account created for {email}')
             return redirect('login')
+        else:
+            messages.error(request, 'There was an error with your registration. Please try again.')
     else:
         form = CustomUserCreationForm()
+        
     return render(request, 'student_registration_folder/student_profile_details.html', {'form': form})
 
 def student_login(request):
+    # Check if a user is already authenticated
+    if request.user.is_authenticated:
+        email = request.GET.get('email')
+        if email and email != request.user.email:
+            logout(request)
+        else:
+            return redirect('student_dashboard')
+
     if request.method == 'POST':
-        email = request.POST.get('email', '')  # Get the email from POST data
-        password = request.POST.get('password', '')  # Get the password from POST data
+        email = request.POST.get('email', '')
+        password = request.POST.get('password', '')
 
         try:
-            # Check if the email exists in CustomUser model (which should be for students)
             user = CustomUser.objects.get(email=email)
             user = authenticate(request, email=email, password=password)
             
             if user is not None:
-                login(request, user)  # Login the user
-                return redirect('student_dashboard')  # Redirect to the student dashboard (replace 'student_dashboard' with the correct path)
+                login(request, user)
+                messages.success(request, 'Login successful! Redirecting to your dashboard...')
+                return render(request, 'reset_folder/student_login.html', {'email': email, 'redirect': True})
             else:
                 messages.error(request, 'Invalid email or password for student account.')
 
         except CustomUser.DoesNotExist:
             messages.error(request, 'No student account found with this email.')
 
-        # Re-render the login form with the entered data and error message
-        return render(request, 'reset_folder/student_login.html', {'email': email})
-
-    # If the request is GET, render the student login page
     return render(request, 'reset_folder/student_login.html')
 
 
@@ -323,10 +344,9 @@ def organization_login(request):
 
 
 # User logout
-@login_required(login_url='login')
 def user_logout(request):
     logout(request)
-    return redirect('login')
+    return redirect('index')
 
 # Visit tracking
 def visit_tracker(request):
@@ -340,6 +360,7 @@ def visit_tracker(request):
 
 # * Student Pages =============================
 
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
 @login_required(login_url='login')
 def student_dashboard(request):
     # Basic counts
@@ -347,10 +368,10 @@ def student_dashboard(request):
     organizations = Organization.objects.all()
     org_count = Organization.objects.count()
     user_count = CustomUser.objects.filter(is_active=True).count()
-    
+    internship_count = Internship.objects.count()
+
     # Monthly registration data for the current year
     current_year = now().year
-    
     org_data = (
         Organization.objects
         .filter(date_joined__year=current_year)
@@ -377,19 +398,29 @@ def student_dashboard(request):
     for item in user_data:
         user_counts[item['month'] - 1] = item['count']
 
+    # Recommended internships logic
+    user_applications = Application.objects.filter(student=request.user)
+    applied_internship_ids = user_applications.values_list('internship_id', flat=True)
+
+    # Example filter: recommend internships that the student hasn't applied to
+    recommended_internships = Internship.objects.exclude(id__in=applied_internship_ids).order_by('-created_at')[:5]
+
     # Context for template rendering
     context = {
         'org_count': org_count,
         'user_count': user_count,
+        'internship_count': internship_count,
         'dark_mode': request.session.get('dark_mode', False),
         'user': request.user,
         'users': users,
         'organizations': organizations,
-        'org_counts': org_counts,  # Monthly data for organizations
-        'user_counts': user_counts,  # Monthly data for users
+        'org_counts': org_counts,
+        'user_counts': user_counts,
+        'recommended_internships': recommended_internships,  # Pass to the context
     }
     
     return render(request, 'student_pages/student_dashboard.html', context)
+
 # * <<<<<<<============================================>>>> 
 # ^ Student Internship
 
@@ -409,14 +440,20 @@ def student_internships(request):
     # Check for the application submission notification flag
     application_submitted = request.session.pop('application_submitted', False)  # Retrieve and clear flag
 
+    # Get all applications for the current user
+    user_applications = Application.objects.filter(student=request.user)
+    applied_internship_ids = user_applications.values_list('internship_id', flat=True)
+
     context = {
         'internships': internships,  # Pass the paginated internships
         'org': org,
         'user': request.user,
         'dark_mode': request.session.get('dark_mode', False),
-        'application_submitted': application_submitted  # Pass flag to template
+        'application_submitted': application_submitted,  # Pass flag to template
+        'applied_internship_ids': applied_internship_ids  # Pass IDs of applied internships
     }
     return render(request, 'student_pages/student_internships.html', context)
+
 
 # View for internship detail (Visit)
 def internship_detail(request, id):
@@ -427,30 +464,58 @@ def internship_detail(request, id):
     }
     return render(request, 'student_pages/student_internship_content/internship_detail.html', context)
 
+# * <<<<<<<============================================>>>>
+# ^ Edit Profile
+
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
+@login_required(login_url='login')
+def edit_profile(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('student_dashboard')
+    else:
+        form = ProfileForm(instance=request.user)
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'student_pages/edit_profile.html', context)
 
 
 
 # * <<<<<<<============================================>>>> 
 # ^ Student Status Content
 
+
 @login_required(login_url='login')
 def internship_apply(request, internship_id):
     internship = get_object_or_404(Internship, id=internship_id)
 
-    # Check if application exists or was recently deleted
+    # Check if the student already applied
     already_applied = Application.objects.filter(internship=internship, student=request.user).exists()
-    if request.session.get('application_deleted'):
-        already_applied = False
-        del request.session['application_deleted']  # Clear the flag after checking
 
-    if request.method == 'POST' and not already_applied:
-        Application.objects.create(
-            internship=internship,
-            organization=internship.organization,
-            student=request.user,
-        )
-        request.session['application_submitted'] = True
-        return redirect('student_internships')
+    # Check available slots before allowing application
+    if internship.max_applicants > 0 and not already_applied:
+        if request.method == 'POST':
+            Application.objects.create(
+                internship=internship,
+                organization=internship.organization,
+                student=request.user,
+            )
+            # Decrease max_applicants by 1
+            internship.max_applicants -= 1
+            internship.save()
+
+            # Set session flag to show notification and redirect
+            request.session['application_submitted'] = True
+            return redirect('student_internships')
+    elif already_applied:
+        messages.info(request, "You have already applied for this internship.")
+    else:
+        messages.warning(request, "No available slots for this internship.")
 
     context = {
         'internship': internship,
@@ -469,7 +534,7 @@ def student_status(request):
             Q(internship__organization__company_name__icontains=search_query)
         )
 
-    paginator = Paginator(applications, 5)
+    paginator = Paginator(applications, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -482,21 +547,38 @@ def student_status(request):
     return render(request, 'student_pages/student_status_content/student_status.html', context)
 
 
+@login_required(login_url='login')
+def delete_applications(request, application_id=None):
+    # Handle individual application deletion if application_id is provided
+    if application_id:
+        application = get_object_or_404(Application, id=application_id, student=request.user)
+        
+        if request.method == 'POST':
+            internship = application.internship
+            application.delete()
+            internship.max_applicants += 1
+            internship.save()
+            messages.success(request, "Your application has been successfully deleted.")
+            return redirect('student_status')
 
+        return render(request, 'student_pages/student_status_content/delete_application_confirm.html', {'application': application})
 
-def delete_application_confirm(request, application_id):
-    # Get the application object; restrict access to the current student's applications only
-    application = get_object_or_404(Application, id=application_id, student=request.user)
-    
+    # Handle bulk deletion
     if request.method == 'POST':
-        # Delete the application if the form is submitted
-        application.delete()
-        messages.success(request, "Your application has been successfully deleted.")
-        return redirect('student_status')  # Redirect back to the student's status page
-    
-    # Render the confirmation template if request method is GET
-    return render(request, 'student_pages/student_status_content/delete_application_confirm.html', {'application': application})
+        selected_application_ids = request.POST.getlist('application_ids')
+        
+        for app_id in selected_application_ids:
+            application = get_object_or_404(Application, id=app_id, student=request.user)
+            internship = application.internship
+            application.delete()
+            internship.max_applicants += 1
+            internship.save()
 
+        messages.success(request, "Selected applications have been successfully deleted.")
+        return redirect('student_status')
+
+    # Optionally handle GET requests if needed, or redirect
+    return redirect('student_status')
 
 
 def view_status(request, application_id):
@@ -644,16 +726,33 @@ def organization_interns(request):
 
 @organization_login_required
 def organization_applicant(request):
-    org = Organization.objects.get(id=request.session['organization_id'])
+    # Retrieve the organization either from the session or the logged-in user
+    org = None
+    if 'organization_id' in request.session:
+        org = get_object_or_404(Organization, id=request.session['organization_id'])
+    elif hasattr(request.user, 'organization'):
+        org = request.user.organization
     
-    # Fetch applications related to this organization
-    applications = Application.objects.filter(organization=org).select_related('internship', 'student')
+    if not org:
+        # Redirect or handle error if organization cannot be determined
+        return redirect('some_error_page')
+
+    # Fetch applications related to this organization, grouped by internship
+    applications = Application.objects.filter(internship__organization=org).select_related('internship', 'student')
+    
+    # Group applications by internship
+    grouped_applications = {}
+    for application in applications:
+        if application.internship not in grouped_applications:
+            grouped_applications[application.internship] = []
+        grouped_applications[application.internship].append(application)
 
     context = {
-        'applications': applications,
+        'grouped_applications': grouped_applications,
         'org': org,
     }
     return render(request, 'organization_pages/organization_applicants.html', context)
+
 
 @organization_login_required
 def view_application(request, application_id):
@@ -677,39 +776,65 @@ def delete_application(request, application_id):
 def about_us_org(request):
     return render(request, 'organization_pages/about_us_org.html')
 
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
 @organization_login_required
 def org_dashboard(request):
-    # Retrieve the organization ID from the session
     organization_id = request.session.get('organization_id')
     
     if organization_id:
-        # Fetch the organization object using the ID from the session
         org = Organization.objects.filter(id=organization_id).first()
-
-        # If the organization doesn't exist (for some reason), handle it
+        
         if not org:
             messages.error(request, 'Organization not found. Please log in again.')
             return redirect('login')
 
-        # Fetch additional counts if necessary
         org_count = Organization.objects.count()
-        user_count = CustomUser.objects.count()  # Replace with your actual user model
+        user_count = CustomUser.objects.count()
+        student_applicants = Application.objects.count()
+
+        # Monthly internship counts per organization
+        monthly_data = (Internship.objects
+                        .annotate(month=TruncMonth('created_at'))
+                        .values('month', 'organization__company_name')
+                        .annotate(count=Count('id'))
+                        .order_by('month', 'organization__company_name'))
+
+        # Prepare data for consistent months across all organizations
+        organization_data = defaultdict(lambda: {'months': [], 'counts': []})
+        month_labels = []
+
+        # Gather unique months across all organizations
+        for entry in monthly_data:
+            month_str = entry['month'].strftime('%B')
+            if month_str not in month_labels:
+                month_labels.append(month_str)
+
+        # Populate organization data with counts per month, ensuring consistent months
+        for entry in monthly_data:
+            month_str = entry['month'].strftime('%B')
+            organization_name = entry['organization__company_name']
+            organization_data[organization_name]['months'] = month_labels
+            for month in month_labels:
+                if month == month_str:
+                    organization_data[organization_name]['counts'].append(entry['count'])
+                else:
+                    organization_data[organization_name]['counts'].append(0)
 
         context = {
             'org': org,
+            'student_applicants': student_applicants,
             'org_count': org_count,
             'user_count': user_count,
-            'organization_name': org.company_name,  # Optional, passing the organization name
+            'organization_name': org.company_name,
+            'organization_data': dict(organization_data),  # Convert defaultdict to dict for JSON serialization
+            'month_labels': month_labels,  # Add month labels for x-axis consistency
         }
 
         return render(request, 'organization_pages/organization_dashboard.html', context)
-
+    
     else:
-        # If the organization ID is not in the session, redirect to login
         messages.error(request, 'You must log in to access the dashboard.')
         return redirect('login')
-
-
 
 
 # * Ajax Functions
@@ -725,3 +850,95 @@ def get_applications(request):
     } for app in applications]
 
     return JsonResponse(data, safe=False)
+
+
+# * Admin Dashboard
+def admin_dashboard(request):
+    # Check if the logged-in user is an admin
+    if not request.user.is_admin:
+        messages.error(request, "You do not have permission to access this page.")
+        return redirect('login')  # Redirect to login or another page if not an admin
+
+    # Fetch all students and organizations
+    users = CustomUser.objects.all()
+    organizations = Organization.objects.all()
+
+    context = {
+        'users': users,
+        'organizations': organizations,
+    }
+    return render(request, 'admin_folder/admin_dashboard.html', context)
+
+
+def admin_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, email=email, password=password)
+        
+        if user is not None and user.is_admin:
+            login(request, user)
+            return redirect('admin_dashboard')
+        else:
+            messages.error(request, 'Invalid login credentials or not an admin.')
+
+    return render(request, 'admin_folder/admin_login.html')
+@login_required(login_url='login')
+def admin_view_student(request, id):
+    student = get_object_or_404(CustomUser, id=id)
+    return render(request, 'admin_folder/admin_view.html', {'student': student})
+
+# Edit student details
+@login_required(login_url='login')
+def admin_edit_student(request, id):
+    student = get_object_or_404(CustomUser, id=id)
+    
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST, request.FILES, instance=student)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Student details updated successfully.')
+            return redirect('admin_dashboard')
+    else:
+        form = CustomUserCreationForm(instance=student)
+    
+    return render(request, 'admin_folder/admin_edit.html', {'form': form, 'student': student})
+
+# Delete student
+@login_required(login_url='login')
+def admin_delete_student(request, id):
+    student = get_object_or_404(CustomUser, id=id)
+    student.delete()
+    messages.success(request, 'Student deleted successfully.')
+    return redirect('admin_dashboard')
+
+
+# View organization details
+@login_required(login_url='login')
+def admin_view_organization(request, id):
+    organization = get_object_or_404(Organization, id=id)
+    return render(request, 'admin_folder/admin_view_organization.html', {'organization': organization})
+
+# Edit organization details
+@login_required(login_url='login')
+def admin_edit_organization(request, id):
+    organization = get_object_or_404(Organization, id=id)
+    
+    if request.method == 'POST':
+        form = Organization(request.POST, instance=organization)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Organization details updated successfully.')
+            return redirect('admin_dashboard')
+    else:
+        form = Organization(instance=organization)
+    
+    return render(request, 'admin_edit_organization.html', {'form': form, 'organization': organization})
+
+# Delete organization
+@login_required(login_url='login')
+def admin_delete_organization(request, id):
+    organization = get_object_or_404(Organization, id=id)
+    organization.delete()
+    messages.success(request, 'Organization deleted successfully.')
+    return redirect('admin_dashboard')

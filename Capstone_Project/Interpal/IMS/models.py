@@ -3,7 +3,7 @@ from django.db import models
 from django.conf import settings  # This will allow us to reference the CustomUser model
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
-
+from cloudinary.models import CloudinaryField
 # Custom User Manager
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
@@ -48,6 +48,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False)
     reset_token = models.CharField(max_length=32, null=True, blank=True)
     reset_otp = models.IntegerField(blank=True, null=True)
+    cor_picture = CloudinaryField('image', blank=True, null=True)
+    profile_picture = CloudinaryField('image', blank=True, null=True)
 
     # One-to-one relationship with Organization (optional)
     organization = models.OneToOneField(
@@ -61,7 +63,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'date_of_birth']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'date_of_birth', 'cor_picture']
 
     def __str__(self):
         return self.email
@@ -159,7 +161,7 @@ class Internship(models.Model):
     
 class Application(models.Model):
     STATUS_CHOICES = [
-        ('Applied', 'Applied'),
+        ('Pending', 'Pending'),
         ('In Review', 'In Review'),
         ('Interview Scheduled', 'Interview Scheduled'),
         ('Offer Extended', 'Offer Extended'),
@@ -206,3 +208,8 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.student_first_name} {self.student_last_name} - {self.internship.title}"
+
+    def get_student_profile_picture(self):
+        if self.student.profile_picture:
+            return self.student.profile_picture.url
+        return None
