@@ -14,7 +14,7 @@
                 <div class="md-step-title">{{ stage }}</div>
             </div>
             {% if not forloop.last %}
-                <div class="md-step-line"></div> <!-- Line between steps -->
+                <div class="md-step-line"></div>
             {% endif %}
         {% endfor %}
     </div>
@@ -26,160 +26,58 @@
         <p><strong>Comments:</strong> {{ status_details.comments }}</p>
     </div>
 
-    <a href="{% url 'student_status' %}" class="btn back-btn mt-3">Back to Internships</a>
+    <a href="{% url 'student_status' %}" class="btn back-btn mt-3">Back to Internship Status</a>
 </div>
 
 <style>
+    /* Styling for consistency with the organization view */
     .status-container {
-        padding: 40px;
+        padding: 30px;
         border: 1px solid #ddd;
         border-radius: 8px;
         background-color: #f9f9f9;
         max-width: 100%;
         width: 90%;
-        margin: 30px auto;
-        text-align: center;
+        margin: 20px auto;
     }
     
     .md-stepper-horizontal {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin: 0 auto;
         background-color: #FFFFFF;
         box-shadow: 0 3px 8px -6px rgba(0,0,0,.50);
-    }
-    
-    .md-stepper-horizontal .md-step {
-        display: inline-flex;
-        position: relative;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-        text-align: center;
-        flex: 1;
-    }
-    
-    .md-stepper-horizontal .md-step:hover,
-    .md-stepper-horizontal .md-step:active {
-        background-color: rgba(0,0,0,0.04);
     }
     
     .md-stepper-horizontal .md-step .md-step-circle {
         width: 50px;
         height: 50px;
-        margin: 0 auto;
         background-color: #999999;
         border-radius: 50%;
+        color: #FFFFFF;
         text-align: center;
         line-height: 50px;
         font-size: 18px;
         font-weight: 600;
-        color: #FFFFFF;
     }
-
-    /* Active and Done Circle Colors */
+    
+    /* Color for Active and Completed Stages */
     .md-stepper-horizontal .md-step.active .md-step-circle,
     .md-stepper-horizontal .md-step.done .md-step-circle {
-        background-color: #007bff;  /* Blue color */
+        background-color: #007bff;
     }
-
-    .md-stepper-horizontal .md-step.done .md-step-circle:before {
-        font-family: 'FontAwesome';
-        font-weight: 100;
-        content: "\f00c";
-    }
-
+    
     .md-stepper-horizontal .md-step .md-step-title {
         margin-top: 20px;
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 600;
     }
-
-    .md-stepper-horizontal .md-step .md-step-optional {
-        font-size: 14px;
-    }
-
-    .md-stepper-horizontal .md-step.active .md-step-title {
-        font-weight: 600;
-        color: rgba(0,0,0,.87);
-    }
-
-    /* Line between the circles */
+    
     .md-step-line {
         flex-grow: 1;
         height: 3px;
-        background-color: #007bff; /* Blue line color */
-        margin-top: 25px;  /* Adjust to center the line */
-        margin-bottom: 25px; /* Adjust to align line with circles */
-    }
-
-    .status-details p {
-        font-size: 1.1rem;
-        color: #333;
-        margin: 20px 0;
-    }
-
-    .btn.back-btn {
-        margin-top: 30px;
-        display: inline-block;
-        padding: 12px 30px;
-        color: #fff;
         background-color: #007bff;
-        border: none;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: background-color 0.3s;
-    }
-    
-    .btn.back-btn:hover {
-        background-color: #0056b3;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .status-container {
-            padding: 20px;
-            width: 95%;
-        }
-
-        .md-stepper-horizontal {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .md-stepper-horizontal .md-step {
-            padding: 15px;
-        }
-
-        .md-step-line {
-            width: 80%;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-
-        .status-details p {
-            font-size: 1rem;
-        }
-
-        .btn.back-btn {
-            width: 100%;
-            padding: 14px 0;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .md-stepper-horizontal .md-step .md-step-circle {
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            font-size: 16px;
-        }
-
-        .md-stepper-horizontal .md-step .md-step-title {
-            font-size: 16px;
-        }
+        margin-top: 25px;
     }
 </style>
-
 {% endblock %}

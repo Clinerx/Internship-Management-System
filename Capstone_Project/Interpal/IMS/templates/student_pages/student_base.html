@@ -269,6 +269,7 @@
     }
     .hori-selector .right {
         right: -25px;
+        
     }
     .hori-selector .left {
         left: -25px;
@@ -438,6 +439,7 @@
         border-radius: 10px; /* Adjust as desired */
     }
     
+    
 </style>
 
 {% if user.is_authenticated %}
@@ -480,6 +482,7 @@
             </ul>
         </div>
     </nav>
+    
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -516,9 +519,6 @@
         </div>
     </div>
 
-    <div class="notification-icon" onclick="openNotificationModal()">
-        <i class="fas fa-bell"></i>
-    </div>
 
     <!-- Notification Modal -->
     <div class="notification-modal-overlay" id="notificationModal">

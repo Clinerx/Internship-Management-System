@@ -11,7 +11,7 @@
         <!-- Profile Image Section -->
         <div class="profile-img">
             <img 
-                src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'img/header-2.jpg' %}{% endif %}" 
+                src="{% if user.profile_picture %}{{ user.profile_picture.url }}{% else %}{% static 'img/default_profile.jpg' %}{% endif %}" 
                 alt="Profile Image" 
                 onclick="openStudentModal()"
                 style="cursor: pointer;"

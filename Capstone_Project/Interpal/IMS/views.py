@@ -581,22 +581,28 @@ def delete_applications(request, application_id=None):
     return redirect('student_status')
 
 
+# Student view to display the current status of their application
 def view_status(request, application_id):
     application = get_object_or_404(Application, id=application_id)
+    # Determine completed stages up to the current status
+    stages = ["Applied", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
+    completed_stages = stages[:stages.index(application.status) + 1]
+    
     status_details = {
         "status": application.status,
-        "review_stage": "Review Stage Info Here",  # Adjust as necessary
+        "review_stage": application.review_stage,
         "submission_date": application.applied_at,
-        "comments": "Comments Here",  # Adjust as necessary
-        "completed_stages": ["Applied", "In Review"]  # Example completed stages
+        "comments": application.comments,
+        "completed_stages": completed_stages
     }
-    stages = ["Applied", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
+    
     context = {
         'application': application,
         'status_details': status_details,
         'stages': stages
     }
     return render(request, 'student_pages/student_status_content/view_status.html', context)
+
 
 
 # * <<<<<<<============================================>>>> 
@@ -753,12 +759,47 @@ def organization_applicant(request):
     }
     return render(request, 'organization_pages/organization_applicants.html', context)
 
-
 @organization_login_required
 def view_application(request, application_id):
-    application = Application.objects.get(id=application_id, organization_id=request.session['organization_id'])
-    context = {'application': application}
+    application = get_object_or_404(Application, id=application_id, organization_id=request.session['organization_id'])
+
+    # Define the stages for the application process
+    stages = ["Applied", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
+    completed_stages = stages[:stages.index(application.status) + 1]
+
+    if request.method == "POST":
+        # Get the selected status from the form
+        new_status = request.POST.get("status")
+        if new_status in stages:
+            # Update the application status and save it
+            application.status = new_status
+            application.save()
+            messages.success(request, "Application status updated successfully.")
+            return redirect(reverse('view_application', args=[application_id]))
+
+    # Prepare context data for rendering
+    context = {
+        'application': application,
+        'stages': stages,
+        'completed_stages': completed_stages,
+    }
     return render(request, 'organization_pages/view_application.html', context)
+
+# View for updating the application status by organization
+@organization_login_required
+def update_application_status(request, application_id):
+    application = get_object_or_404(Application, id=application_id, organization_id=request.session['organization_id'])
+    
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Application.STATUS_CHOICES):  # Ensure new_status is valid
+            application.status = new_status
+            application.save()
+            messages.success(request, "Application status updated successfully.")
+        else:
+            messages.error(request, "Invalid status selected.")
+    
+    return redirect('view_application', application_id=application.id)
 
 @organization_login_required
 def delete_application(request, application_id):

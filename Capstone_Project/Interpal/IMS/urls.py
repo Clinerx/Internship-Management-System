@@ -29,8 +29,10 @@ urlpatterns = [
     path('post/edit/<int:internship_id>/', views.edit_internship, name='edit_internship'),
     path('delete_internship/<int:internship_id>/', views.delete_internship, name='delete_internship'),
     path('internship/<int:internship_id>/', views.view_internship, name='view_internship'),
+    path('organization/application/<int:application_id>/update-status/', views.update_application_status, name='update_application_status'),
     path('organization/applications/<int:application_id>/view/', views.view_application, name='view_application'),
     path('organization/applications/<int:application_id>/delete/', views.delete_application, name='delete_application'), 
+    path('application/<int:application_id>/status/', views.view_status, name='view_status'),
     # path('organization_applicant/', views.organization_applicant, name='organization_applicant'),
     
     path('about_us_org/', views.about_us_org, name='about_us_org'),

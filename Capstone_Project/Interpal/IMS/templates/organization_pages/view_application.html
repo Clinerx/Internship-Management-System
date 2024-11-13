@@ -1,30 +1,138 @@
-<div class="stepper">
-    {% for stage in stages %}
-        <div class="step {% if stage in status_details.completed_stages %}completed{% endif %}">
-            <span>{{ stage }}</span>
-            {% if stage != stages|last %}<span class="step-separator"></span>{% endif %}
+{% extends 'organization_pages/organization_base.html' %}
+
+{% block title %}Applicant Details & Update Status{% endblock %}
+
+{% block content %}
+<div class="applicant-details container">
+    <h2>Application Details for {{ application.internship.title }}</h2>
+    
+    <!-- Applicant Information -->
+    <div class="applicant-info">
+        <p><strong>Applicant Name:</strong> {{ application.student_first_name }} {{ application.student_last_name }}</p>
+        <p><strong>College:</strong> {{ application.student_college }}</p>
+        <p><strong>Course:</strong> {{ application.student_course }}</p>
+        <p><strong>Date Applied:</strong> {{ application.applied_at|date:"F d, Y" }}</p>
+    </div>
+
+    <!-- Uploaded Files -->
+    {% if application.resume %}
+        <div class="uploaded-files mt-4">
+            <h4>Uploaded Documents:</h4>
+            <ul>
+                <li><a href="{{ application.resume.url }}" target="_blank">Resume</a></li>
+                {% if application.cover_letter %}
+                    <li>Cover Letter: {{ application.cover_letter }}</li>
+                {% endif %}
+            </ul>
         </div>
-    {% endfor %}
+    {% else %}
+        <p>No files uploaded by the applicant.</p>
+    {% endif %}
+
+    <!-- Stepper with Update Controls -->
+    <div class="status-container mt-5">
+        <h4>Update Application Status</h4>
+        <div class="md-stepper-horizontal d-flex justify-content-between flex-wrap">
+            {% for stage in stages %}
+                <div class="md-step {% if stage == application.status %}active{% elif stage in completed_stages %}done{% endif %}" data-stage="{{ stage }}">
+                    <div class="md-step-circle"><span>{{ forloop.counter }}</span></div>
+                    <div class="md-step-title">{{ stage }}</div>
+                </div>
+                {% if not forloop.last %}
+                    <div class="md-step-line"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <form id="statusUpdateForm" method="post" action="{% url 'view_application' application.id %}" class="mt-4">
+            {% csrf_token %}
+            <label for="status">Select Next Stage:</label>
+            <select name="status" id="status" class="form-control" disabled>
+                {% for stage in stages %}
+                    <option value="{{ stage }}" {% if stage == application.status %}selected{% endif %}>{{ stage }}</option>
+                {% endfor %}
+            </select>
+            <button type="button" id="nextStageButton" class="btn btn-primary mt-3" onclick="moveToNextStage()">Update Status</button>
+        </form>
+    </div>
 </div>
+
 <style>
-    .stepper {
+    /* Styles for status container, stepper, and steps */
+    .status-container, .applicant-details {
+        padding: 40px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        max-width: 100%;
+        width: 90%;
+        margin: 30px auto;
+        text-align: center;
+    }
+    .md-stepper-horizontal {
         display: flex;
         align-items: center;
+        justify-content: space-between;
+        margin: 0 auto;
+        background-color: #FFFFFF;
+        box-shadow: 0 3px 8px -6px rgba(0,0,0,.50);
     }
-    
-    .step {
-        display: flex;
-        align-items: center;
-        padding: 10px;
+    .md-stepper-horizontal .md-step .md-step-circle {
+        width: 50px;
+        height: 50px;
+        background-color: #999999;
+        border-radius: 50%;
+        color: #FFFFFF;
+        text-align: center;
+        line-height: 50px;
+        font-size: 18px;
+        font-weight: 600;
     }
-    
-    .step.completed {
-        color: green;
+    .md-stepper-horizontal .md-step.active .md-step-circle,
+    .md-stepper-horizontal .md-step.done .md-step-circle {
+        background-color: #007bff;
     }
-    
-    .step-separator {
-        width: 20px;
-        height: 2px;
-        background-color: gray;
+    .md-step-line {
+        flex-grow: 1;
+        height: 3px;
+        background-color: #007bff;
+        margin-top: 25px;
     }
 </style>
+
+<script>
+    const stages = {{ stages|safe }};
+    let currentStageIndex = stages.indexOf("{{ application.status }}");
+
+    function moveToNextStage() {
+        const nextStage = stages[currentStageIndex + 1];
+        
+        // Check if there are more stages to move to
+        if (nextStage) {
+            switch (nextStage) {
+                case "In Review":
+                    alert("Please check the application letter and resume before moving to the next stage.");
+                    break;
+                case "Interview Scheduled":
+                    alert("Send an interview scheduling email to the applicant.");
+                    break;
+                case "Offer Extended":
+                    alert("Conduct the interview, then extend an offer based on the outcome.");
+                    break;
+                case "Completed":
+                    alert("Mark the application as Hired or Not Hired.");
+                    break;
+                default:
+                    alert("Proceeding to the next stage.");
+                    break;
+            }
+            
+            // Update the status dropdown and enable submission
+            document.getElementById("status").value = nextStage;
+            document.getElementById("statusUpdateForm").submit();
+        } else {
+            alert("All stages are completed.");
+        }
+    }
+</script>
+{% endblock content %}
