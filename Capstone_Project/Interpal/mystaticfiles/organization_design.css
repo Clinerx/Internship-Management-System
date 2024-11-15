@@ -1,871 +1,245 @@
-/* Google Font Import - Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-*{
-    margin: 0;
+:root {
+    --primary-color: #3685fb;
+    --primary-color-dark: #2f73d9;
+    --secondary-color: #fafcff;
+    --text-dark: #0d213f;
+    --text-light: #767268;
+    --extra-light: #ffffff;
+    --max-width: 1200px;
+
+    /* Dark mode colors */
+    --dark-background: #0c0c0c;
+    --dark-secondary: #1f1f1f;
+    --dark-accent: #242424;
+    --dark-text: #e0e0e0;
+    --dark-text-light: #b3b3b3;
+    --dark-primary: #3a8ef6;
+    --dark-primary-dark: #2b6db2;
+    --dark-gradient: linear-gradient(145deg, #1c1c1c, #2a2a2a);
+}
+       /* Light mode styles */
+            /* Navbar items */
+.navbar-nav .nav-item {
+    display: flex;
+    align-items: center; /* Aligns the icon and text vertically */
+    justify-content: flex-start;
+}
+
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center; /* Center text and icon vertically */
+    padding: 10px 15px; /* Adjust padding for better spacing */
+    font-size: 16px; /* Optional: Adjust font size */
+}
+
+/* Adjust the size of the icons */
+.navbar-nav .nav-link .icon {
+    font-size: 20px; /* Adjust the icon size */
+    margin-right: 8px; /* Add space between icon and text */
+}
+
+/* Dark Mode Toggle Button */
+#darkModeToggle {
+    display: flex;
+    align-items: center;
+}
+
+#darkModeToggle .fa-moon {
+    font-size: 15px; /* Adjust moon icon size */
+}
+
+
+/* Remove the border, width, and height for the dark mode toggle button */
+.nav-links {
+    border: none;
+    background: none;
     padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-
-:root{
-    /* ===== Colors ===== */
-    --body-color: #E4E9F7;
-    --sidebar-color: #ffffff;
-    --primary-color: #695CFE;
-    --primary-color-light: #F6F5FF;
-    --toggle-color: #DDD;
-    --text-color: #707070;
-
-    /* ====== Transition ====== */
-    --tran-03: all 0.2s ease;
-    --tran-03: all 0.3s ease;
-    --tran-04: all 0.3s ease;
-    --tran-05: all 0.3s ease;
-}
-
-body{
-    min-height: 100vh;
-    background-color: var(--body-color);
-    transition: var(--tran-05);
-}
-
-::selection{
-    background-color: var(--primary-color);
-    color: #fff;
-}
-
-body.dark{
-    --body-color: #18191a;
-    --sidebar-color: #242526;
-    --primary-color: #3a3b3c;
-    --primary-color-light: #3a3b3c;
-    --toggle-color: #fff;
-    --text-color: #ccc;
-}
-
-/* ===== Sidebar ===== */
- .sidebar{
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 250px;
-    padding: 10px 14px;
-    background: var(--sidebar-color);
-    transition: var(--tran-05);
-    z-index: 100;  
-}
-.sidebar.close{
-    width: 88px;
-    
-    
-}
-
-/* * ===== Reusable code - Here ===== */
-.sidebar li{
-    height: 50px;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.sidebar header .image,
-.sidebar .icon{
-    min-width: 60px;
-    border-radius: 6px;
-}
-
-.sidebar .icon{
-    min-width: 60px;
-    border-radius: 6px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-}
-
-.sidebar .text,
-.sidebar .icon{
-    color: var(--text-color);
-    transition: var(--tran-03);
-}
-
-.sidebar .text{
-    font-size: 17px;
-    font-weight: 500;
-    white-space: nowrap;
-    opacity: 1;
-}
-.sidebar.close .text{
-    opacity: 0;
-}
-/* * =========================== */
-
-.sidebar header{
-    position: relative;
-}
-
-.sidebar header .image-text{
-    display: flex;
-    align-items: center;
-}
-.sidebar header .logo-text{
-    display: flex;
-    flex-direction: column;
-}
-header .image-text .name {
-    margin-top: 2px;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-header .image-text .profession{
-    font-size: 16px;
-    margin-top: -2px;
-    display: block;
-}
-
-.sidebar header .image{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.sidebar header .image img{
-    width: 40px;
-    border-radius: 6px;
-}
-
-.sidebar header .toggle{
-    position: absolute;
-    top: 50%;
-    right: -25px;
-    transform: translateY(-50%) rotate(180deg);
-    height: 25px;
-    width: 25px;
-    background-color: var(--primary-color);
-    color: var(--sidebar-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    cursor: pointer;
-    transition: var(--tran-05);
-}
-
-body.dark .sidebar header .toggle{
-    color: var(--text-color);
-}
-
-.sidebar.close .toggle{
-    transform: translateY(-50%) rotate(0deg);
-}
-
-.sidebar .menu{
-    margin-top: 40px;
-}
-
-.sidebar li.search-box{
-    border-radius: 6px;
-    background-color: var(--primary-color-light);
-    cursor: pointer;
-    transition: var(--tran-05);
-}
-
-.sidebar li.search-box input{
-    height: 100%;
-    width: 100%;
-    outline: none;
-    border: none;
-    background-color: var(--primary-color-light);
-    color: var(--text-color);
-    border-radius: 6px;
-    font-size: 17px;
-    font-weight: 500;
-    transition: var(--tran-05);
-}
-.sidebar li a{
-    list-style: none;
-    height: 100%;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: var(--tran-03);
-}
-
-.sidebar li a:hover{
-    background-color: var(--primary-color);
-}
-.sidebar li a:hover .icon,
-.sidebar li a:hover .text{
-    color: var(--sidebar-color);
-}
-body.dark .sidebar li a:hover .icon,
-body.dark .sidebar li a:hover .text{
-    color: var(--text-color);
-}
-
-.sidebar .menu-bar{
-    height: calc(100% - 55px);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow-y: scroll;
-}
-.menu-bar::-webkit-scrollbar{
-    display: none;
-}
-.sidebar .menu-bar .mode{
-    border-radius: 6px;
-    background-color: var(--primary-color-light);
-    position: relative;
-    transition: var(--tran-05);
-}
-
-.menu-bar .mode .sun-moon{
-    height: 50px;
-    width: 60px;
-}
-
-.mode .sun-moon i{
-    position: absolute;
-}
-.mode .sun-moon i.sun{
-    opacity: 0;
-}
-body.dark .mode .sun-moon i.sun{
-    opacity: 1;
-}
-body.dark .mode .sun-moon i.moon{
-    opacity: 0;
-}
-
-.menu-bar .bottom-content .toggle-switch{
-    position: absolute;
-    right: 0;
-    height: 100%;
-    min-width: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    cursor: pointer;
-}
-.toggle-switch .switch{
-    position: relative;
-    height: 22px;
-    width: 40px;
-    border-radius: 25px;
-    background-color: var(--toggle-color);
-    transition: var(--tran-05);
-}
-
-.switch::before{
-    content: '';
-    position: absolute;
-    height: 15px;
-    width: 15px;
-    border-radius: 50%;
-    top: 50%;
-    left: 5px;
-    transform: translateY(-50%);
-    background-color: var(--sidebar-color);
-    transition: var(--tran-04);
-}
-
-body.dark .switch::before{
-    left: 20px;
-}
-
-.home{
-    position: absolute;
-    top: 0;
-    left: 250px;
-    height: 100vh;
-    width: calc(100% - 250px);
-    background-color: var(--body-color);
-    transition: var(--tran-05);
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-}
-.home .text{
-    font-size: 30px;
-    font-weight: 500;
-    color: var(--text-color);
-    padding: 20px 0;
-}
-
-.sidebar.close ~ .home{
-    left: 78px;
-    height: 100vh;
-    width: calc(100% - 78px);
-}
-body.dark .home .text{
-    color: var(--text-color);
-}
-
-/* Dashboard Overview Cards */
-.dashboard-overview {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-}
-
-.overview-card {
-   /* background-color: rgb(232, 122, 122); */
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 30%;
-    text-align: center;
-}
-
-.overview-card:first-child {
-    background-color: #2962ff;
-    
-  }
-  
-  .overview-card:nth-child(2) {
-    background-color: #ff6d00;
-  }
-  
-  .overview-card:nth-child(3) {
-    background-color: #2e7d32;
-  }
-
-.overview-card h3 {
-    color: var(--primary-color);
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.overview-card p {
-    font-size: 16px;
-    color: var(--text-color);
-}
-
-/* Charts Section */
-.charts-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.charts {
-    display: flex;
-    justify-content: space-between;
-}
-
-.dashboard_header{
-    display: flex;
-    background-color: #2962ff;
-    height: 65px;
-    padding: 0 10px;
-    color: white;
-    align-items: center;
-    justify-content: flex-end;
-}
-.line_design p{
-    margin-top: 20px;
-    border-bottom: 1px solid #18191a;
-}
-.dashboard_header .header_icons i{
-    padding-left: 30px;
-    color: white;
-}
-.sidebar.close ~ .home {
-    left: 88px;/* Adjust to match the closed sidebar width */
-    width: calc(100% - 88px); /* Adjust to prevent overflow */
-}
-
-
-.dashboard_header .header_icons{
-    display: flex;
-    font-size: 20px;
-    gap: 20px;
-    align-items: center;
-    
-}
-.student_avatar_picture {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 27px 0;
-    margin-left: 50px;
-    border-radius: 15px;
-    width: 270px;
-    height: 50px;
-    border: 1px solid white;
-}
-.student_avatar_picture .student_img{
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 3px solid white;
-    margin-left: 25px;
-}
-.student_avatar_picture .student_avatar_name .user_course{
-    font-size: 12px;
-    text-align: center;
-    
-}
-
-.counting_box, .home .text, .charts-container{
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    margin-left: 20px;
-}
-.counting_box{
-    margin-right: 20px;
-}
-
-.counting_box .counting_user{
-    width: 400px;
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    height: 150px;
-}
-.charts_section{
-    display: flex;    
-}
-
-.sidebar.close ~ .home #org_counting{
-    width: 450px;
-    transition: var(--tran-03);
-}
-.sidebar.close ~ .home #user_counting{
-    width: 500px;
-    transition: var(--tran-03);
-}
-.sidebar.close ~ .home #bar_charts{
-    width: 900px;
-    transition: var(--tran-03);
-}
-/* Adding padding and responsiveness for charts */
-.charts {
-    justify-content: space-between;
-    margin-top: 20px;
-    padding: 20px;
-    gap: 30px; /* Spacing between pie and bar charts */
-}
-
-
-
-.charts-container {
-    background-color: #ffffff;
-    border-radius: 15px;
-    display: flex;
-    box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 100%; /* Ensures it adjusts within container */
-    
-}
-.charts-container .charts_name #barChart{
-    padding-top: 5%;
-}
-
-.charts-container .charts_name #pieChart{
-    padding-top: 5%;
-}
-.charts_name{
-    width: 100%;
-    text-align: center;
-}
-
-
-
-
-/* * Posting Sections */
-.internship-buttons .btn-info {
-    background-color: #17a2b8;
-    color: #fff;
-    border: none;
-}
-
-.internship-buttons .btn-info:hover {
-    background-color: #138496;
-}
-
-
-
-
-/* * Creating Internship Modal */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 100;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto; /* Allows scrolling if the content is taller than the viewport */
-    background-color: rgba(0, 0, 0, 0.7); /* Darker background with opacity */
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(10px); /* Subtle blur for the background */
-    padding: 20px; /* Adds padding to prevent content from touching the screen edges */
-}
-
-.modal-content {
-    background-color: #fff; /* Clean white background */
-    padding: 30px;
-    border-radius: 15px; /* Rounded corners for a modern look */
-    width: 100%;
-    max-width: 500px; /* Maximum width to fit within smaller screens */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Soft shadow for depth */
-    position: relative;
-    margin: auto; /* Center the modal horizontally */
-    animation: slideDown 0.3s ease-in-out; /* Subtle slide-down animation */
-    transition: all 0.3s ease-in-out; /* Smooth transition for visibility */
-    display: flex;
-    flex-direction: column; /* Stack modal content in a column layout */
-}
-
-.close {
-    color: #555; /* Dark gray for a softer look */
-    font-size: 24px;
-    font-weight: bold;
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-.close:hover {
-    color: #333; /* Darker on hover for emphasis */
-}
-
-.modal h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333; /* Muted black for the title */
-    font-weight: bold;
-    text-align: center; /* Center the modal title */
-}
-
-.modal-content .form-group {
-    display: flex;
-    flex-direction: column; /* Stack labels and inputs in column */
-}
-
-.modal-content .form-group label {
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #666; /* Softer color for labels */
-}
-
-.modal-content .form-group input,
-.modal-content .form-group textarea {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px; /* Softly rounded inputs */
-    border: 1px solid #ddd; /* Light gray border */
-    background-color: #f9f9f9; /* Slight off-white background */
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-}
-
-.modal-content .form-group input:focus,
-.modal-content .form-group textarea:focus {
-    border-color: #007BFF; /* Highlighted border on focus */
-    outline: none; /* Remove default outline */
-}
-
-.modal-content .form-button {
-    text-align: center;
-}
-
-.modal-content .form-button button {
-    background-color: #007BFF; /* Primary button color */
-    color: #fff;
-    padding: 12px 30px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-}
-
-.modal-content .form-button button:hover {
-    background-color: #0056b3; /* Darker on hover */
-}
-
-@keyframes slideDown {
-    from {
-        transform: translateY(-30px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-
-/* *Notify Posted Internships Design */
-/* Notification Styles */
-#notification {
-    display: none; /* Initially hidden */
-    position: fixed;
-    bottom: 20px;  /* Position from the bottom */
-    right: -300px; /* Start off-screen to the right */
-    background: linear-gradient(145deg, #F9FFF5, #E4F2D8); /* Subtle gradient for 3D effect */
-    color: #333; /* Softer text color */
-    height: 60px;
-    padding: 10px 20px;
-    border-radius: 10px; /* Rounded for a smoother look */
-    display: flex;
-    align-items: center;
-    box-shadow: 6px 6px 15px rgba(0, 0, 0, 0.15), 
-                -3px -3px 10px rgba(255, 255, 255, 0.7); /* Enhanced shadow for 3D effect */
-    border: 1px solid #D1E7B5; /* Light beveled border */
-    transition: right 0.5s ease-in-out;
-    z-index: 1000; /* Ensure it's on top of other elements */
-}
-
-/* Class to show the notification */
-#notification.show {
-    right: 20px; /* Slide in position */
-}
-
-/* Notification Icon Styles */
-.notification-icon {
-    display: flex;
-    align-items: center;
-    margin-right: 10px;
-}
-
-.notification-icon i {
-    font-size: 25px;
-    color: #28a745; /* Green icon for success */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* 3D icon effect */
-}
-
-/* Notification Message Styles */
-.notification-message {
-    font-size: 16px;
-    color: #4F8A10; /* Text color for success message */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* 3D text effect */
-}
-
-/* ! delete_internships design */
-/* Modal Container - The outer box */
-#deleteModal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 999; /* On top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    background-color: rgba(0, 0, 0, 0.6); /* Black background with opacity */
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s ease-in-out;
-}
-
-/* Modal Content Box */
-#deleteModal .modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
-    width: 400px;
-    max-width: 90%;
-    position: relative;
-    text-align: center;
-    animation: modalFadeIn 0.5s ease;
-}
-
-/* Modal Header */
-#deleteModal h2 {
-    margin-top: 0;
-    color: #333;
-}
-
-/* Modal Text */
-#deleteModal p {
-    margin: 15px 0;
-    color: #666;
-}
-
-/* Button Group */
-#deleteModal .button-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-/* Modal Buttons */
-#deleteModal .button-group .btn {
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-#deleteModal .btn-danger {
-    background-color: #dc3545;
-    color: white;
-    transition: background-color 0.3s ease;
-}
-
-#deleteModal .btn-danger:hover {
-    background-color: #c82333;
-}
-
-#deleteModal .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-    transition: background-color 0.3s ease;
-}
-
-#deleteModal .btn-secondary:hover {
-    background-color: #5a6268;
-}
-
-/* Close Button (X icon) */
-#deleteModal .close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #aaa;
-    cursor: pointer;
-}
-
-#deleteModal .close:hover {
-    color: #333;
-}
-
-/* Fade in animation for modal */
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Media query for mobile devices */
-@media (max-width: 600px) {
-    #deleteModal .modal-content {
-        width: 90%;
-    }
-
-    #deleteModal .button-group {
-        flex-direction: column;
-    }
-
-    #deleteModal .btn {
-        margin-bottom: 10px;
-    }
-}
-
-
-
-/* *edit_internship design */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* * Table Design */
-.table-container {
     width: auto;
-    margin: 0 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    overflow-x: auto; /* For responsive design */
-    margin-bottom: 20px;
+    height: auto;
 }
-
-.styled-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 16px;
-    text-align: left;
+/* Customize the icon size and appearance */
+.nav-links i {
+    font-size: 24px; /* Adjust size if necessary */
+    color: #0d213f; /* Set the color for the icon */
+    border: transparent;
 }
-
-.styled-table thead tr {
-    background-color: var(--primary-color);
-    color: #ffffff;
-    text-align: left;
+/* Optionally, you can add hover effect for the icon */
+.nav-links:hover i {
+    color: #3685fb; /* Change color on hover */
 }
-.styled-table thead tr th{
-    color: black;
-}
-.styled-table th, 
-.styled-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #ddd;
-    color: var(--text-color);
-}
-.styled-table tbody tr td{
-    border: 2px solid rgba(0, 0, 0, 0.2);
-}
-.styled-table tbody tr {
-    background-color: var(--primary-color-light);
-    transition: background-color 0.3s ease;
-}
-
-.styled-table tbody tr:hover {
-    background-color: var(--primary-color-light);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-}
-
-.styled-table tbody tr:nth-of-type(even) {
-    background-color: #f3f3f3;
-}
-
-.styled-table tbody td {
+/* Remove border from the dark mode toggle icon */
+#moonIcon {
+    border-radius: 50%;
+    padding: 5px;
+    font-size: 25px;
     font-weight: 400;
+    margin-right: -10px;
+    margin-left: 50px;
+    outline: none !important; /* Removes outline if any */
+}
+/* Remove any border or outline from the button around the icon */
+.nav-links {
+    border: none !important;
+    outline: none !important;
+    background: none; /* Optional: remove any background */
+}
+.img_icon img {
+    max-width: 100%; /* Ensures the image is responsive */
+    height: auto; /* Maintains the aspect ratio */
+    object-fit: contain; /* Ensures the entire image fits within the container */
+    width: 80px; /* Set a specific width if needed */
+    filter: drop-shadow(4px 0 0 rgba(0, 0, 0, 0.6)); /* Combined filters */
+    height: 10%; 
+    
 }
 
-.delete-btn {
-    background-color: #777be2;
+/* Dark Mode Styles */
+body.dark-mode .custom-navbar{
+    background-color: var(--dark-secondary);
+    box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.434);
+}
+body.dark-mode #moonIcon {
+    color: #fff; /* Light color for the icon in dark mode */
+}
+.dark-mode {
+    background-color: var(--dark-background);
+    color: var(--dark-text);
+}
+
+/* Navbar */
+
+.dark-mode .navbar-mainbg {
+    background-color: var(--dark-accent);
+}
+
+.dark-mode .navbar-logo {
+    color: var(--dark-text);
+}
+
+.dark-mode .navbar-brand span {
+    color: var(--dark-primary);
+}
+
+.dark-mode #navbarSupportedContent ul li a {
     color: white;
-    border: none;
-    padding: 6px 12px;
-    font-size: 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
-.delete-btn:hover {
-    background-color: #999ce9;
+.dark-mode .navbar-toggler {
+    background-color: var(--dark-accent);
 }
 
-/* Responsive table */
-@media (max-width: 768px) {
-    .styled-table th, .styled-table td {
-        font-size: 14px;
-    }
+.dark-mode .navbar-nav .nav-link {
+    color: var(--dark-text-light);
 }
+
+.dark-mode .navbar-nav .nav-link.active {
+    color: var(--dark-primary);
+}
+
+.dark-mode .navbar-nav .nav-item .icon {
+    color: var(--dark-text-light);
+}
+
+/* Dark Mode Toggle */
+.dark-mode #darkModeToggle {
+    background-color: var(--dark-accent);
+    color: var(--dark-text);
+}
+
+.dark-mode #darkModeToggle .fa-moon {
+    color: var(--dark-text-light);
+}
+
+.dark-mode #logout {
+    background-color: var(--dark-primary);
+    color: var(--dark-text);
+}
+
+.dark-mode #logout:hover {
+    background-color: var(--dark-primary-dark);
+}
+
+/* Modify other components if necessary */
+.dark-mode .hori-selector .left,
+.dark-mode .hori-selector .right {
+    background-color: var(--dark-primary);
+}
+
+/* Adjust the other text and background colors as needed */
+.dark-mode .counting_box {
+    background-color: var(--dark-secondary);
+}
+
+.dark-mode .counting_user {
+    color: var(--dark-text-light);
+}
+
+/* Light Mode Styles */
+.light-mode {
+    background-color: #fff;
+    color: #000;
+}
+
+/* Light Mode Navbar */
+.light-mode .navbar {
+    background-color: #f8f9fa;
+}
+
+/* Dark Mode for Hori-selector */
+.dark-mode .hori-selector {
+    background-color: var(--dark-primary);
+}
+
+.dark-mode .hori-selector .right,
+.dark-mode .hori-selector .left {
+    background-color: var(--dark-primary);
+}
+
+.dark-mode .hori-selector .right:before,
+.dark-mode .hori-selector .left:before {
+    background-color: var(--dark-secondary);
+}
+
+
+/* Dark Mode Specific Overrides */
+body.dark-mode footer {
+    background-color: var(--dark-secondary); /* Ensure dark background */
+    color: var(--dark-text); /* Ensure text color in dark mode */
+}
+
+body.dark-mode .footer__container {
+    color: var(--dark-text-light); /* Footer container text color for dark mode */
+}
+
+body.dark-mode .footer__col h3 {
+    color: var(--dark-text); /* Dark mode header color */
+}
+
+body.dark-mode .footer__col p {
+    color: var(--dark-text); /* Paragraph text color in dark mode */
+}
+
+body.dark-mode .footer__col p:hover {
+    color: var(--dark-primary); /* Highlight color on hover in dark mode */
+}
+
+body.dark-mode .footer__col a {
+    color: var(--dark-text); /* Links color in dark mode */
+}
+
+body.dark-mode .footer__col a:hover {
+    color: var(--dark-primary); /* Link hover color in dark mode */
+}
+
+body.dark-mode .footer__bar {
+    color: var(--dark-text-light); /* Light footer bar text color in dark mode */
+    border-top: 1px solid var(--dark-text-light); /* Dark mode border color */
+}
+
+  
+  body.dark-mode .footer__col h3,
+  body.dark-mode .footer__col p,
+  body.dark-mode .footer__col h4 {
+    color: var(--dark-text);
+  }

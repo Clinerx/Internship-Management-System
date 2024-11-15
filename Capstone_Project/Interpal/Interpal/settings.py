@@ -102,12 +102,12 @@ WSGI_APPLICATION = 'Interpal.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ims_db',  # Database name
-        'USER': 'root',  # MySQL username
-        'PASSWORD': 'root',  # MySQL password
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',  # Database name
+        'USER': 'postgres.jwfpxpiqblgijcvjhwil',  # MySQL username
+        'PASSWORD': 'Sitti143dan',  # MySQL password
+        'HOST': 'aws-0-us-west-1.pooler.supabase.com',
+        'PORT': '6543',
     }
 }
 

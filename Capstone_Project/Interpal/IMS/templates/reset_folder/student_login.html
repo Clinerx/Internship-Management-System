@@ -107,9 +107,8 @@
                     }, 500);  // Remove after fade-out
                 }, 2000);  // 5-second duration
             }
-            
-            // Handle notifications on page load
-            window.onload = function() {
+             // Handle notifications on page load
+             window.onload = function() {
                 {% if messages %}
                     {% for message in messages %}
                         {% if 'error' in message.tags %}

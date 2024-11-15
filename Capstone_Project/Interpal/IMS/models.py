@@ -188,14 +188,13 @@ class Application(models.Model):
     student_last_name = models.CharField(max_length=255, null=True)
     student_college = models.CharField(max_length=255, null=True)
     student_course = models.CharField(max_length=255, null=True)
-    resume = models.FileField(upload_to='resumes/', blank=True, null=True)
-    cover_letter = models.TextField(blank=True, null=True)
+    resume = CloudinaryField('resume', folder="resumes/", null=True)
+    application_letter = CloudinaryField('application_letter', folder="application_letters/", null=True)
     applied_at = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Applied')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
     
-    # New fields for review stage and comments
-    review_stage = models.CharField(max_length=100, default="Under Review")  # Track the review stage
-    comments = models.TextField(blank=True, null=True)  # Allow for any comments on the application
+    review_stage = models.CharField(max_length=100, default="Under Review")
+    comments = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:  # Only set on creation

@@ -5,12 +5,6 @@
 {% block header %}Internships{% endblock %}
 {% block content %}
 
-<div class="dashboard-header">
-    <div class="header-icons">
-        <i class='bx bx-envelope'></i>
-        <i class='bx bx-bell'></i>
-    </div>
-</div>
 
 <div class="search-bar-container">
     <input type="text" id="search-bar" placeholder="Search for internships..." oninput="filterInternships()">
@@ -74,6 +68,7 @@
         <a href="?page={{ internships.paginator.num_pages }}" class="pagination-link">Last</a>
     {% endif %}
 </div>
+
 
 <style>
     /* General Styles */

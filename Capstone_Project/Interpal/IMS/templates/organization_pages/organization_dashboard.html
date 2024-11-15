@@ -3,133 +3,91 @@
 {% block title %}Organization || Dashboard{% endblock %}
 
 {% block content %}
-<div class="dashboard_header">
-    <div class="header_icons">
-        <i class='bx bx-envelope'></i>
-        <div class="chevron_right">
-            <i class='bx bx-bell'></i>
-        </div>
-    </div>
-    <div class="student_avatar_picture">
-        <div class="student_avatar_name">
-            <p class="user_first_name">{{org.first_name}} {{org.last_name}}</p>
-            <p class="user_course">{{org.company_name}}</p>
-        </div> 
-        <div class="student_img">
-            <img src="" alt="">
-        </div>
-    </div>  
-</div>
-<div class="text"></div>
-
-
-
-<div class="counting_box">
-    <div class="counting_user" id="org_counting">
-        <div class='counting_user_content'>
-            <i class='bx bx-user'></i>
-            <p>Registered Organizations: {{ org_count }}</p>
-            <a href="">View Details</a>
-        </div>
-    </div>
-    <div class="counting_user" id="user_counting">
-        <div class='counting_user_content'>
-            <i class='bx bx-user'></i>
-            <p>Registered Students: {{ user_count }}</p>
-            <a href="">View Details</a>
-        </div>
-    </div>
-    <div class="counting_user">
-        <div class='counting_user_content'>
-            <i class='bx bx-user'></i>
-            <p>Applicants: {{ student_applicants }}</p>
-            <a href="">View Details</a>
-        </div>
-    </div>
-</div>
-
-<section>
-    <div class="profile_section">
-        <div class="profile_container">
-            <div class="profile_avatar"></div>
-        </div>
-    </div>
-</section>
-<section>
-    <div class="charts_section">
-        <div class="charts-container" id="bar_charts">
-            <div class="charts_name">
-                <h3>User Charts</h3>
-                <canvas id="barChart"></canvas>
+<!-- Main Container Section -->
+<div class="container mt-5 custom-container">
+    <div class="row">
+        <!-- Counting Box Section -->
+        <div class="col-12 mb-5">
+            <div class="row text-center">
+                <div class="col-md-4 mb-4">
+                    <div class="counting_box shadow-sm p-4 bg-gradient rounded">
+                        <i class='bx bx-building text-primary'></i>
+                        <h5 class="mt-2">Registered Organizations</h5>
+                        <p class="display-6 text-primary">{{ org_count }}</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm mt-2">View Details</a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="counting_box shadow-sm p-4 bg-gradient rounded">
+                        <i class='bx bx-user text-success'></i>
+                        <h5 class="mt-2">Registered Students</h5>
+                        <p class="display-6 text-success">{{ user_count }}</p>
+                        <a href="#" class="btn btn-outline-success btn-sm mt-2">View Details</a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="counting_box shadow-sm p-4 bg-gradient rounded">
+                        <i class='bx bx-file text-info'></i>
+                        <h5 class="mt-2">Applicants</h5>
+                        <p class="display-6 text-info">{{ student_applicants }}</p>
+                        <a href="#" class="btn btn-outline-info btn-sm mt-2">View Details</a>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="charts-container" id="line_charts">
-            <div class="charts_name">
-                <h3>Internship Distribution</h3>
-                <canvas id="lineChart"></canvas>
-            </div>
+
+        <!-- Charts Section -->
+        <div class="col-12">
+            <section class="charts_section py-5">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="charts-container shadow-sm p-4 bg-white rounded">
+                            <h3 class="text-center">User Charts</h3>
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="charts-container shadow-sm p-4 bg-white rounded">
+                            <h3 class="text-center">Internship Distribution</h3>
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
-</section>
+</div>
 
-<a href="{% url 'admin_view' %}" class="btn">Check Account</a>
+<!-- Button Section -->
+<div class="text-center my-5">
+    <a href="{% url 'admin_view' %}" class="btn btn-primary btn-lg">Check Account</a>
+</div>
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Fetching data passed from Django view
     const orgCount = {{ org_count }};
     const userCount = {{ user_count }};
-    // const internshipCount = {{ internship_count }}; // Uncomment if you have an internship model
+    const organizationData = {{ organization_data|safe }};
+    const months = {{ month_labels|safe }};
 
     // Bar Chart
     const barCtx = document.getElementById('barChart').getContext('2d');
     const barChart = new Chart(barCtx, {
-        type: 'bar', // Change to your preferred chart type
+        type: 'bar',
         data: {
-            labels: ['Organizations', 'Users'], // Update labels as necessary
+            labels: ['Organizations', 'Users'],
             datasets: [{
                 label: '# of Users/Organizations',
-                data: [orgCount, userCount], // Use dynamic data here
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(255, 99, 132, 0.2)',
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 99, 132, 1)',
-                ],
+                data: [orgCount, userCount],
+                backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(255, 99, 132, 0.7)'],
+                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
                 borderWidth: 1
             }]
         },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-    // Fetch data from Django
-    const organizationData = {{ organization_data|safe }};
-    const months = {{ month_labels|safe }};  // Consistent month labels for x-axis
-
-    // Prepare datasets for each organization
-    const datasets = Object.keys(organizationData).map(orgName => {
-        return {
-            label: orgName,
-            data: organizationData[orgName].counts,
-            fill: false,
-            borderColor: getRandomColor(),
-            backgroundColor: getRandomColor(0.2),
-            borderWidth: 2,
-            tension: 0.4,
-            pointBackgroundColor: getRandomColor(),
-            pointBorderColor: getRandomColor(),
-        };
+        options: { scales: { y: { beginAtZero: true } } }
     });
 
-    // Utility function to generate random colors for each organization line
     function getRandomColor(alpha = 1) {
         const r = Math.floor(Math.random() * 255);
         const g = Math.floor(Math.random() * 255);
@@ -137,44 +95,102 @@
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
-    // Initialize Line Chart
     const lineCtx = document.getElementById('lineChart').getContext('2d');
     const lineChart = new Chart(lineCtx, {
         type: 'line',
-        data: {
-            labels: months,  // Dynamic month labels for x-axis
-            datasets: datasets  // All organization datasets
-        },
+        data: { labels: months, datasets: Object.keys(organizationData).map(orgName => ({
+                label: orgName,
+                data: organizationData[orgName].counts,
+                fill: false,
+                borderColor: getRandomColor(),
+                borderWidth: 2,
+                pointBackgroundColor: getRandomColor()
+            })) },
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Internships Posted Per Organization Each Month'
-                },
+                title: { display: true, text: 'Internships Posted Per Organization Each Month' }
             },
             scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Month'
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Internships Posted'
-                    }
-                }
+                x: { title: { display: true, text: 'Month' }},
+                y: { beginAtZero: true, title: { display: true, text: 'Internships Posted' }}
             }
         }
     });
-
 </script>
+
+<style>
+    :root {
+        --primary-color: #3685fb;
+        --primary-color-dark: #2f73d9;
+        --secondary-color: #fafcff;
+        --text-dark: #0d213f;
+        --text-light: #767268;
+        --extra-light: #ffffff;
+        --max-width: 1200px;
+    
+        /* Dark mode colors */
+        --dark-background: #0c0c0c;
+        --dark-secondary: #1f1f1f;
+        --dark-accent: #242424;
+        --dark-text: #e0e0e0;
+        --dark-text-light: #b3b3b3;
+        --dark-primary: #3a8ef6;
+        --dark-primary-dark: #2b6db2;
+        --dark-gradient: linear-gradient(145deg, #1c1c1c, #2a2a2a);
+    }
+
+    /* General Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background-color: #f9f9f9; }
+
+    /* Counting Box Styles */
+    .counting_box {
+        background: linear-gradient(135deg, #ffffff, #e9f2fb);
+        transition: transform 0.3s;
+        border-radius: 10px;
+        margin-top: 100px;
+    }
+    .counting_box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    .counting_box i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    .counting_box h5, .counting_box p {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Chart Container Styles */
+    .charts-container {
+        border-radius: 10px;
+        transition: transform 0.3s;
+    }
+    .charts-container:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button */
+    .btn-primary {
+        transition: background-color 0.3s ease;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    /* Media Queries */
+    @media (max-width: 768px) {
+        .counting_box {
+            margin-bottom: 15px;
+        }
+        .charts_section .charts-container {
+            margin-bottom: 20px;
+        }
+    }
+</style>
 {% endblock %}
 {% endblock %}

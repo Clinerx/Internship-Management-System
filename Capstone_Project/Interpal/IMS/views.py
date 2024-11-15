@@ -346,7 +346,7 @@ def organization_login(request):
 # User logout
 def user_logout(request):
     logout(request)
-    return redirect('index')
+    return redirect('login')
 
 # Visit tracking
 def visit_tracker(request):
@@ -585,7 +585,7 @@ def delete_applications(request, application_id=None):
 def view_status(request, application_id):
     application = get_object_or_404(Application, id=application_id)
     # Determine completed stages up to the current status
-    stages = ["Applied", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
+    stages = ["Pending", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
     completed_stages = stages[:stages.index(application.status) + 1]
     
     status_details = {
