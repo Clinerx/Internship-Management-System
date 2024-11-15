@@ -369,17 +369,6 @@
                 font-size: 0.6rem; /* Smaller footer text on mobile */
             }
         }
-                    /* Make the modal dialog responsive */
-            .modal-dialog {
-                max-width: 400px; /* Limit the modal width */
-                margin: 30px auto;
-            }
-
-            /* Optional: add a smooth transition for modal */
-            .modal-content {
-                transition: transform 0.3s ease-in-out;
-            }
-
         
                             
 
@@ -447,6 +436,7 @@
         {% block content %}{% endblock %}
     </section>
 
+    <!-- Logout Confirmation Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -456,9 +446,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    Are you sure you want to logout?
-                </div>
+                <div class="modal-body">Are you sure you want to logout?</div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
@@ -641,10 +629,6 @@ document.addEventListener("DOMContentLoaded", function () {
     updateDarkModeIcon(currentMode);
 });
 
-function openLogoutModal() {
-    // Show the modal when the logout button is clicked
-    $('#logoutModal').modal('show');
-}
 
     </script>
 </body>
