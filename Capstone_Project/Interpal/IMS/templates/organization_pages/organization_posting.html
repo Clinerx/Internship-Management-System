@@ -4,13 +4,12 @@
 {% block content %}
 
 
-<!-- Modal Structure -->
-<div id="postingModal" class="modal fade" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
-    
+<!-- Create Internship Modal -->
+<div id="createInternshipModal" class="modal fade" role="dialog" aria-labelledby="createInternshipTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <span class="close" aria-label="Close modal">&times;</span>
-            <h2 id="modalTitle" class="modal-title text-primary">Posting Internship</h2>
+            <span class="close close-create-modal" aria-label="Close modal">&times;</span>
+            <h2 id="createInternshipTitle" class="modal-title text-primary">Create Internship</h2>
             <form class="internship-form" method="POST">
                 {% csrf_token %}
                 <div class="modal-body">
@@ -63,12 +62,15 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary rounded-pill">Submit Posting</button>
+                    <button type="submit" class="btn btn-primary rounded-pill">Submit Internship</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<button id="openCreateModalBtn" class="btn btn-primary">Create Internship</button>
+
 
 <!-- Pagination controls -->
 <div class="pagination d-flex justify-content-center my-4">
@@ -154,19 +156,18 @@
     </button>
 </div>
 
-<!-- Modal for Delete Confirmation -->
-<div id="deleteModal" class="modal fade" role="dialog" aria-labelledby="deleteModalTitle" aria-hidden="true">
+
+<div id="deleteInternshipModal" class="modal fade" role="dialog" aria-labelledby="deleteInternshipTitle" aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
-            <span class="close" aria-label="Close delete modal">&times;</span>
-            <h2 id="deleteModalTitle" class="modal-title text-danger">Delete Internship</h2>
+            <span class="close close-delete-modal" aria-label="Close modal">&times;</span>
+            <h2 id="deleteInternshipTitle" class="modal-title text-danger">Delete Internship</h2>
             <p>Are you sure you want to delete the internship <strong id="internshipTitleToDelete"></strong>?</p>
-
-            <form id="deleteForm" method="POST" action="">
+            <form id="deleteInternshipForm" method="POST" action="">
                 {% csrf_token %}
-                <div class="button-group">
-                    <button type="submit" class="btn btn-danger rounded-pill">Yes, Delete</button>
-                    <button type="button" class="btn btn-secondary rounded-pill close-delete-modal" data-dismiss="modal">Cancel</button>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger rounded-pill">Delete</button>
+                    <button type="button" class="btn btn-secondary rounded-pill close-delete-modal">Cancel</button>
                 </div>
             </form>
         </div>
@@ -203,43 +204,7 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .modal-content {
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    /* Custom Styles for the "Create Internship" Button */
-    #openModalBtn {
-        background-color: #007bff;
-        border-color: #007bff;
-        padding: 12px 30px; /* Add padding for a larger button */
-        font-size: 16px;
-        font-weight: 500;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Hover Effect */
-    #openModalBtn:hover {
-        background-color: #0056b3;
-        border-color: #004085;
-        transform: translateY(-2px); /* Adds a subtle "lift" effect */
-    }
-
-    /* Focus Effect */
-    #openModalBtn:focus {
-        box-shadow: 0 0 0 0.25rem rgba(38, 143, 255, 0.5);
-        outline: none;
-    }
-
-    /* Icon in the Button */
-    #openModalBtn i {
-        font-size: 20px; /* Icon size */
-        margin-right: 10px; /* Spacing between icon and text */
-    }
-
+   
     /* Responsive Button */
     @media (max-width: 576px) {
         #openModalBtn {
@@ -283,27 +248,25 @@
 <!-- Styles for Modal -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var modal = document.getElementById("postingModal");
-        var openModalBtn = document.getElementById("openModalBtn");
-        var closeModalBtn = document.querySelector(".close");
-
-        // Open the modal when the button is clicked
-        openModalBtn.onclick = function () {
-            modal.style.display = "flex";
-            modal.setAttribute("aria-hidden", "false");
+        // Create Internship Modal Logic
+        const createModal = document.getElementById("createInternshipModal");
+        const openCreateModalBtn = document.getElementById("openCreateModalBtn");
+        const closeCreateModalBtn = document.querySelector(".close-create-modal");
+    
+        openCreateModalBtn.onclick = function () {
+            createModal.style.display = "flex";
+            createModal.setAttribute("aria-hidden", "false");
         };
-
-        // Close the modal when the 'X' button is clicked
-        closeModalBtn.onclick = function () {
-            modal.style.display = "none";
-            modal.setAttribute("aria-hidden", "true");
+    
+        closeCreateModalBtn.onclick = function () {
+            createModal.style.display = "none";
+            createModal.setAttribute("aria-hidden", "true");
         };
-
-        // Close the modal if user clicks outside of the modal content
+    
         window.onclick = function (event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-                modal.setAttribute("aria-hidden", "true");
+            if (event.target === createModal) {
+                createModal.style.display = "none";
+                createModal.setAttribute("aria-hidden", "true");
             }
         };
 

@@ -167,7 +167,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'psuinterpal@gmail.com'  
-EMAIL_HOST_PASSWORD = 'yjjw tsxg wqfm gkkv'
+EMAIL_HOST_PASSWORD = 'zviy ttlc ymjh klyo'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default session engine

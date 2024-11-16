@@ -90,5 +90,14 @@ urlpatterns = [
     path('admin/organization/<int:id>/edit/', views.admin_edit_organization, name='admin_edit_organization'),
     path('admin/organization/<int:id>/delete/', views.admin_delete_organization, name='admin_delete_organization'),
     
+    path('base/', views.admin_base, name='admin_base'),
+    path('departments/', views.admin_departments, name='admin_departments'),
+    path('advisors/', views.admin_advisors, name='admin_advisors'),
+    path('internship-dates/', views.admin_internship_dates, name='admin_internship_dates'),
+    path('account-approve/', views.admin_account_approve, name='admin_account_approve'),
+    path('account-decline/', views.admin_account_decline, name='admin_account_decline'),
+    path('intern-transactions/', views.admin_intern_transactions, name='admin_intern_transactions'),
+    path('view-internship/', views.admin_view_internship, name='admin_view_internship'),
+    path('confirm-internship/', views.admin_confirm_internship, name='admin_confirm_internship'),
     
 ]

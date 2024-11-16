@@ -136,7 +136,7 @@ def organization_registration(request):
             send_mail(
                 'Your OTP Code',
                 f'Your OTP code is {otp}. It is valid for 10 minutes.',
-                'your-email@gmail.com',
+                'psuinterpal@gmail.com',
                 [company_email],
                 fail_silently=False,
             )
@@ -983,3 +983,39 @@ def admin_delete_organization(request, id):
     organization.delete()
     messages.success(request, 'Organization deleted successfully.')
     return redirect('admin_dashboard')
+
+
+
+# Admin Contents
+
+def admin_base(request):
+    return render(request, 'admin_folder/admin_base.html')
+
+def admin_departments(request):
+    return render(request, 'admin_folder/admin_departments.html')
+
+# Advisors View
+def admin_advisors(request):
+    return render(request, 'admin_folder/admin_advisors.html')
+
+# Internship Dates View
+def admin_internship_dates(request):
+    return render(request, 'admin_folder/admin_internship_dates.html')
+
+# Account Approval Views
+def admin_account_approve(request):
+    return render(request, 'admin_folder/admin_account_approve.html')
+
+def admin_account_decline(request):
+    return render(request, 'admin_folder/admin_account_decline.html')
+
+# Intern Transactions View
+def admin_intern_transactions(request):
+    return render(request, 'admin_folder/admin_intern_transactions.html')
+
+# Internship Procedures Views
+def admin_view_internship(request):
+    return render(request, 'admin_folder/admin_view_internship.html')
+
+def admin_confirm_internship(request):
+    return render(request, 'admin_folder/admin_confirm_internship.html')
