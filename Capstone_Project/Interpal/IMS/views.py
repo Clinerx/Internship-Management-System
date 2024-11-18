@@ -1,7 +1,7 @@
 import random
 from functools import wraps
 from random import randint
-
+from .utils import get_matching_internships  # Importing the function from utils.py
 from django.views.decorators.cache import cache_control
 from django.db.models.functions import TruncMonth
 from django.views.decorators.http import require_POST
@@ -398,12 +398,8 @@ def student_dashboard(request):
     for item in user_data:
         user_counts[item['month'] - 1] = item['count']
 
-    # Recommended internships logic
-    user_applications = Application.objects.filter(student=request.user)
-    applied_internship_ids = user_applications.values_list('internship_id', flat=True)
-
-    # Example filter: recommend internships that the student hasn't applied to
-    recommended_internships = Internship.objects.exclude(id__in=applied_internship_ids).order_by('-created_at')[:5]
+    # Get recommended internships based on the matching algorithm
+    recommended_internships = get_matching_internships(request.user)
 
     # Context for template rendering
     context = {
@@ -764,7 +760,7 @@ def view_application(request, application_id):
     application = get_object_or_404(Application, id=application_id, organization_id=request.session['organization_id'])
 
     # Define the stages for the application process
-    stages = ["Applied", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
+    stages = ["Pending", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
     completed_stages = stages[:stages.index(application.status) + 1]
 
     if request.method == "POST":

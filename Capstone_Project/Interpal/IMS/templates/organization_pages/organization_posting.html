@@ -4,104 +4,105 @@
 {% block content %}
 
 
-<!-- Create Internship Modal -->
-<div id="createInternshipModal" class="modal fade" role="dialog" aria-labelledby="createInternshipTitle" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <span class="close close-create-modal" aria-label="Close modal">&times;</span>
-            <h2 id="createInternshipTitle" class="modal-title text-primary">Create Internship</h2>
-            <form class="internship-form" method="POST">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="row">
-                        <!-- Internship Title & Organization Name -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="internshipTitle" class="font-weight-bold">{{ form.title.label_tag }}</label>
-                                {{ form.title }}
-                            </div>
-                            <div class="form-group">
-                                <label for="organizationName" class="font-weight-bold">{{ form.organization_name.label_tag }}</label>
-                                {{ form.organization_name }}
-                            </div>
-                        </div>
+<!-- Button to open the modal -->
 
-                        <!-- Location & Description -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="location" class="font-weight-bold">{{ form.location.label_tag }}</label>
-                                {{ form.location }}
-                            </div>
-                            <div class="form-group">
-                                <label for="description" class="font-weight-bold">{{ form.description.label_tag }}</label>
-                                {{ form.description }}
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <!-- Requirements & Application Process -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="requirements" class="font-weight-bold">{{ form.requirements.label_tag }}</label>
-                                {{ form.requirements }}
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="applicationProcess" class="font-weight-bold">{{ form.application_process.label_tag }}</label>
-                                {{ form.application_process }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="maxApplicants" class="font-weight-bold">{{ form.max_applicants.label_tag }}</label>
-                        {{ form.max_applicants }}
-                    </div>
+<!-- Modal Structure -->
+<div id="postingModal" class="modal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-content">
+        <span class="close" aria-label="Close modal">&times;</span>
+        <h2 id="modalTitle">Posting Internship</h2>
+        <form class="internship-form" method="POST">
+            {% csrf_token %}
+            <div class="form-column">
+                <div class="form-group" >
+                    <label for="internshipTitle">{{ form.title.label_tag }}</label>
+                    {{ form.title }}
                 </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary rounded-pill">Submit Internship</button>
+                <div class="form-group">
+                    <label for="organizationName">{{ form.organization_name.label_tag }}</label>
+                    {{ form.organization_name }}
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="location">{{ form.location.label_tag }}</label>
+                    {{ form.location }}
+                </div>
+                <div class="form-group">
+                    <label for="description">{{ form.description.label_tag }}</label>
+                    {{ form.description }}
+                </div>
+            </div>
+
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="requirements">{{ form.requirements.label_tag }}</label>
+                    {{ form.requirements }}
+                </div>
+                <div class="form-group">
+                    <label for="applicationProcess">{{ form.application_process.label_tag }}</label>
+                    {{ form.application_process }}
+                </div>
+            </div>
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="requiredSkill">{{ form.required_skills.label_tag }}</label>
+                    {{ form.required_skills }}
+                </div>
+            </div>
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="desiredExperience">{{ form.desired_experience.label_tag }}</label>
+                    {{ form.desired_experience }}
+                </div>
+            </div>
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="maxApplicants">{{ form.max_applicants.label_tag }}</label>
+                    {{ form.max_applicants }}
+                </div>
+            </div>
+            
+            <div class="form-button">
+                <button type="submit" class="btn btn-primary">Submit Posting</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<button id="openCreateModalBtn" class="btn btn-primary">Create Internship</button>
+ <!-- Pagination controls -->
+ 
 
-
-<!-- Pagination controls -->
-<div class="pagination d-flex justify-content-center my-4">
-    <span class="step-links">
-        {% if internships.has_previous %}
-            <a href="?page=1" class="btn btn-outline-primary btn-sm shadow-sm mx-1 rounded-pill">&laquo; First</a>
-            <a href="?page={{ internships.previous_page_number }}" class="btn btn-outline-primary btn-sm shadow-sm mx-1 rounded-pill">Previous</a>
-        {% endif %}
-
-        <span class="current">
-            <span class="font-weight-bold">Page {{ internships.number }} of {{ internships.paginator.num_pages }}</span>
-        </span>
-
-        {% if internships.has_next %}
-            <a href="?page={{ internships.next_page_number }}" class="btn btn-outline-primary btn-sm shadow-sm mx-1 rounded-pill">Next</a>
-            <a href="?page={{ internships.paginator.num_pages }}" class="btn btn-outline-primary btn-sm shadow-sm mx-1 rounded-pill">Last &raquo;</a>
-        {% endif %}
-    </span>
-</div>
-
-<hr class="my-5">
-
+<hr>
 
 <section class="internship-postings-section">
-    <h2 class="text-center text-primary mb-4">Posted Internships</h2>
-    <button id="openModalBtn" class="btn btn-primary mb-3 shadow-lg d-flex align-items-center justify-content-center">
-        <i class="bx bx-plus-circle mr-2"></i> Create Internship
-    </button>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover table-bordered internship-table">
-            <thead class="thead-light">
+    <h2>Posted Internships</h2>
+    <div class="btn_page_create">
+        <button id="openModalBtn" class="btn btn-primary">Create Internship</button>
+        <div class="pagination">
+            <span class="step-links">
+                {% if internships.has_previous %}
+                    <a href="?page=1">&laquo; First</a>
+                    <a href="?page={{ internships.previous_page_number }}">Previous</a>
+                {% endif %}
+        
+                <span class="current">
+                    Page {{ internships.number }} of {{ internships.paginator.num_pages }}
+                </span>
+        
+                {% if internships.has_next %}
+                    <a href="?page={{ internships.next_page_number }}">Next</a>
+                    <a href="?page={{ internships.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    
+    <div class="table-responsive posting-section">
+        <table class="table table-bordered internship-table">
+            <thead>
                 <tr>
                     <th>No.</th>
                     <th>Organization</th>
@@ -116,29 +117,31 @@
                 {% for internship in internships %}
                     <tr>
                         <td>{{ start_number|add:forloop.counter }}</td>
+
                         <!-- Organization Picture and Name -->
                         <td class="organizationProfile">
-                            <div class="d-flex align-items-center">
-                                <div class="ml-2">
-                                    <p class="mb-0 text-muted">{{ internship.organization.company_name }}</p>
-                                </div>
+                            <div class="org_image_name">
+                                <p>{{ internship.organization.company_name }}</p>
                             </div>
                         </td>
+
                         <!-- Internship Details -->
                         <td>{{ internship.title }}</td>
                         <td>{{ internship.location }}</td>
-                        <td>{{ internship.max_applicants }}</td>
+                        <th>{{ internship.max_applicants}}</th>
                         <td>{{ internship.created_at|date:"F d, Y" }}</td>
+
                         <!-- Edit and Delete Buttons -->
                         <td class="internship-buttons">
-                            <a href="{% url 'view_internship' internship.id %}" class="btn btn-info btn-sm ">View</a>
-                            <a href="{% url 'edit_internship' internship.id %}" class="btn btn-primary btn-sm ">Edit</a>
-                            <button class="btn btn-danger btn-sm  open-delete-modal" data-id="{{ internship.id }}" data-title="{{ internship.title }}">Delete</button>
+                            <a href="{% url 'view_internship' internship.id %}" class="btn btn-info">View</a>
+                            <a href="{% url 'edit_internship' internship.id %}" class="btn btn-primary">Edit</a>
+                            <button class="btn btn-danger open-delete-modal" data-id="{{ internship.id }}" data-title="{{ internship.title }}">Delete</button>
                         </td>
+                        
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center text-muted">No internships available at this time.</td>
+                        <td colspan="5" class="text-center">No internships available at this time.</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -147,126 +150,382 @@
 </section>
 
 
-
-<!-- Notification Container -->
-<div id="notification" class="alert alert-success alert-dismissible fade show" role="alert" aria-live="assertive" style="display: none;">
-    <i class="bx bx-check-circle"></i> Internship Posted Successfully!
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-
-
-<div id="deleteInternshipModal" class="modal fade" role="dialog" aria-labelledby="deleteInternshipTitle" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <span class="close close-delete-modal" aria-label="Close modal">&times;</span>
-            <h2 id="deleteInternshipTitle" class="modal-title text-danger">Delete Internship</h2>
-            <p>Are you sure you want to delete the internship <strong id="internshipTitleToDelete"></strong>?</p>
-            <form id="deleteInternshipForm" method="POST" action="">
-                {% csrf_token %}
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger rounded-pill">Delete</button>
-                    <button type="button" class="btn btn-secondary rounded-pill close-delete-modal">Cancel</button>
-                </div>
-            </form>
+        <!-- Notification Container -->
+    <div id="notification" class="alert alert-success" role="alert" aria-live="assertive" style="display: none;">
+        <div class="notification-icon">
+            <i class="bx bx-check-circle"></i>
+        </div>
+        <div class="notification-message">
+                Internship Posted Successfully!
         </div>
     </div>
-</div>
 
-<!-- Custom Styling -->
+
+
+
+</section>
+
 <style>
-    /* Custom Styles */
-    .btn-primary {
-        background-color: #007bff;
+    .internship-postings-section{
+        padding: 130px 100px;
+    }
+    .internship-postings-section h2{
+        text-align: center;
+    }
+    .btn_page_create{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    /* General Modal Styling */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #ffffff;
+        padding: 20px;
+        margin-top: 95%;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        max-width: 600px;
+        width: 90%;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-content h2 {
+        font-size: 1.5rem;
+        color: #333333;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .modal-content .close {
+        color: #666666;
+        font-size: 1.5rem;
+        font-weight: bold;
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+
+    .modal-content .close:hover {
+        color: #ff5e57;
+    }
+
+    /* Form Styling */
+    .internship-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .internship-form .form-column {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;  /* Ensure the group takes the full width */
+    }
+
+    .form-group label { 
+        font-size: 1rem;
+        font-weight: bold;
+        color: #555555;
+        margin-bottom: 5px;
+    }
+
+    .form-column .form-group .form-input{
+        width: 100%;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 10px;
+        border: 1px solid #0d213f;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease-in-out;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
         border-color: #007bff;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
+        outline: none;
     }
 
-    .btn-primary:hover {
+    .form-button button {
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+    .form-button button:hover {
         background-color: #0056b3;
-        border-color: #004085;
     }
 
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
+    /* Table Styling */
+    /* General Table Styling */
+    .table-responsive {
+        overflow-x: auto;
+        margin-top: 20px;
+        border: 1px solid #dddddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+        padding: 15px;
     }
 
-    .btn-danger:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
+    /* Table Structure */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1rem;
+        color: #333333;
+        text-align: left;
     }
 
-    .organization-image {
-        border: 2px solid #ddd;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-   
-    /* Responsive Button */
-    @media (max-width: 576px) {
-        #openModalBtn {
-            width: 100%; /* Makes the button full-width on small screens */
-        }
-    }
-
-
-    /* Main Section Styles */
-    .internship-postings-section {
-        padding-inline: 15px; /* Ensures the content is not too wide */
-        max-width: 1200px; /* Max width for larger screens */
-        margin: 0 auto; /* Centering content */
-        margin-bottom: 30vh;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
+    .table thead {
+        background-color: #007bff;
+        color: #ffffff;
+        text-transform: uppercase;
+        font-size: 0.9rem;
         font-weight: bold;
     }
 
-    .table-striped tbody tr:nth-of-type(odd) {
-        background-color: #f2f2f2;
+    .table th,
+    .table td {
+        padding: 15px;
+        vertical-align: middle;
+        border-bottom: 1px solid #eeeeee;
     }
 
-    .table-hover tbody tr:hover {
-        background-color: #e9ecef;
-        cursor: pointer;
+    .table tbody tr {
+        transition: background-color 0.3s ease-in-out;
     }
 
-    .pagination {
-        font-size: 14px;
+    .table tbody tr:hover {
+        background-color: #f9f9f9;
     }
 
-    .form-group input, .form-group select, .form-group textarea {
-        border-radius: 10px;
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        /* Modal */
+        .btn-info{
+            padding-inline: 50px;
+            margin-bottom: 5px;
+
+        }
+        .internship-postings-section{
+            padding: 0;
+            margin-top: 100px;
+        }
+        
+        .modal-content {
+            margin-top: 0;
+            width: 95%;
+            max-width: 100%;
+        }
+
+        /* Internship Table */
+        .table-responsive {
+            padding: 10px;
+        }
+
+        .table th,
+        .table td {
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+
+        .btn_page_create {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        /* Form Columns */
+        .internship-form .form-column {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-group {
+            width: 100%;
+        }
+
+        .form-button button {
+            width: 100%;
+        }
     }
+
+    @media (max-width: 480px) {
+        /* Header Font Size */
+        internship-buttons a{
+            padding-inline: 100%;
+
+        }
+        .internship-postings-section h2{
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        .btn_page_create{
+            padding-inline: 10px;
+            display: flex;
+            gap: 15px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-content h2 {
+            font-size: 1.25rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+
+        .table th,
+        .table td {
+            font-size: 0.85rem;
+        }
+
+        .form-button button {
+            padding: 8px 15px;
+        }
+    }
+/* Delete Confirmation Modal */
+#deleteModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+#deleteModal .modal-content {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    text-align: center;
+}
+
+#deleteModal .modal-content p {
+    margin: 20px 0;
+    color: #555555;
+}
+
+/* Pagination Styling */
+.pagination .step-links a {
+    text-decoration: none;
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: 1px solid #007bff;
+    color: #007bff;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.pagination .step-links a:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.pagination .step-links .current {
+    padding: 8px 12px;
+    margin: 0 5px;
+    color: #ffffff;
+    background-color: #007bff;
+    border-radius: 5px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
 </style>
-
-
 <!-- Styles for Modal -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Create Internship Modal Logic
-        const createModal = document.getElementById("createInternshipModal");
-        const openCreateModalBtn = document.getElementById("openCreateModalBtn");
-        const closeCreateModalBtn = document.querySelector(".close-create-modal");
-    
-        openCreateModalBtn.onclick = function () {
-            createModal.style.display = "flex";
-            createModal.setAttribute("aria-hidden", "false");
+        var modal = document.getElementById("postingModal");
+        var openModalBtn = document.getElementById("openModalBtn");
+        var closeModalBtn = document.querySelector(".close");
+
+        // Open the modal when the button is clicked
+        openModalBtn.onclick = function () {
+            modal.style.display = "flex";
+            modal.setAttribute("aria-hidden", "false");
         };
-    
-        closeCreateModalBtn.onclick = function () {
-            createModal.style.display = "none";
-            createModal.setAttribute("aria-hidden", "true");
+
+        // Close the modal when the 'X' button is clicked
+        closeModalBtn.onclick = function () {
+            modal.style.display = "none";
+            modal.setAttribute("aria-hidden", "true");
         };
-    
+
+        // Close the modal if user clicks outside of the modal content
         window.onclick = function (event) {
-            if (event.target === createModal) {
-                createModal.style.display = "none";
-                createModal.setAttribute("aria-hidden", "true");
+            if (event.target == modal) {
+                modal.style.display = "none";
+                modal.setAttribute("aria-hidden", "true");
             }
         };
 
@@ -322,6 +581,10 @@
             }
         };
     });
+
+
+
+    
 </script>
 
 {% endblock content %}

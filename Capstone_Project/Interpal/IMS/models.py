@@ -30,7 +30,6 @@ class CustomUserManager(BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
-
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(verbose_name='email', max_length=60, unique=True)
     first_name = models.CharField(max_length=30)
@@ -50,15 +49,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     reset_otp = models.IntegerField(blank=True, null=True)
     cor_picture = CloudinaryField('image', blank=True, null=True)
     profile_picture = CloudinaryField('image', blank=True, null=True)
-
-    # One-to-one relationship with Organization (optional)
     organization = models.OneToOneField(
         'Organization', 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True,
-        related_name='user'  # Reverse relation name
+        related_name='user'
     )
+    skills = models.TextField(help_text="Comma-separated skills", blank=True, null=True)
+    experience = models.IntegerField(help_text="Years of experience", default=0)
 
     objects = CustomUserManager()
 
@@ -68,11 +67,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
-    def has_perm(self, perm, obj=None):
-        return self.is_admin
+    def skills_list(self):
+        """Return a list of skills."""
+        if self.skills:
+            return [skill.strip().lower() for skill in self.skills.split(",") if skill.strip()]
+        return []  # Return an empty list if no skills are provided
 
-    def has_module_perms(self, app_label):
-        return True
 
 
 class UserVisit(models.Model):
@@ -137,11 +137,10 @@ class Organization(models.Model):
     def __str__(self):
         return self.company_name
 
-
 class Internship(models.Model):
     title = models.CharField(max_length=200, null=True)
     organization = models.ForeignKey(
-        Organization, 
+        'Organization', 
         on_delete=models.SET_NULL, 
         null=True, 
         related_name='internships'
@@ -152,12 +151,21 @@ class Internship(models.Model):
     application_process = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     max_applicants = models.PositiveIntegerField(default=1) 
+    required_skills = models.TextField(blank=True, null=True)
+    desired_experience = models.IntegerField(help_text="Years of experience", default=0)
 
     def __str__(self):
         return self.title
 
     def get_applications(self):
         return self.applications.all()
+
+    def required_skills_list(self):
+        """Return a list of required skills, ensuring skills is not None."""
+        if self.required_skills:
+            return [skill.strip().lower() for skill in self.required_skills.split(",") if skill.strip()]
+        return []  # Return an empty list if no skills are provided
+
     
 class Application(models.Model):
     STATUS_CHOICES = [

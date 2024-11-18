@@ -149,7 +149,9 @@
         .hori-selector .right {
             right: -25px;
             
+            
         }
+        
         .hori-selector .left {
             left: -25px;
         }
@@ -160,7 +162,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background-color: white;
+            background-color: var(--secondary-color);
         }
         .hori-selector .right:before {
             bottom: 0;
@@ -380,7 +382,15 @@
                 transition: transform 0.3s ease-in-out;
             }
 
-        
+            .img_icon img {
+                max-width: 100%; /* Ensures the image is responsive */
+                height: auto; /* Maintains the aspect ratio */
+                object-fit: contain; /* Ensures the entire image fits within the container */
+                width: 80px; /* Set a specific width if needed */
+                filter: brightness(250%) drop-shadow(4px 0 0 rgba(0, 0, 0, 0.6)); /* Combined filters */
+                height: 10%; 
+                
+            }
                             
 
     </style>
@@ -399,14 +409,19 @@
       <nav class="navbar navbar-expand-md navbar-mainbg fixed-top custom-navbar">
         <div class="img_icon">
             <img src="{% static 'img/dienginside.png' %}" alt="Logo" class="navbar-logo-img">            
-         </div>
+        </div>
         <a class="navbar-brand navbar-logo" href="{% url 'organization_dashboard' %}"><span>I</span>nternPal<span>.</span></a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <i class="fas fa-bars" style="color: #0d213f;"></i>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
-                <div class="hori-selector"><div class="left"></div><div class="right"></div></div>
+                {% if request.resolver_match.url_name in 'organization_dashboard organization_post organization_applicant organization_interns about_us' %}
+                    <div class="hori-selector">
+                        <div class="left"></div>
+                        <div class="right"></div>
+                    </div>
+                {% endif %}
                 
                 <li class="nav-item {% if request.resolver_match.url_name == 'organization_dashboard' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'organization_dashboard' %}"><i class="bx bx-bar-chart-alt icon"></i>Dashboard</a>
@@ -414,17 +429,16 @@
                 <li class="nav-item {% if request.resolver_match.url_name == 'organization_post' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'organization_post' %}"><i class="bx bx-message-square-edit icon"></i>Post</a>
                 </li>
-                <li class="nav-item {% if request.resolver_match.url_name == 'organization_interns' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'organization_interns' %}"><i class="bx bx-group icon"></i>Interns</a>
-                </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'organization_applicant' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'organization_applicant' %}"><i class="bx bx-folder icon"></i>Applicants</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'organization_interns' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'organization_interns' %}"><i class="bx bx-group icon"></i>Interns</a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'about_us' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'about_us' %}"><i class="bx bx-info-circle icon"></i>About Us</a>
                 </li>
                 <div class="dark-logout-btn">
-                    
                 </div>
                 <li class="nav-item">
                     <button class="nav-links" onclick="toggleDarkMode()">
@@ -645,6 +659,7 @@ function openLogoutModal() {
     // Show the modal when the logout button is clicked
     $('#logoutModal').modal('show');
 }
+
 
     </script>
 </body>

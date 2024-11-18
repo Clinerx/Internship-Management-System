@@ -1,13 +1,17 @@
-
 {% extends 'student_pages/student_base.html' %}
 
 {% block title %}Student || Organizations Internships{% endblock %}
 {% block header %}Internships{% endblock %}
 {% block content %}
 
-
+<h1>Choose Internships that you prefer</h1>
 <div class="search-bar-container">
-    <input type="text" id="search-bar" placeholder="Search for internships..." oninput="filterInternships()">
+    <input type="text" id="search-bar" placeholder="Search for internships..." oninput="showRecommendations()">
+    <button id="search-btn" onclick="filterInternships()">Search</button>
+    <!-- Recommendations Dropdown -->
+    <div id="recommendations" class="recommendations-dropdown">
+        <ul id="recommendation-list"></ul>
+    </div>
 </div>
 
 <!-- Pagination Top -->
@@ -71,59 +75,224 @@
 
 
 <style>
+    /* Page fade-in animation */
+@keyframes fadeInPage {
+    from {
+        opacity: 0;
+        transform: translateY(20px); /* Slide slightly upwards */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body.fade-in {
+    animation: fadeInPage 0.8s ease-in-out;
+}
+
+    /* Styling for the H1 Heading */
+h1 {
+    font-size: 2.5em; /* Larger, more prominent font size */
+    font-weight: bold; /* Make it stand out */
+    color: #0056b3; /* A strong, professional color */
+    text-align: center; /* Center align for visual impact */
+    margin-bottom: 20px; /* Add space below */
+    margin-top: 50px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Add subtle animation for entrance */
+h1 {
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
     /* General Styles */
-    .dashboard-header {
-        display: flex;
-        justify-content: flex-end;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-    }
+.dashboard-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
 
-    .header-icons i {
-        font-size: 20px;
-        margin-left: 15px;
-        color: #666;
-    }
+.header-icons i {
+    font-size: 20px;
+    margin-left: 15px;
+    color: #666;
+}
 
+.search-bar-container {
+    text-align: center;
+    margin: 15px 0;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: 8px; /* Space between input and button */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+#search-bar {
+    padding: 8px;
+    width: 90%;
+    max-width: 500px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#search-btn {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 40px; /* Consistent height */
+    font-size: 16px;
+}
+
+#search-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Recommendations Dropdown */
+.recommendations-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 500px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+    opacity: 0; /* For animation */
+    transform-origin: top;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.recommendations-dropdown.show {
+    display: block;
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+}
+
+.recommendation-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.recommendation-item:hover {
+    background-color: #f1f1f1;
+}
+
+/* Pagination */
+.pagination-container {
+    text-align: center;
+    margin: 15px 0;
+    font-size: 0.9em;
+}
+
+.pagination-link {
+    margin: 0 5px;
+    padding: 6px 10px;
+    color: #007bff;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.pagination-link:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Internship Card Styles */
+.internship-listings {
+    padding: 20px;
+    font-size: 0.95em;
+}
+
+.internship-listings h2 {
+    font-size: 1.5em;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
     .search-bar-container {
-        text-align: center;
-        margin: 15px 0;
+        flex-direction: row; /* Ensure horizontal alignment */
+        justify-content: space-between;
+        align-items: center; /* Align vertically */
+        padding: 0 10px;
     }
 
     #search-bar {
-        padding: 8px;
-        width: 90%;
-        max-width: 500px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        width: 70%; /* Reduced width for smaller screens */
+        font-size: 14px;
     }
 
-    .pagination-container {
-        text-align: center;
-        margin: 15px 0;
-        font-size: 0.9em;
+    #search-btn {
+        width: 25%; /* Make the button match the input proportionally */
+        padding: 0; /* Remove extra padding */
+        height: 40px; /* Ensure consistent height */
+        font-size: 14px; /* Adjust font size for smaller screens */
     }
 
-    .pagination-link {
-        margin: 0 5px;
-        padding: 6px 10px;
-        color: #007bff;
-        text-decoration: none;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        transition: background-color 0.2s;
+    .recommendations-dropdown {
+        max-width: 90%; /* Ensure dropdown fits within screen width */
+    }
+}
+
+@media (max-width: 480px) {
+    h1{
+        font-size: 2em;
+    }
+    .search-bar-container {
+        gap: 5px; /* Reduce gap between input and button */
     }
 
-    .pagination-link:hover {
-        background-color: #007bff;
-        color: #fff;
+    #search-bar {
+        width: 65%; /* Further reduce width for smaller screens */
+        font-size: 14px;
     }
 
-    /* Internship Card Styles */
-    .internship-listings {
-        padding: 20px;
-        font-size: 0.95em;
+    #search-btn {
+        width: 30%; /* Adjust button width proportionally */
+        height: 30px; /* Consistent height */
+        font-size: 14px;
+        display: none;
     }
+
+    .recommendation-item {
+        font-size: 12px;
+    }
+
+    .recommendations-dropdown {
+        width: 90%; /* Adjust dropdown to fit mobile screen */
+        left: 50%; /* Center within screen */
+        top: 100%;
+        transform: none; /* Remove translateX for mobile */
+        text-align: left;
+    }
+}
 
     .internship-cards {
         display: grid;
@@ -244,24 +413,63 @@
         {% endif %}
     });
 
-    // Internship Filter Functionality
+     // Function to show search recommendations based on internships
+     function showRecommendations() {
+        const input = document.getElementById("search-bar").value.toLowerCase();
+        const recommendationsContainer = document.getElementById("recommendations");
+        const recommendationList = document.getElementById("recommendation-list");
+        const internshipCards = document.getElementsByClassName("internship-card");
+
+        recommendationList.innerHTML = ""; // Clear previous recommendations
+
+        if (input.length > 0) {
+            recommendationsContainer.classList.add("show");
+
+            for (let i = 0; i < internshipCards.length; i++) {
+                const title = internshipCards[i]
+                    .getElementsByClassName("card-title")[0]
+                    .innerText.toLowerCase();
+
+                // If title matches input, add to recommendations
+                if (title.includes(input)) {
+                    const listItem = document.createElement("li");
+                    listItem.classList.add("recommendation-item");
+                    listItem.innerText = internshipCards[i]
+                        .getElementsByClassName("card-title")[0]
+                        .innerText;
+                    listItem.onclick = function () {
+                        document.getElementById("search-bar").value = this.innerText;
+                        filterInternships();
+                        recommendationsContainer.classList.remove("show");
+                    };
+                    recommendationList.appendChild(listItem);
+                }
+            }
+        } else {
+            recommendationsContainer.classList.remove("show");
+        }
+    }
+
     function filterInternships() {
-        var input, filter, cards, title, i;
-        input = document.getElementById("search-bar");
-        filter = input.value.toUpperCase();
-        cards = document.getElementsByClassName("internship-posting");
-        
-        for (i = 0; i < cards.length; i++) {
-            title = cards[i].getElementsByClassName("card-title")[0];
+        const input = document.getElementById("search-bar").value.toUpperCase();
+        const cards = document.getElementsByClassName("internship-card");
+
+        for (let i = 0; i < cards.length; i++) {
+            const title = cards[i].getElementsByClassName("card-title")[0];
             if (title) {
-                if (title.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                if (title.innerHTML.toUpperCase().includes(input)) {
                     cards[i].style.display = "";
                 } else {
                     cards[i].style.display = "none";
                 }
-            }       
+            }
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.classList.add('fade-in');
+    });
+    
 </script>
 
 {% endblock %}

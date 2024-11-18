@@ -28,15 +28,27 @@
                     {{ form.requirements }}
                 </div>
             </div>
-
             <div class="form_column">
+                <div class="form_group">
+                    <label for="requiredSkill">{{ form.required_skills.label_tag }}</label>
+                    {{ form.required_skills }}
+                </div>
                 <div class="form_group">
                     <label for="applicationProcess">{{ form.application_process.label_tag }}</label>
                     {{ form.application_process }}
+                </div>
+            </div>  
+
+            <div class="form_column">
+                <div class="form_group">
+                    <label for="desiredExperience">{{ form.desired_experience.label_tag }}</label>
+                    {{ form.desired_experience }}
                     <label for="maxApplicants">{{ form.max_applicants.label_tag }}</label>
                     {{ form.max_applicants }}
                 </div>
             </div>
+          
+        
 
 
             <div class="form_button">

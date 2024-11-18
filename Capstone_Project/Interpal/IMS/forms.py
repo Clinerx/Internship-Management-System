@@ -41,8 +41,8 @@ class OrganizationRegistrationForm(forms.ModelForm):
 class InternshipForm(forms.ModelForm):
     class Meta:
         model = Internship
-        fields = ['title', 'location', 'description', 'requirements', 'application_process', 'max_applicants']
-        
+        fields = ['title', 'location', 'description', 'requirements', 'application_process', 'max_applicants', 'required_skills', 'desired_experience']
+
     def __init__(self, *args, **kwargs):
         super(InternshipForm, self).__init__(*args, **kwargs)
         self.fields['title'].widget.attrs['placeholder'] = 'e.g., Software Engineering Intern'
@@ -50,10 +50,25 @@ class InternshipForm(forms.ModelForm):
         self.fields['description'].widget.attrs['placeholder'] = 'e.g., Assist in software development...'
         self.fields['requirements'].widget.attrs['placeholder'] = 'e.g., Python, teamwork, communication skills'
         self.fields['application_process'].widget.attrs['placeholder'] = 'e.g., Send resume and cover letter to email@example.com'
-        
+        self.fields['required_skills'].widget.attrs['placeholder'] = 'e.g., Python, JavaScript, SQL'
+        self.fields['desired_experience'].widget.attrs['placeholder'] = 'e.g., 1-2 years'
+
         
         
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['profile_picture', 'first_name', 'last_name', 'email', 'phone_number', 'address', 'course', 'college']
+        fields = ['profile_picture', 'first_name', 'last_name', 'email', 'phone_number', 'address', 'course', 'college', 'skills', 'experience']
+
+    # You can add custom validations if needed
+    def clean_skills(self):
+        skills = self.cleaned_data.get('skills')
+        if skills:
+            skills = [skill.strip() for skill in skills.split(',') if skill.strip()]
+        return ", ".join(skills)  # Ensure skills are stored in a standardized format
+
+    def clean_experience(self):
+        experience = self.cleaned_data.get('experience')
+        if experience < 0:
+            raise forms.ValidationError("Experience cannot be negative.")
+        return experience
