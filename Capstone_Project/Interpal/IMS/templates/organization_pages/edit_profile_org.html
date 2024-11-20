@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Change Profile</title>
+    <title>Edit Organization Profile</title>
     <link rel="stylesheet" href="{% static 'blob.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-
 </head>
 <body>
     <div class="blob_animation">
@@ -15,21 +14,27 @@
         <div class="blob blob3"></div>
     </div>
     <div class="edit-profile-container">
-        <h2 class="edit-profile-title">Edit Profile</h2>
+        <h2 class="edit-profile-title">Edit Organization Profile</h2>
         <form method="POST" enctype="multipart/form-data" class="edit-profile-form">
             {% csrf_token %}
             
             <div class="form-group">
-                
-                {% if user.profile_picture.url %}
+                <label for="profile_picture">Profile Picture</label>
+                {% if organization.profile_picture %}
                     <div class="profile-picture-preview">
-                        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-img">
+                        <img src="{{ organization.profile_picture.url }}" alt="Profile Picture" class="profile-img">
                     </div>
                 {% endif %}
-                
                 {{ form.profile_picture }}
             </div>
-            
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="company_name">Company Name</label>
+                    {{ form.company_name }}
+                </div>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="first_name">First Name</label>
@@ -40,50 +45,17 @@
                     {{ form.last_name }}
                 </div>
             </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="phone_number">Phone Number</label>
-                    {{ form.phone_number }}
-                </div>
-                <div class="form-group">
-                    <label for="address">Address</label>
-                    {{ form.address }}
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="course">Course</label>
-                    {{ form.course }}
-                </div>
-                <div class="form-group">
-                    <label for="college">College</label>
-                    {{ form.college }}
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="skills">Skills (comma-separated)</label>
-                {{ form.skills }}
-            </div>
-            
-            <div class="form-group">
-                <label for="experience">Experience (in years)</label>
-                {{ form.experience }}
-            </div>
-            
+
             <button type="submit" class="save-changes-btn">Save Changes</button>
         </form>
     </div>
-    
-    
+
     <style>
         /* General Font Styling */
         body {
             font-family: 'Poppins', sans-serif;
         }
-        
+
         /* General Container Styling */
         .edit-profile-container {
             max-width: 700px;
@@ -94,7 +66,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Title Styling */
         .edit-profile-title {
             text-align: center;
@@ -103,38 +75,38 @@
             color: #2c3e50;
             margin-bottom: 20px;
         }
-        
+
         /* Form Styling */
         .edit-profile-form {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        
+
         /* Form Row for Side-by-Side Fields */
         .form-row {
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
         }
-        
+
         .form-row .form-group {
             flex: 1;
         }
-        
+
         /* Form Group Styling */
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        
+
         .form-group label {
             font-size: 14px;
             color: #34495e;
             font-weight: bold;
         }
-        
+
         .form-group input,
         .form-group textarea,
         .form-group select {
@@ -144,7 +116,7 @@
             border-radius: 6px;
             transition: border-color 0.3s ease;
         }
-        
+
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
@@ -152,13 +124,13 @@
             outline: none;
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
         }
-        
+
         /* Profile Picture Styling */
         .profile-picture-preview {
             margin-bottom: 15px;
             text-align: center;
         }
-        
+
         .profile-picture-preview img.profile-img {
             width: 120px;
             height: 120px;
@@ -167,7 +139,7 @@
             border: 2px solid #3498db;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Save Changes Button */
         .save-changes-btn {
             padding: 12px;
@@ -180,25 +152,22 @@
             transition: background-color 0.3s ease;
             font-weight: bold;
         }
-        
+
         .save-changes-btn:hover {
             background-color: #2980b9;
         }
-        
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
             }
-        
+
             .save-changes-btn {
                 font-size: 14px;
                 padding: 10px;
             }
         }
-        
-        
     </style>
-    
 </body>
 </html>

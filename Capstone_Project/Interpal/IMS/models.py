@@ -57,7 +57,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         related_name='user'
     )
     skills = models.TextField(help_text="Comma-separated skills", blank=True, null=True)
-    experience = models.IntegerField(help_text="Years of experience", default=0)
+    experience = models.PositiveIntegerField(default=0)
 
     objects = CustomUserManager()
 
@@ -69,9 +69,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def skills_list(self):
         """Return a list of skills."""
-        if self.skills:
-            return [skill.strip().lower() for skill in self.skills.split(",") if skill.strip()]
-        return []  # Return an empty list if no skills are provided
+        return [skill.strip().lower() for skill in (self.skills or "").split(",") if skill.strip()]
+
 
 
 
@@ -121,6 +120,7 @@ class Organization(models.Model):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    profile_picture = CloudinaryField('image', blank=True, null=True)
 
     objects = OrganizationManager()
 
@@ -161,10 +161,9 @@ class Internship(models.Model):
         return self.applications.all()
 
     def required_skills_list(self):
-        """Return a list of required skills, ensuring skills is not None."""
-        if self.required_skills:
-            return [skill.strip().lower() for skill in self.required_skills.split(",") if skill.strip()]
-        return []  # Return an empty list if no skills are provided
+        """Return a list of required skills."""
+        return [skill.strip().lower() for skill in (self.requirements or "").split(",") if skill.strip()]
+
 
     
 class Application(models.Model):
@@ -220,3 +219,19 @@ class Application(models.Model):
         if self.student.profile_picture:
             return self.student.profile_picture.url
         return None
+    
+    
+class OrganizationIntern(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    student = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    internship = models.ForeignKey(Internship, on_delete=models.CASCADE, null=True) 
+    hire_date = models.DateField(auto_now_add=True)
+    start_date = models.DateField(null=True)  # Specifies when the internship starts
+    end_date = models.DateField(null=True)  # Specifies when the internship ends
+
+    def __str__(self):
+        return (
+            f"{self.student.first_name} {self.student.last_name} - "
+            f"{self.internship.title} at {self.organization.name} "
+            f"from {self.start_date} to {self.end_date}"
+        )

@@ -58,7 +58,7 @@ class InternshipForm(forms.ModelForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['profile_picture', 'first_name', 'last_name', 'email', 'phone_number', 'address', 'course', 'college', 'skills', 'experience']
+        fields = ['profile_picture', 'first_name', 'last_name', 'phone_number', 'address', 'course', 'college', 'skills', 'experience']
 
     # You can add custom validations if needed
     def clean_skills(self):
@@ -72,3 +72,8 @@ class ProfileForm(forms.ModelForm):
         if experience < 0:
             raise forms.ValidationError("Experience cannot be negative.")
         return experience
+    
+class ProfileFormOrg(forms.ModelForm):
+    class Meta:
+        model = Organization
+        fields = ['profile_picture', 'first_name', 'last_name', 'company_name',]

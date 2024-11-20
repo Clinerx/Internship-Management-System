@@ -86,7 +86,7 @@
                         <td>{{ application.applied_at|date:"F d, Y" }}</td>
                         <td>
                             <span class="badge 
-                                {% if application.status == 'Approved' %}bg-success
+                                {% if application.status == 'Hired' %}bg-success
                                 {% elif application.status == 'Rejected' %}bg-danger
                                 {% else %}bg-warning{% endif %}">
                                 {{ application.status|default:"In Progress" }}
@@ -220,13 +220,13 @@
 }
 .table th, .table td {
     padding: 12px;
-    vertical-align: middle;
     text-align: center;
     font-weight: 500;
 }
 .table thead {
     background-color: #4e73df;
     color: white;
+    text-align: center;
 }
 .table tbody tr:nth-child(odd) {
     background-color: #f7f8fa;

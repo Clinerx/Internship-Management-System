@@ -2,6 +2,7 @@
 
 {% block title %}Student || Organizations Internships{% endblock %}
 {% block header %}Internships{% endblock %}
+{% load static %}
 {% block content %}
 
 <h1>Choose Internships that you prefer</h1>
@@ -34,14 +35,13 @@
         {% for internship in internships %}
             <div class="internship-card {% if internship.max_applicants == 0 %}inactive-card{% endif %}">
                 <div class="card-header">
-                    <img src="" alt="" class="org-img">
+                    <img src="{% if internship.org.profile_picture %}{{ internship.org.profile_picture.url }}{% else %}{% static 'img/default_profile.jpg' %}{% endif %}"  alt="" class="org-img">
                     <div class="org-info">
                         <p class="org-name">{{ internship.organization.company_name }}</p>
                     </div>
                 </div>
                 <div class="card-content">
                     <h3 class="card-title">{{ internship.title }}</h3>
-                    <p><strong>Organization:</strong> {{ internship.organization.company_name }}</p>
                     <p><strong>Location:</strong> {{ internship.location }}</p>
                     <p><strong>Available Slots:</strong> {{ internship.max_applicants }}</p>
                     <p class="posted-date"><small>Posted on: {{ internship.created_at|date:"F d, Y" }}</small></p>
@@ -49,7 +49,7 @@
                         <a href="{% url 'internship_detail' internship.id %}" class="btn-secondary">Details</a>
                         <a href="{% url 'internship_apply' internship.id %}" class="btn-primary">Apply</a>
                         {% if internship.id in applied_internship_ids %}
-                            <p class="applied-message">You have already applied for this internship.</p>
+                            <p class="applied-message">Already Applied.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -75,6 +75,15 @@
 
 
 <style>
+    .card-content .buttons p{
+        font-size: 0.9em;
+        text-align: center;
+    }
+    .applied-message{
+        border-radius: 10px;
+        padding: 5px 10px;
+        border: 1px solid green;
+    }
     /* Page fade-in animation */
 @keyframes fadeInPage {
     from {
@@ -211,7 +220,6 @@ h1 {
 }
 
 .pagination-link {
-    margin: 0 5px;
     padding: 6px 10px;
     color: #007bff;
     text-decoration: none;
@@ -366,7 +374,7 @@ h1 {
     }
 
     .applied-message {
-        color: #28a745;
+        color: green;
         font-size: 0.8em;
         margin-top: 8px;
     }

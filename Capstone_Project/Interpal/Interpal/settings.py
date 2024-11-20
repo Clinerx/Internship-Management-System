@@ -162,7 +162,7 @@ LOGIN_URL = '/login/'
 # settings.py
 
 # Use Gmail's SMTP server
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Temporarily switch to console for testing
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True

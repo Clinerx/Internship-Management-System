@@ -1,138 +1,391 @@
 {% extends 'organization_pages/organization_base.html' %}
 
 {% block title %}Applicant Details & Update Status{% endblock %}
-
+{% load static %}
 {% block content %}
-<div class="applicant-details container">
-    <h2>Application Details for {{ application.internship.title }}</h2>
+<div class="container my-5">
+    <h2 class="text-center mb-4">Application Details for {{ application.internship.title }}</h2>
     
     <!-- Applicant Information -->
-    <div class="applicant-info">
-        <p><strong>Applicant Name:</strong> {{ application.student_first_name }} {{ application.student_last_name }}</p>
-        <p><strong>College:</strong> {{ application.student_college }}</p>
-        <p><strong>Course:</strong> {{ application.student_course }}</p>
-        <p><strong>Date Applied:</strong> {{ application.applied_at|date:"F d, Y" }}</p>
+    <div class="card shadow-sm mb-4">
+        
+        <div class="card-header bg-primary text-white">
+            <h5>Applicant Information</h5>
+        </div>
+        
+        <div class="profile-img text-center mt-3">
+            <img 
+                src="{% if application.student.profile_picture %}{{ application.student.profile_picture.url }}{% else %}{% static 'img/default_profile.jpg' %}{% endif %}" 
+                alt="Profile Image" 
+                class="rounded-circle border-4 border-primary profile-img-style" 
+                onclick="openStudentModal()" 
+                style="cursor: pointer;">
+        </div>
+
+        <div class="card-body">
+            <p><strong>Name:</strong> {{ application.student_first_name }} {{ application.student_last_name }}</p>
+            <p><strong>College:</strong> {{ application.student_college }}</p>
+            <p><strong>Course:</strong> {{ application.student_course }}</p>
+            <p><strong>Date Applied:</strong> {{ application.applied_at|date:"F d, Y" }}</p>
+        </div>
     </div>
 
     <!-- Uploaded Files -->
     {% if application.resume %}
-        <div class="uploaded-files mt-4">
-            <h4>Uploaded Documents:</h4>
-            <ul>
-                <li><a href="{{ application.resume.url }}" target="_blank">Resume</a></li>
-                {% if application.cover_letter %}
-                    <li>Cover Letter: {{ application.cover_letter }}</li>
-                {% endif %}
-            </ul>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5>Uploaded Documents</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li><a href="{{ application.resume.url }}" target="_blank">Resume</a></li>
+                    {% if application.cover_letter %}
+                        <li><a href="{{ application.cover_letter.url }}" target="_blank">Cover Letter</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     {% else %}
-        <p>No files uploaded by the applicant.</p>
+        <div class="alert alert-warning">No files uploaded by the applicant.</div>
     {% endif %}
 
-    <!-- Stepper with Update Controls -->
-    <div class="status-container mt-5">
-        <h4>Update Application Status</h4>
-        <div class="md-stepper-horizontal d-flex justify-content-between flex-wrap">
-            {% for stage in stages %}
-                <div class="md-step {% if stage == application.status %}active{% elif stage in completed_stages %}done{% endif %}" data-stage="{{ stage }}">
-                    <div class="md-step-circle"><span>{{ forloop.counter }}</span></div>
-                    <div class="md-step-title">{{ stage }}</div>
-                </div>
-                {% if not forloop.last %}
-                    <div class="md-step-line"></div>
-                {% endif %}
-            {% endfor %}
+    <!-- Stepper and Update Status -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Update Application Status</h5>
         </div>
-        
-        <form id="statusUpdateForm" method="post" action="{% url 'view_application' application.id %}" class="mt-4">
-            {% csrf_token %}
-            <label for="status">Select Next Stage:</label>
-            <select name="status" id="status" class="form-control" disabled>
-                {% for stage in stages %}
-                    <option value="{{ stage }}" {% if stage == application.status %}selected{% endif %}>{{ stage }}</option>
-                {% endfor %}
-            </select>
-            <button type="button" id="nextStageButton" class="btn btn-primary mt-3" onclick="moveToNextStage()">Update Status</button>
-        </form>
+        <div class="card-body">
+            <!-- Horizontal Stepper -->
+            <div class="stepper-container mb-4">
+                <div class="md-stepper-horizontal">
+                    {% for stage in stages %}
+                        <div class="md-step {% if stage == application.status %}active{% elif stage in completed_stages %}done{% endif %}">
+                            <div class="md-step-circle"><span>{{ forloop.counter }}</span></div>
+                            <div class="md-step-title">{{ stage }}</div>
+                            {% if not forloop.last %}
+                                <div class="md-step-line"></div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+    
+            <!-- Update Status Form -->
+            <form id="statusUpdateForm" method="post" action="{% url 'view_application' application.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="status">Current Status:</label>
+                    <select name="status" id="status" class="form-control">
+                        {% for stage in stages %}
+                            <option value="{{ stage }}" {% if stage == application.status %}selected{% endif %}>{{ stage }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-actions text-center mt-3">
+                    <button type="button" class="btn btn-outline-secondary" onclick="moveToPreviousStage()">Previous</button>
+                    <button type="button" class="btn btn-primary" onclick="moveToNextStage()">Next</button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- Email for Interview Scheduled -->
+    {% if application.status == 'Interview Scheduled' %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Send Interview Invitation</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'send_interview_email' application.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="emailMessage">Message:</label>
+                        <textarea id="emailMessage" name="emailMessage" class="form-control" rows="4" placeholder="Enter your message here..."></textarea>
+                    </div>
+                    <input type="hidden" name="organizationEmail" value="{{ application.organization.company_email }}">
+                    <input type="hidden" name="studentEmail" value="{{ application.student.email }}">
+                    <button type="submit" class="btn btn-success mt-3">Send Email</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Confirmation Step -->
+            {% if application.status == 'Confirmation' %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5>Confirm Student's Response</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p class="mb-4">You have reached the final stage of the application. Please confirm the student's response by approving or declining.</p>
+                    
+                    <div class="d-flex justify-content-center gap-4">
+                        <!-- Approve Button -->
+                        <form method="post" action="{% url 'view_application' application.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="Hired">
+                            <button type="submit" class="btn btn-success btn-lg">Approve</button>
+                        </form>
+
+                        <!-- Decline Button -->
+                        <form method="post" action="{% url 'view_application' application.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="Rejected">
+                            <button type="submit" class="btn btn-danger btn-lg">Decline</button>
+                        </form>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <small class="text-muted">Please ensure all necessary checks are done before finalizing the student's status.</small>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Show Start and End Dates Form if Hired -->
+        {% if application.status == 'Hired' %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5>Internship Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'view_application' application.id %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="start_date">Internship Start Date:</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date">Internship End Date:</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Save Internship Dates</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+
+
+    <!-- Final Status -->
+    {% if application.status == 'Hired' or application.status == 'Rejected' %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Final Status</h5>
+        </div>
+        <div class="card-body text-center">
+            <p>The student has been <strong>{{ application.final_decision }}</strong>.</p>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
+<!-- Styles -->
 <style>
-    /* Styles for status container, stepper, and steps */
-    .status-container, .applicant-details {
-        padding: 40px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #f9f9f9;
-        max-width: 100%;
-        width: 90%;
-        margin: 30px auto;
-        text-align: center;
+        body{
+            font-family: 'Poppins', sans-serif;
+        }
+            /* Apply margin-right on the Approve button to add space */
+        .btn-success {
+            margin-right: 20px; /* Adjust the value as needed */
+        }
+
+        /* Stepper Container */
+        .md-stepper-horizontal {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            position: relative;
+        }
+        
+        /* Individual Step */
+        .md-step {
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+        
+        /* Circle */
+        .md-step-circle {
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #dee2e6;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .md-step.active .md-step-circle {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #0056b3;
+        }
+        
+        .md-step.done .md-step-circle {
+            background-color: #28a745;
+            color: #fff;
+            border-color: #218838;
+        }
+        
+        /* Line */
+        .md-step-line {
+            height: 2px;
+            background-color: #dee2e6;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: calc(100% + 1rem);
+            z-index: -1;
+            transform: translateX(-50%);
+        }
+        
+        .md-step.active + .md-step-line {
+            background-color: #007bff;
+        }
+        
+        .md-step.done + .md-step-line {
+            background-color: #28a745;
+        }
+        
+        /* Step Title */
+        .md-step-title {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6c757d;
+            transition: color 0.3s ease;
+        }
+        
+        .md-step.active .md-step-title {
+            color: #007bff;
+        }
+        
+        .md-step.done .md-step-title {
+            color: #28a745;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .md-stepper-horizontal {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            .md-step-line {
+                width: 2px;
+                height: 100%;
+                transform: translateY(-50%);
+            }
+        }
+        /* Card Styling */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
     }
-    .md-stepper-horizontal {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin: 0 auto;
-        background-color: #FFFFFF;
-        box-shadow: 0 3px 8px -6px rgba(0,0,0,.50);
+
+    /* Card Header */
+    .card-header {
+        background-color: #3498db;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-bottom: 1px solid #f1f1f1;
     }
-    .md-stepper-horizontal .md-step .md-step-circle {
-        width: 50px;
-        height: 50px;
-        background-color: #999999;
+
+    /* Profile Image Styling */
+    .profile-img {
+        margin-top: -50px; /* Slightly pull up the profile image */
+    }
+
+    .profile-img img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
         border-radius: 50%;
-        color: #FFFFFF;
-        text-align: center;
-        line-height: 50px;
-        font-size: 18px;
-        font-weight: 600;
+        border: 4px solid #3498db; /* Blue border around profile image */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
     }
-    .md-stepper-horizontal .md-step.active .md-step-circle,
-    .md-stepper-horizontal .md-step.done .md-step-circle {
-        background-color: #007bff;
+
+    .profile-img img:hover {
+        transform: scale(1.05); /* Slight zoom effect on hover */
     }
-    .md-step-line {
-        flex-grow: 1;
-        height: 3px;
-        background-color: #007bff;
-        margin-top: 25px;
+
+    /* Card Body */
+    .card-body {
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-top: 1px solid #f1f1f1;
     }
+
+    .card-body p {
+        font-size: 16px;
+        color: #333;
+        line-height: 1.5;
+        margin: 10px 0;
+    }
+
+    .card-body p strong {
+        color: #3498db; /* Blue color for labels */
+    }
+
+    /* Small Text for Dates */
+    .card-body p:last-child {
+        font-style: italic;
+        color: #7f8c8d;
+    }
+
+    /* Responsive Design for Mobile Devices */
+    @media (max-width: 768px) {
+        .card {
+            margin: 15px;
+        }
+
+        .profile-img img {
+            width: 100px;
+            height: 100px;
+        }
+    }
+
+        
 </style>
 
+<!-- Scripts -->
 <script>
     const stages = {{ stages|safe }};
     let currentStageIndex = stages.indexOf("{{ application.status }}");
 
     function moveToNextStage() {
-        const nextStage = stages[currentStageIndex + 1];
-        
-        // Check if there are more stages to move to
-        if (nextStage) {
-            switch (nextStage) {
-                case "In Review":
-                    alert("Please check the application letter and resume before moving to the next stage.");
-                    break;
-                case "Interview Scheduled":
-                    alert("Send an interview scheduling email to the applicant.");
-                    break;
-                case "Offer Extended":
-                    alert("Conduct the interview, then extend an offer based on the outcome.");
-                    break;
-                case "Completed":
-                    alert("Mark the application as Hired or Not Hired.");
-                    break;
-                default:
-                    alert("Proceeding to the next stage.");
-                    break;
-            }
-            
-            // Update the status dropdown and enable submission
-            document.getElementById("status").value = nextStage;
-            document.getElementById("statusUpdateForm").submit();
+        if (currentStageIndex < stages.length - 1) {
+            currentStageIndex++;
+            updateStatus();
         } else {
-            alert("All stages are completed.");
+            alert("This is the last stage.");
         }
     }
+
+    function moveToPreviousStage() {
+        if (currentStageIndex > 0) {
+            currentStageIndex--;
+            updateStatus();
+        } else {
+            alert("This is the first stage.");
+        }
+    }
+
+    function updateStatus() {
+        const nextStatus = stages[currentStageIndex];
+        document.getElementById("status").value = nextStatus;
+        document.getElementById("statusUpdateForm").submit();
+    }
 </script>
+
 {% endblock content %}

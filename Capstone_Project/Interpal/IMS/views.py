@@ -24,11 +24,12 @@ from django.utils.timezone import now
 from django.utils import timezone
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.utils.crypto import get_random_string
+from django.core.mail import EmailMessage
 
 from collections import defaultdict
 
-from .forms import CustomUserCreationForm, InternshipForm, ProfileForm
-from .models import CustomUser, Internship, Organization, UserVisit, Application
+from .forms import CustomUserCreationForm, InternshipForm, ProfileForm, ProfileFormOrg
+from .models import CustomUser, Internship, Organization, UserVisit, Application, OrganizationIntern
 
 
 
@@ -282,6 +283,7 @@ def student_register(request):
         
     return render(request, 'student_registration_folder/student_profile_details.html', {'form': form})
 
+
 def student_login(request):
     # Check if a user is already authenticated
     if request.user.is_authenticated:
@@ -292,8 +294,12 @@ def student_login(request):
             return redirect('student_dashboard')
 
     if request.method == 'POST':
-        email = request.POST.get('email', '')
-        password = request.POST.get('password', '')
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if not email or not password:
+            messages.error(request, 'Please enter both email and password.', extra_tags='login')
+            return render(request, 'reset_folder/student_login.html', {'email': email})
 
         try:
             user = CustomUser.objects.get(email=email)
@@ -301,13 +307,13 @@ def student_login(request):
             
             if user is not None:
                 login(request, user)
-                messages.success(request, 'Login successful! Redirecting to your dashboard...')
+                messages.success(request, 'Login successful! Redirecting to your dashboard...', extra_tags='login')
                 return render(request, 'reset_folder/student_login.html', {'email': email, 'redirect': True})
             else:
-                messages.error(request, 'Invalid email or password for student account.')
+                messages.error(request, 'Invalid email or password for student account.', extra_tags='login')
 
         except CustomUser.DoesNotExist:
-            messages.error(request, 'No student account found with this email.')
+            messages.error(request, 'No student account found with this email.', extra_tags='login')
 
     return render(request, 'reset_folder/student_login.html')
 
@@ -481,6 +487,37 @@ def edit_profile(request):
     return render(request, 'student_pages/edit_profile.html', context)
 
 
+@organization_login_required
+def edit_profile_org(request):
+    # Fetch the logged-in organization's profile using the organization_id from session
+    organization_id = request.session.get('organization_id')
+    if not organization_id:
+        messages.error(request, 'Organization not found.')
+        return redirect('login')
+    
+    try:
+        org = Organization.objects.get(id=organization_id)
+    except Organization.DoesNotExist:
+        messages.error(request, 'Organization not found.')
+        return redirect('login')
+    
+    if request.method == 'POST':
+        form = ProfileFormOrg(request.POST, request.FILES, instance=org)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('organization_dashboard')
+    else:
+        form = ProfileFormOrg(instance=org)
+
+    context = {
+        'form': form,
+        'organization': org,
+    }
+    return render(request, 'organization_pages/edit_profile_org.html', context)
+
+
+
 
 # * <<<<<<<============================================>>>> 
 # ^ Student Status Content
@@ -577,27 +614,52 @@ def delete_applications(request, application_id=None):
     return redirect('student_status')
 
 
-# Student view to display the current status of their application
 def view_status(request, application_id):
     application = get_object_or_404(Application, id=application_id)
-    # Determine completed stages up to the current status
-    stages = ["Pending", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
-    completed_stages = stages[:stages.index(application.status) + 1]
-    
+
+    # Define the base stages of the application process
+    stages = ["Pending", "In Review", "Interview Scheduled", "Confirmation", "Hired"]
+
+    # Replace "Phantom Hired" with the actual final status
+    if application.status == "Hired":
+        stages[-1] = "Hired"
+    elif application.status == "Rejected":
+        stages[-1] = "Rejected"
+
+    # Determine the stages completed based on the current status
+    if application.status in stages:
+        completed_stages = stages[:stages.index(application.status) + 1]
+    else:
+        completed_stages = []
+
+    # Add custom messages for the final stages
+    if application.status == "Hired":
+        status_message = "Congratulations! You have been hired for the position."
+    elif application.status == "Rejected":
+        status_message = "We regret to inform you that your application has been rejected."
+    else:
+        status_message = f"Your application is currently in the '{application.status}' stage."
+
+    # Prepare status details for rendering
     status_details = {
         "status": application.status,
         "review_stage": application.review_stage,
         "submission_date": application.applied_at,
         "comments": application.comments,
-        "completed_stages": completed_stages
+        "completed_stages": completed_stages,
+        "status_message": status_message,  # Custom message based on the current status
     }
-    
+
     context = {
         'application': application,
         'status_details': status_details,
-        'stages': stages
+        'stages': stages,
     }
     return render(request, 'student_pages/student_status_content/view_status.html', context)
+
+
+
+
 
 
 
@@ -705,7 +767,6 @@ def delete_internship(request, internship_id):
 
     return render(request, 'organization_pages/delete_internship.html', {'internship': internship})
 
-
 @organization_login_required
 def organization_interns(request):
     # Check if 'organization_id' is in session
@@ -714,18 +775,20 @@ def organization_interns(request):
         messages.error(request, "No organization is currently logged in.")
         return redirect('login')
 
-    # Fetch organization and related users
-    users = CustomUser.objects.all()
+    # Get the organization
     org = Organization.objects.get(id=organization_id)
 
+    # Fetch interns and their related internship details
+    interns = OrganizationIntern.objects.filter(hiring_organization=org).select_related('student', 'internship')
+
     context = {
-        'users': users,
+        'interns': interns,
         'org': org,
     }
     return render(request, 'organization_pages/organization_interns.html', context)
 
-# * ================ Application =========================
 
+# * ================ Application =========================
 @organization_login_required
 def organization_applicant(request):
     # Retrieve the organization either from the session or the logged-in user
@@ -741,10 +804,15 @@ def organization_applicant(request):
 
     # Fetch applications related to this organization, grouped by internship
     applications = Application.objects.filter(internship__organization=org).select_related('internship', 'student')
-    
-    # Group applications by internship
+
+    # Group applications by internship and annotate the hired status
     grouped_applications = {}
     for application in applications:
+        # Add `is_hired` attribute to check if the student is hired elsewhere
+        application.is_hired = Application.objects.filter(
+            student=application.student, status="Hired"
+        ).exists()
+
         if application.internship not in grouped_applications:
             grouped_applications[application.internship] = []
         grouped_applications[application.internship].append(application)
@@ -759,27 +827,100 @@ def organization_applicant(request):
 def view_application(request, application_id):
     application = get_object_or_404(Application, id=application_id, organization_id=request.session['organization_id'])
 
-    # Define the stages for the application process
-    stages = ["Pending", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
-    completed_stages = stages[:stages.index(application.status) + 1]
+    # Define the base stages of the application process
+    stages = ["Pending", "In Review", "Interview Scheduled", "Confirmation", "Hired"]
 
+    # Replace "Phantom Hired" with the actual final status
+    if application.status == "Hired":
+        stages[-1] = "Hired"
+    elif application.status == "Rejected":
+        stages[-1] = "Rejected"
+
+    # Determine the stages completed based on the current status
+    if application.status in stages:
+        completed_stages = stages[:stages.index(application.status) + 1]
+    else:
+        completed_stages = []
+
+    # Add custom messages for the final stages
+    if application.status == "Hired":
+        status_message = "Congratulations! You have been hired for the position."
+    elif application.status == "Rejected":
+        status_message = "We regret to inform you that your application has been rejected."
+    else:
+        status_message = f"Your application is currently in the '{application.status}' stage."
+
+    # Handling status update (approve or reject)
     if request.method == "POST":
         # Get the selected status from the form
         new_status = request.POST.get("status")
-        if new_status in stages:
-            # Update the application status and save it
+        
+        # Handling application status updates
+        if new_status == "Hired":
+            application.status = "Hired"
+            application.final_decision = "approved"  # Optional: Track the decision
+            application.save()
+
+            # Add the student to the organization's intern list
+            # Fetch internship start and end dates from the form
+            start_date = request.POST.get('start_date')
+            end_date = request.POST.get('end_date')
+            if start_date and end_date:
+                # Create the OrganizationIntern record with the dates
+                OrganizationIntern.objects.create(
+                    organization_id=request.session['organization_id'],
+                    student=application.student,
+                    start_date=start_date,  # Add start date
+                    end_date=end_date,      # Add end date
+                )
+                messages.success(request, f"The student {application.student_first_name} {application.student_last_name} has been approved and marked as hired.")
+                messages.success(request, "Internship dates have been saved.")
+            else:
+                messages.error(request, "Please provide both start and end dates for the internship.")
+
+        elif new_status == "Rejected":
+            application.status = "Rejected"
+            application.final_decision = "declined"  # Optional: Track the decision
+            application.save()
+            messages.success(request, f"The student {application.student_first_name} {application.student_last_name} has been declined.")
+        elif new_status in stages:
+            # Handle standard status updates
             application.status = new_status
             application.save()
             messages.success(request, "Application status updated successfully.")
-            return redirect(reverse('view_application', args=[application_id]))
+        
+        return redirect(reverse('view_application', args=[application_id]))
 
-    # Prepare context data for rendering
+    # Prepare status details for rendering
+    status_details = {
+        "status": application.status,
+        "review_stage": application.review_stage,
+        "submission_date": application.applied_at,
+        "comments": application.comments,
+        "completed_stages": completed_stages,
+        "status_message": status_message,  # Custom message based on the current status
+    }
+
+    # Context for the template
     context = {
         'application': application,
+        'status_details': status_details,
         'stages': stages,
         'completed_stages': completed_stages,
     }
     return render(request, 'organization_pages/view_application.html', context)
+
+
+
+@organization_login_required
+def organization_interns(request):
+    interns = OrganizationIntern.objects.filter(organization_id=request.session['organization_id'])
+
+    context = {
+        'interns': interns,
+    }
+    return render(request, 'organization_pages/organization_interns.html', context)
+
 
 # View for updating the application status by organization
 @organization_login_required
@@ -816,6 +957,7 @@ def about_us_org(request):
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 @organization_login_required
 def org_dashboard(request):
+    
     organization_id = request.session.get('organization_id')
     
     if organization_id:
@@ -875,6 +1017,42 @@ def org_dashboard(request):
 
 
 # * Ajax Functions
+def send_interview_email(request, application_id):
+    if request.method == 'POST':
+        application = get_object_or_404(Application, id=application_id)
+        student_email = application.student.email  # Ensure your Application model has a reference to the Student
+        organization_name = application.organization.company_name  # Get organization name
+        organization_email = application.organization.company_email  # Get organization email
+        email_message = request.POST.get('emailMessage', '')
+
+        # Prepare the email message
+        message = f"""
+        Dear {application.student.first_name} {application.student.last_name},
+
+        {email_message}
+
+        This message is from {organization_name} ({organization_email}).
+        Please reach out to the organization for further queries.
+
+        Best regards,
+        PSU InternPal Team
+        """
+
+        subject = f"Interview Invitation for {application.internship.title}"
+        from_email = 'psuinterpal@gmail.com'  # Fixed email sender
+        recipient_list = [student_email]
+
+        try:
+            send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            messages.success(request, "Interview invitation email sent successfully to the student.")
+        except Exception as e:
+            messages.error(request, f"Failed to send email: {e}")
+        
+        return redirect('view_application', application_id=application_id)  # Redirect back to the application view
+    
+    return HttpResponse("Invalid request method.", status=405)
+    
+
 def get_applications(request):
     applications = Application.objects.all()  # Fetch the applications
     data = [{
@@ -1015,3 +1193,5 @@ def admin_view_internship(request):
 
 def admin_confirm_internship(request):
     return render(request, 'admin_folder/admin_confirm_internship.html')
+
+

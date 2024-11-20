@@ -1,34 +1,58 @@
 # utils.py
 
 from .models import Internship, CustomUser
+def calculate_compatibility(student, internship):
+    """
+    Calculate the compatibility score between a student and an internship.
 
-def calculate_matching_score(user, internship):
-    # Extract required skills for internship and student skills
-    required_skills = set(internship.required_skills_list())
-    user_skills = set(user.skills_list())
+    :param student: CustomUser instance representing the student.
+    :param internship: Internship instance.
+    :return: Compatibility score (float).
+    """
+    # Skill Match Score
+    student_skills = set(student.skills_list())  # Convert student skills to a set
+    internship_skills = set(internship.required_skills_list())  # Convert required skills to a set
 
-    # Calculate skill match (percentage of required skills that the user has)
-    skill_match = len(required_skills.intersection(user_skills)) / len(required_skills) if required_skills else 0
+    if not internship_skills:
+        skill_match_score = 0
+    else:
+        matching_skills = student_skills.intersection(internship_skills)
+        skill_match_score = len(matching_skills) / len(internship_skills) * 100
 
-    # Calculate experience match (whether the user meets the desired experience)
-    experience_match = min(user.experience, internship.desired_experience) / internship.desired_experience if internship.desired_experience else 1
+    # Experience Match Score
+    required_experience = internship.required_experience if hasattr(internship, 'required_experience') else 0
+    student_experience = student.experience if student.experience else 0
 
-    # Calculate overall compatibility score (could be weighted based on importance)
-    total_score = (skill_match + experience_match) / 2  # Average the two scores (you can adjust this formula as needed)
+    experience_match_score = min(student_experience / required_experience, 1) * 100 if required_experience > 0 else 100
 
-    return total_score
+    # Location Match Score (Optional: Add location matching logic if needed)
+    location_match_score = 100  # Assuming it's not considered or always matches.
 
-def get_matching_internships(user):
-    internships = Internship.objects.all()
-    matches = []
+    # Weighted Compatibility Score
+    compatibility_score = (
+        (skill_match_score * 0.5) +
+        (experience_match_score * 0.3) +
+        (location_match_score * 0.2)
+    )
+
+    return round(compatibility_score, 2)  # Return a rounded score
+
+
+def get_matching_internships(student):
+    """
+    Get recommended internships for a student based on the matching algorithm.
+
+    :param student: CustomUser instance representing the student.
+    :return: List of tuples (internship, compatibility_score), sorted by score.
+    """
+    internships = Internship.objects.all()  # Fetch all internships
+    recommendations = []
 
     for internship in internships:
-        # Calculate compatibility score for each internship
-        score = calculate_matching_score(user, internship)
-        matches.append((internship, score))
+        compatibility_score = calculate_compatibility(student, internship)
+        recommendations.append((internship, compatibility_score))
 
-    # Sort by highest score
-    matches.sort(key=lambda x: x[1], reverse=True)
+    # Sort internships by compatibility score in descending order
+    recommendations.sort(key=lambda x: x[1], reverse=True)
 
-    # Return the top 8 matches (you can adjust the number of matches shown)
-    return matches[:8]
+    return recommendations

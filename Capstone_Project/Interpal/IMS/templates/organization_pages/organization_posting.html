@@ -133,7 +133,6 @@
 
                         <!-- Edit and Delete Buttons -->
                         <td class="internship-buttons">
-                            <a href="{% url 'view_internship' internship.id %}" class="btn btn-info">View</a>
                             <a href="{% url 'edit_internship' internship.id %}" class="btn btn-primary">Edit</a>
                             <button class="btn btn-danger open-delete-modal" data-id="{{ internship.id }}" data-title="{{ internship.title }}">Delete</button>
                         </td>
@@ -315,11 +314,13 @@
         text-transform: uppercase;
         font-size: 0.9rem;
         font-weight: bold;
+        text-align: center;
     }
 
     .table th,
     .table td {
         padding: 15px;
+        text-align: center;
         vertical-align: middle;
         border-bottom: 1px solid #eeeeee;
     }
@@ -332,8 +333,21 @@
         background-color: #f9f9f9;
     }
 
+    .btn-danger{
+        padding-inline: 73px;
+    }
+    .btn-primary{
+        margin-top: -4px;
+
+    }
+    .internship-buttons{
+        display: flex;
+        flex-direction: column; 
+        gap: 5px;
+    }
     /* Responsive Styles */
     @media (max-width: 768px) {
+       
         /* Modal */
         .btn-info{
             padding-inline: 50px;
@@ -385,9 +399,13 @@
 
     @media (max-width: 480px) {
         /* Header Font Size */
-        internship-buttons a{
-            padding-inline: 100%;
-
+        .modal-content {
+            margin-top: 400%;
+        }
+        .internship-buttons{
+            display: flex;
+            flex-direction: column; 
+            gap: 5px;
         }
         .internship-postings-section h2{
             text-align: center;

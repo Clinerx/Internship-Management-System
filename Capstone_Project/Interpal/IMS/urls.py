@@ -38,6 +38,7 @@ urlpatterns = [
     path('about_us_org/', views.about_us_org, name='about_us_org'),
     path('about_us/', views.about_us, name='about_us'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('organization/edit-profile/', views.edit_profile_org, name='edit_profile_org'),
     
     # * <<<<====================>>>>
     # ^ Student Dashboard
@@ -65,7 +66,9 @@ urlpatterns = [
     
     # * <<<<====================>>>>
     # ^ Ajax URL
+    path('applications/<int:application_id>/send_email/', views.send_interview_email, name='send_interview_email'),
     path('get-applications/', views.get_applications, name='get_applications'),
+    
     
     
     
