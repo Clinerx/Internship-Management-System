@@ -1,0 +1,49 @@
+.internship_table_container {
+    width: 100%;
+    overflow-x: auto;
+    padding: 0 20px;
+}
+
+.internship_table {
+    width: 100%;
+    border-collapse: collapse;
+    
+}
+
+.internship_table th, .internship_table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.internship_table th {
+    background-color: #f4f4f4;
+}
+
+.status.in-progress {
+    color: #ff9800;
+    font-weight: bold;
+}
+
+.btn {
+    padding: 8px 12px;
+    margin-right: 4px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.btn.check-status {
+    background-color: #2196f3;
+    color: white;
+}
+
+.btn.edit {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn.delete {
+    background-color: #f44336;
+    color: white;
+}

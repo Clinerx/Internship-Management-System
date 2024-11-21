@@ -1,362 +1,248 @@
-/* Google Font Import - Poppins */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
+:root {
+    --primary-color: #3685fb;
+    --primary-color-dark: #2f73d9;
+    --secondary-color: #fafcff;
+    --text-dark: #0d213f;
+    --text-light: #767268;
+    --extra-light: #ffffff;
+    --max-width: 1200px;
 
-:root{
-    /* ===== Colors ===== */
-    --body-color: #E4E9F7;
-    --sidebar-color: #ffffff;
-    --primary-color: #695CFE;
-    --primary-color-light: #F6F5FF;
-    --toggle-color: #DDD;
-    --text-color: #707070;
-
-    /* ====== Transition ====== */
-    --tran-03: all 0.2s ease;
-    --tran-03: all 0.3s ease;
-    --tran-04: all 0.3s ease;
-    --tran-05: all 0.3s ease;
+    /* Dark mode colors */
+    --dark-background: #0c0c0c;
+    --dark-secondary: #1f1f1f;
+    --dark-accent: #242424;
+    --dark-text: #e0e0e0;
+    --dark-text-light: #b3b3b3;
+    --dark-primary: #3a8ef6;
+    --dark-primary-dark: #2b6db2;
+    --dark-gradient: linear-gradient(145deg, #1c1c1c, #2a2a2a);
 }
-
-body{
-    min-height: 100vh;
-    background-color: var(--body-color);
-    transition: var(--tran-05);
-}
-
-::selection{
-    background-color: var(--primary-color);
-    color: #fff;
-}
-
-body.dark{
-    --body-color: #18191a;
-    --sidebar-color: #242526;
-    --primary-color: #3a3b3c;
-    --primary-color-light: #3a3b3c;
-    --toggle-color: #fff;
-    --text-color: #ccc;
-}
-
-/* ===== Sidebar ===== */
- .sidebar{
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 250px;
-    padding: 10px 14px;
-    background: var(--sidebar-color);
-    transition: var(--tran-05);
-    z-index: 100;  
-}
-.sidebar.close{
-    width: 88px;
-}
-
-/* ===== Reusable code - Here ===== */
-.sidebar li{
-    height: 50px;
-    list-style: none;
+       /* Light mode styles */
+            /* Navbar items */
+.navbar-nav .nav-item {
     display: flex;
-    align-items: center;
-    margin-top: 10px;
+    align-items: center; /* Aligns the icon and text vertically */
+    justify-content: flex-start;
 }
 
-.sidebar header .image,
-.sidebar .icon{
-    min-width: 60px;
-    border-radius: 6px;
-}
-
-.sidebar .icon{
-    min-width: 60px;
-    border-radius: 6px;
-    height: 100%;
+.navbar-nav .nav-link {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
+    align-items: center; /* Center text and icon vertically */
+    padding: 10px 15px; /* Adjust padding for better spacing */
+    font-size: 16px; /* Optional: Adjust font size */
 }
 
-.sidebar .text,
-.sidebar .icon{
-    color: var(--text-color);
-    transition: var(--tran-03);
+/* Adjust the size of the icons */
+.navbar-nav .nav-link .icon {
+    font-size: 20px; /* Adjust the icon size */
+    margin-right: 8px; /* Add space between icon and text */
 }
 
-.sidebar .text{
-    font-size: 17px;
-    font-weight: 500;
-    white-space: nowrap;
-    opacity: 1;
-}
-.sidebar.close .text{
-    opacity: 0;
-}
-/* =========================== */
-
-.sidebar header{
-    position: relative;
-}
-
-.sidebar header .image-text{
+/* Dark Mode Toggle Button */
+#darkModeToggle {
     display: flex;
     align-items: center;
 }
-.sidebar header .logo-text{
-    display: flex;
-    flex-direction: column;
-}
-header .image-text .name {
-    margin-top: 2px;
-    font-size: 18px;
-    font-weight: 600;
+
+#darkModeToggle .fa-moon {
+    font-size: 15px; /* Adjust moon icon size */
 }
 
-header .image-text .profession{
-    font-size: 16px;
-    margin-top: -2px;
-    display: block;
-}
 
-.sidebar header .image{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.sidebar header .image img{
-    width: 40px;
-    border-radius: 6px;
-}
-
-.sidebar header .toggle{
-    position: absolute;
-    top: 50%;
-    right: -25px;
-    transform: translateY(-50%) rotate(180deg);
-    height: 25px;
-    width: 25px;
-    background-color: var(--primary-color);
-    color: var(--sidebar-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    cursor: pointer;
-    transition: var(--tran-05);
-}
-
-body.dark .sidebar header .toggle{
-    color: var(--text-color);
-}
-
-.sidebar.close .toggle{
-    transform: translateY(-50%) rotate(0deg);
-}
-
-.sidebar .menu{
-    margin-top: 40px;
-}
-
-.sidebar li.search-box{
-    border-radius: 6px;
-    background-color: var(--primary-color-light);
-    cursor: pointer;
-    transition: var(--tran-05);
-}
-
-.sidebar li.search-box input{
-    height: 100%;
-    width: 100%;
-    outline: none;
+/* Remove the border, width, and height for the dark mode toggle button */
+.nav-links {
     border: none;
-    background-color: var(--primary-color-light);
-    color: var(--text-color);
-    border-radius: 6px;
-    font-size: 17px;
-    font-weight: 500;
-    transition: var(--tran-05);
+    background: none;
+    padding: 0;
+    width: auto;
+    height: auto;
 }
-.sidebar li a{
-    list-style: none;
-    height: 100%;
-    background-color: transparent;
-    display: flex;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: var(--tran-03);
+/* Customize the icon size and appearance */
+.nav-links i {
+    font-size: 24px; /* Adjust size if necessary */
+    color: #0d213f; /* Set the color for the icon */
+    border: transparent;
 }
-
-.sidebar li a:hover{
-    background-color: var(--primary-color);
+/* Optionally, you can add hover effect for the icon */
+.nav-links:hover i {
+    color: #3685fb; /* Change color on hover */
 }
-.sidebar li a:hover .icon,
-.sidebar li a:hover .text{
-    color: var(--sidebar-color);
-}
-body.dark .sidebar li a:hover .icon,
-body.dark .sidebar li a:hover .text{
-    color: var(--text-color);
-}
-
-.sidebar .menu-bar{
-    height: calc(100% - 55px);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow-y: scroll;
-}
-.menu-bar::-webkit-scrollbar{
-    display: none;
-}
-.sidebar .menu-bar .mode{
-    border-radius: 6px;
-    background-color: var(--primary-color-light);
-    position: relative;
-    transition: var(--tran-05);
-}
-
-.menu-bar .mode .sun-moon{
-    height: 50px;
-    width: 60px;
-}
-
-.mode .sun-moon i{
-    position: absolute;
-}
-.mode .sun-moon i.sun{
-    opacity: 0;
-}
-body.dark .mode .sun-moon i.sun{
-    opacity: 1;
-}
-body.dark .mode .sun-moon i.moon{
-    opacity: 0;
-}
-
-.menu-bar .bottom-content .toggle-switch{
-    position: absolute;
-    right: 0;
-    height: 100%;
-    min-width: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    cursor: pointer;
-}
-.toggle-switch .switch{
-    position: relative;
-    height: 22px;
-    width: 40px;
-    border-radius: 25px;
-    background-color: var(--toggle-color);
-    transition: var(--tran-05);
-}
-
-.switch::before{
-    content: '';
-    position: absolute;
-    height: 15px;
-    width: 15px;
+/* Remove border from the dark mode toggle icon */
+#moonIcon {
     border-radius: 50%;
-    top: 50%;
-    left: 5px;
-    transform: translateY(-50%);
-    background-color: var(--sidebar-color);
-    transition: var(--tran-04);
+    padding: 5px;
+    font-size: 25px;
+    font-weight: 400;
+    margin-right: -10px;
+    margin-left: 50px;
+    outline: none !important; /* Removes outline if any */
 }
-
-body.dark .switch::before{
-    left: 20px;
+/* Remove any border or outline from the button around the icon */
+.nav-links {
+    border: none !important;
+    outline: none !important;
+    background: none; /* Optional: remove any background */
 }
-
-.home{
-    position: absolute;
-    top: 0;
-    top: 0;
-    left: 250px;
-    height: 100vh;
-    width: calc(100% - 250px);
-    background-color: var(--body-color);
-    transition: var(--tran-05);
-}
-.home .text{
-    font-size: 30px;
-    font-weight: 500;
-    color: var(--text-color);
-    padding: 12px 60px;
-}
-
-.sidebar.close ~ .home{
-    left: 78px;
-    height: 100vh;
-    width: calc(100% - 78px);
-}
-body.dark .home .text{
-    color: var(--text-color);
-}
-
-/* Dashboard Overview Cards */
-.dashboard-overview {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-}
-
-.overview-card {
-   /* background-color: rgb(232, 122, 122); */
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 30%;
-    text-align: center;
-}
-
-.overview-card:first-child {
-    background-color: #2962ff;
+.img_icon img {
+    max-width: 100%; /* Ensures the image is responsive */
+    height: auto; /* Maintains the aspect ratio */
+    object-fit: contain; /* Ensures the entire image fits within the container */
+    width: 80px; /* Set a specific width if needed */
+    filter: drop-shadow(4px 0 0 rgba(0, 0, 0, 0.6)); /* Combined filters */
+    height: 10%; 
     
-  }
-  
-  .overview-card:nth-child(2) {
-    background-color: #ff6d00;
-  }
-  
-  .overview-card:nth-child(3) {
-    background-color: #2e7d32;
-  }
-
-.overview-card h3 {
-    color: var(--primary-color);
-    font-size: 18px;
-    margin-bottom: 10px;
 }
 
-.overview-card p {
-    font-size: 16px;
-    color: var(--text-color);
+/* Dark Mode Styles */
+body.dark-mode .custom-navbar{
+    background-color: var(--dark-secondary);
+    box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.434);
+}
+body.dark-mode #moonIcon {
+    color: #fff; /* Light color for the icon in dark mode */
+}
+.dark-mode {
+    background-color: var(--dark-background);
+    color: var(--dark-text);
 }
 
-/* Charts Section */
-.charts-container {
+/* Navbar */
+
+.dark-mode .navbar-mainbg {
+    background-color: var(--dark-accent);
+}
+
+.dark-mode .navbar-logo {
+    color: var(--dark-text);
+}
+
+.dark-mode .navbar-brand span {
+    color: var(--dark-primary);
+}
+
+.dark-mode #navbarSupportedContent ul li a {
+    color: white;
+}
+
+.dark-mode .navbar-toggler {
+    background-color: var(--dark-accent);
+}
+
+.dark-mode .navbar-nav .nav-link {
+    color: var(--dark-text-light);
+}
+
+.dark-mode .navbar-nav .nav-link.active {
+    color: var(--dark-primary);
+}
+
+.dark-mode .navbar-nav .nav-item .icon {
+    color: var(--dark-text-light);
+}
+
+/* Dark Mode Toggle */
+.dark-mode #darkModeToggle {
+    background-color: var(--dark-accent);
+    color: var(--dark-text);
+}
+
+.dark-mode #darkModeToggle .fa-moon {
+    color: var(--dark-text-light);
+}
+
+.dark-mode #logout {
+    background-color: var(--dark-primary);
+    color: var(--dark-text);
+}
+
+.dark-mode #logout:hover {
+    background-color: var(--dark-primary-dark);
+}
+
+/* Modify other components if necessary */
+.dark-mode .hori-selector .left,
+.dark-mode .hori-selector .right {
+    background-color: var(--dark-primary);
+}
+
+/* Adjust the other text and background colors as needed */
+.dark-mode .counting_box {
+    background-color: var(--dark-secondary);
+}
+
+.dark-mode .counting_user {
+    color: var(--dark-text-light);
+}
+
+/* Light Mode Styles */
+.light-mode {
     background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    color: #000;
 }
 
-.charts {
-    display: flex;
-    justify-content: space-between;
+/* Light Mode Navbar */
+.light-mode .navbar {
+    background-color: #f8f9fa;
 }
+
+/* Dark Mode for Hori-selector */
+.dark-mode .hori-selector {
+    background-color: var(--dark-primary);
+}
+
+.dark-mode .hori-selector .right,
+.dark-mode .hori-selector .left {
+    background-color: var(--dark-primary);
+}
+
+.dark-mode .hori-selector .right:before,
+.dark-mode .hori-selector .left:before {
+    background-color: var(--dark-secondary);
+}
+
+
+/* Dark Mode Specific Overrides */
+body.dark-mode footer {
+    background-color: var(--dark-secondary); /* Ensure dark background */
+    color: var(--dark-text); /* Ensure text color in dark mode */
+}
+
+body.dark-mode .footer__container {
+    color: var(--dark-text-light); /* Footer container text color for dark mode */
+}
+
+body.dark-mode .footer__col h3 {
+    color: var(--dark-text); /* Dark mode header color */
+}
+
+body.dark-mode .footer__col p {
+    color: var(--dark-text); /* Paragraph text color in dark mode */
+}
+
+body.dark-mode .footer__col p:hover {
+    color: var(--dark-primary); /* Highlight color on hover in dark mode */
+}
+
+body.dark-mode .footer__col a {
+    color: var(--dark-text); /* Links color in dark mode */
+}
+
+body.dark-mode .footer__col a:hover {
+    color: var(--dark-primary); /* Link hover color in dark mode */
+}
+
+body.dark-mode .footer__bar {
+    color: var(--dark-text-light); /* Light footer bar text color in dark mode */
+    border-top: 1px solid var(--dark-text-light); /* Dark mode border color */
+}
+
+  
+  body.dark-mode .footer__col h3,
+  body.dark-mode .footer__col p,
+  body.dark-mode .footer__col h4 {
+    color: var(--dark-text);
+  }
+  body.dark-mode .navbar-toggler i {
+    background-color: var(--dark-text);
+  }
