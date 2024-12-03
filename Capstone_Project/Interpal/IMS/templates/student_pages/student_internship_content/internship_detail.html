@@ -24,8 +24,8 @@
             <section>
                 <h3>Requirements</h3>
                 <ul>
-                    {% for requirement in internship.requirements.splitlines %}
-                        <li>{{ requirement }}</li>
+                    {% for required_skills in internship.required_skills.splitlines %}
+                        <li>{{ required_skills }}</li>
                     {% endfor %}
                 </ul>
             </section>

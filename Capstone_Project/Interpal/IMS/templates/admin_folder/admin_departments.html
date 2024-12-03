@@ -1,0 +1,65 @@
+{% extends 'admin_folder/admin_base.html' %}
+
+{% block content %}
+<div class="section-card">
+  <h3>Organization</h3>
+  
+  <!-- Organization Table -->
+  <table class="table table-striped" id="organizationTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Organization Name</th>
+        <th>Location</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for organization in organizations %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ organization.company_name }}</td>
+        <td>{{ organization.location }}</td>
+        <td>
+          <!-- Edit Button -->
+          <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ organization.id }}">Edit</button>
+          <!-- Delete Button -->
+          <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ organization.id }}">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Include DataTables Styles and Scripts -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable for Organizations
+        $('#organizationTable').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: 'Export to Excel',
+                    className: 'btn btn-success'
+                },
+                {
+                    extend: 'print',
+                    text: 'Print Table',
+                    className: 'btn btn-primary'
+                }
+            ]
+        });
+    });
+</script>
+{% endblock content %}

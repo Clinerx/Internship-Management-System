@@ -171,3 +171,14 @@ EMAIL_HOST_PASSWORD = 'zviy ttlc ymjh klyo'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default session engine
+
+
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+    'IMS.authentication.ApprovalBasedAuthenticationBackend',  # Add your custom backend here
+]
+
+
+INTERNSHIP_POSTING_LIMIT = 5

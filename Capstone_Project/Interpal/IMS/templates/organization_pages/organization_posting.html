@@ -3,8 +3,20 @@
 
 {% block content %}
 
-
-<!-- Button to open the modal -->
+<div id="deleteModal" class="modal" role="dialog" aria-labelledby="deleteModalTitle" aria-hidden="true" style="display: none;">
+    <div class="modal-content">
+        <span class="close close-delete-modal" aria-label="Close modal">&times;</span>
+        <h2 id="deleteModalTitle">Confirm Delete</h2>
+        <p>Are you sure you want to delete <span id="internshipTitleToDelete"></span>?</p>
+        <form id="deleteForm" method="POST">
+            {% csrf_token %}
+            <div class="form-button">
+                <button type="submit" class="btn btn-danger">Confirm</button>
+                <button type="button" class="btn btn-secondary close-delete-modal">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 
 <!-- Modal Structure -->
@@ -12,24 +24,36 @@
     <div class="modal-content">
         <span class="close" aria-label="Close modal">&times;</span>
         <h2 id="modalTitle">Posting Internship</h2>
-        <form class="internship-form" method="POST">
+        <h6 style="text-align: center;">Maximum Posting of Internship is 5</h6>
+        <form id="internshipForm" class="internship-form" method="POST">
             {% csrf_token %}
             <div class="form-column">
-                <div class="form-group" >
-                    <label for="internshipTitle">{{ form.title.label_tag }}</label>
-                    {{ form.title }}
-                </div>
+                <!-- Preferred College Dropdown -->
                 <div class="form-group">
-                    <label for="organizationName">{{ form.organization_name.label_tag }}</label>
-                    {{ form.organization_name }}
+                    <label for="preferredCollege">{{ form.preferred_college.label_tag }}</label>
+                    {{ form.preferred_college }}
                 </div>
             </div>
-
+            <div class="form-column">
+                <!-- Preferred Course (Dynamic Input) -->
+                <div class="form-group">
+                    <label for="preferredCourse">{{ form.preferred_course.label_tag }}</label>
+                    <select id="preferredCourse" name="preferred_course">
+                        <option value="">Select Course</option>
+                    </select>
+                </div>
+            </div>
             <div class="form-column">
                 <div class="form-group">
-                    <label for="location">{{ form.location.label_tag }}</label>
-                    {{ form.location }}
+                    <label for="internshipTitle">{{ form.title.label_tag }}</label>
+                    {{ form.title }}
+                    <!-- Placeholder for feedback message -->
+                    <p id="title-feedback-message" style="color: red; display: none;"></p>
                 </div>
+            </div>
+            
+
+            <div class="form-column">
                 <div class="form-group">
                     <label for="description">{{ form.description.label_tag }}</label>
                     {{ form.description }}
@@ -54,8 +78,8 @@
             </div>
             <div class="form-column">
                 <div class="form-group">
-                    <label for="desiredExperience">{{ form.desired_experience.label_tag }}</label>
-                    {{ form.desired_experience }}
+                    <label for="desiredExperience">{{ form.required_experience.label_tag }}</label>
+                    {{ form.required_experience }}
                 </div>
             </div>
             <div class="form-column">
@@ -66,39 +90,53 @@
             </div>
             
             <div class="form-button">
-                <button type="submit" class="btn btn-primary">Submit Posting</button>
+                <button type="button" class="btn btn-primary" id="submitButton">Submit Posting</button>
             </div>
         </form>
     </div>
 </div>
 
- <!-- Pagination controls -->
- 
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="modal" role="dialog" aria-labelledby="confirmationModalTitle" aria-hidden="true">
+    <div class="modal-content">
+        <span class="close" aria-label="Close modal">&times;</span>
+        <h4 id="confirmationModalTitle">Are you sure you want to post this internship?</h4>
+        <div class="modal-buttons">
+            <button type="button" class="btn btn-danger" id="confirmSubmit">Yes, Post</button>
+            <button type="button" class="btn btn-secondary" id="cancelSubmit">Cancel</button>
+        </div>
+    </div>
+</div>
+
 
 <hr>
 
 <section class="internship-postings-section">
     <h2>Posted Internships</h2>
-    <div class="btn_page_create">
-        <button id="openModalBtn" class="btn btn-primary">Create Internship</button>
-        <div class="pagination">
-            <span class="step-links">
-                {% if internships.has_previous %}
-                    <a href="?page=1">&laquo; First</a>
-                    <a href="?page={{ internships.previous_page_number }}">Previous</a>
-                {% endif %}
+    <div class="btn_page_create d-flex align-items-center justify-content-between">
+        <!-- Create Internship Button -->
+        <button id="openModalBtn" class="btn btn-primary" 
+            {% if current_postings_count >= posting_limit %} disabled {% endif %}>
+            Create Internship
+        </button>
         
-                <span class="current">
-                    Page {{ internships.number }} of {{ internships.paginator.num_pages }}
-                </span>
-        
-                {% if internships.has_next %}
-                    <a href="?page={{ internships.next_page_number }}">Next</a>
-                    <a href="?page={{ internships.paginator.num_pages }}">Last &raquo;</a>
-                {% endif %}
-            </span>
+        <!-- Informative text about the posting limit -->
+        <div class="posting-limit-info">
+            {% if current_postings_count >= posting_limit %}
+                <p class="alert alert-danger">
+                    <i class="bx bx-info-circle"></i> You have reached the posting limit of {{ posting_limit }} internships. 
+                    <br><strong>Maximum limit of postings reached!</strong>
+                </p>
+            {% else %}
+                <p class="alert alert-success">
+                    <i class="bx bx-check-circle"></i> You can still post {{ remaining_postings }} more internships.
+                </p>
+            {% endif %}
         </div>
     </div>
+    
+    
     
     <div class="table-responsive posting-section">
         <table class="table table-bordered internship-table">
@@ -127,7 +165,7 @@
 
                         <!-- Internship Details -->
                         <td>{{ internship.title }}</td>
-                        <td>{{ internship.location }}</td>
+                        <td>{{ internship.organization.location }}</td>
                         <th>{{ internship.max_applicants}}</th>
                         <td>{{ internship.created_at|date:"F d, Y" }}</td>
 
@@ -165,6 +203,45 @@
 </section>
 
 <style>
+    .btn_page_create {
+        margin-bottom: 20px; /* Add space between button section and table */
+    }
+    
+    .posting-limit-info {
+        max-width: 500px; /* Restrict the width for better readability */
+        font-size: 14px; /* Ensure the text is legible */
+        padding: 10px; /* Add spacing around the text */
+    }
+    
+    .posting-limit-info p {
+        margin: 0; /* Remove default margin for consistent spacing */
+    }
+    
+    .alert {
+        display: flex; /* Make sure icons align with text */
+        align-items: center;
+        gap: 10px; /* Space between icon and text */
+        padding: 10px 15px; /* Add padding for better visibility */
+        border-radius: 5px; /* Soften corners for a polished look */
+        font-weight: bold; /* Emphasize important information */
+    }
+    
+    .alert i {
+        font-size: 18px; /* Make the icon size consistent */
+    }
+    
+    
+    .text-muted {
+        font-size: 14px;
+        color: #6c757d;
+    }
+    
+    .btn:disabled {
+        background-color: #d6d6d6;
+        border-color: #b5b5b5;
+        color: #777;
+    }
+    
     .internship-postings-section{
         padding: 130px 100px;
     }
@@ -194,7 +271,7 @@
     .modal-content {
         background-color: #ffffff;
         padding: 20px;
-        margin-top: 95%;
+        margin-top: 75%;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
         max-width: 600px;
@@ -273,7 +350,6 @@
     }
 
     .form-button button {
-        background-color: #007bff;
         color: #ffffff;
         border: none;
         padding: 10px 20px;
@@ -447,7 +523,7 @@
 #deleteModal {
     display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 2000;
     left: 0;
     top: 0;
     width: 100%;
@@ -461,6 +537,7 @@
 #deleteModal .modal-content {
     background-color: #ffffff;
     padding: 20px;
+    margin-top: -10px;
     border-radius: 10px;
     max-width: 400px;
     text-align: center;
@@ -518,34 +595,122 @@
     }
 }
 
+#confirmationModal {
+    display: none;
+    position: fixed;
+    z-index: 2000; /* Ensure it is above the posting modal */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+    padding-top: 60px;
+}
+
+#confirmationModal .modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    margin-top: 150px;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+}
+
+#confirmationModal .modal-buttons {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#confirmationModal .modal-buttons button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+#confirmationModal .close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#confirmationModal .close:hover,
+#confirmationModal .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+/* Basic styles for the modal (Posting Modal) */
+#postingModal {
+    display: none;
+    position: fixed;
+    z-index: 1500;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+    padding-top: 60px;
+}
+
+#postingModal .modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    margin-top: 100%;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+}
+
+#postingModal .close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#postingModal .close:hover,
+#postingModal .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
 
 </style>
-<!-- Styles for Modal -->
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var modal = document.getElementById("postingModal");
+        var postingModal = document.getElementById("postingModal");
         var openModalBtn = document.getElementById("openModalBtn");
-        var closeModalBtn = document.querySelector(".close");
-
-        // Open the modal when the button is clicked
+        var closeModalBtn = postingModal.querySelector(".close"); // More specific selector
+    
+        // Open modal
         openModalBtn.onclick = function () {
-            modal.style.display = "flex";
-            modal.setAttribute("aria-hidden", "false");
+            postingModal.style.display = "flex";
+            postingModal.setAttribute("aria-hidden", "false");
         };
-
-        // Close the modal when the 'X' button is clicked
+    
+        // Close modal via close button
         closeModalBtn.onclick = function () {
-            modal.style.display = "none";
-            modal.setAttribute("aria-hidden", "true");
+            postingModal.style.display = "none";
+            postingModal.setAttribute("aria-hidden", "true");
         };
-
-        // Close the modal if user clicks outside of the modal content
+    
+        // Close modal by clicking outside
         window.onclick = function (event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-                modal.setAttribute("aria-hidden", "true");
+            if (event.target == postingModal) {
+                postingModal.style.display = "none";
+                postingModal.setAttribute("aria-hidden", "true");
             }
         };
+    
+    
 
         // Show the notification if the internship was posted
         {% if internship_posted %}
@@ -601,8 +766,284 @@
     });
 
 
+        // Confirmation Modal Logic
+        document.addEventListener('DOMContentLoaded', function () {
+            var confirmationModal = document.getElementById("confirmationModal");
+            var submitButton = document.getElementById("submitButton");
+            var confirmSubmit = document.getElementById("confirmSubmit");
+            var cancelSubmit = document.getElementById("cancelSubmit");
+            var internshipForm = document.getElementById("internshipForm"); // Reference the form by ID
+        
+            // Open the confirmation modal when clicking the submit button
+            submitButton.onclick = function() {
+                confirmationModal.style.display = "block"; // Show the confirmation modal
+            };
+        
+            // Submit the form when clicking "Yes, Post"
+            confirmSubmit.onclick = function() {
+                internshipForm.submit(); // Submit the form
+            };
+        
+            // Close the confirmation modal when clicking "Cancel"
+            cancelSubmit.onclick = function() {
+                confirmationModal.style.display = "none"; // Hide the confirmation modal
+            };
+        
+            // Optional: Close the modal if clicking outside of it
+            window.onclick = function(event) {
+                if (event.target === confirmationModal) {
+                    confirmationModal.style.display = "none";
+                }
+            };
+        });
 
-    
+        document.addEventListener('DOMContentLoaded', function() {
+            const collegeCourses = {
+                'College of Arts and Humanities': {
+                    'Bachelor of Arts in Communication': [
+                        'Journalism Intern', 'Media Relations Intern', 'Public Relations Intern', 'Broadcasting Intern',
+                        'Social Media Intern', 'Content Creation Intern', 'Advertising Intern', 'Copywriting Intern',
+                        'Film Production Intern', 'TV Production Intern', 'Editorial Intern', 'Publishing Intern',
+                        'Brand Strategy Intern', 'Public Information Officer Intern', 'Radio Intern', 'Speech Writing Intern'
+                    ],
+                    'Bachelor of Arts in Political Science': [
+                        'Political Campaign Intern', 'Policy Research Intern', 'Legislative Assistant Intern', 'Diplomatic Affairs Intern',
+                        'Political Analysis Intern', 'International Relations Intern', 'Government Affairs Intern', 'Public Policy Intern',
+                        'Advocacy and Lobbying Intern', 'Campaign Management Intern', 'Public Relations Intern', 'Elections Strategy Intern',
+                        'Human Rights Intern', 'Urban Planning Intern', 'Advocacy Coordinator Intern', 'Government Communications Intern'
+                    ],
+                    'Bachelor of Arts in Philippine Studies': [
+                        'Cultural Research Intern', 'History Research Intern', 'Ethnographic Fieldwork Intern', 'Museum Intern',
+                        'Cultural Program Intern', 'Heritage Preservation Intern', 'Language Documentation Intern', 'Filipino Literature Intern',
+                        'Social Research Intern', 'Community Outreach Intern', 'Public Policy Intern', 'Tourism Development Intern',
+                        'Cultural Consultant Intern', 'Cultural Affairs Intern', 'Archivist Intern'
+                    ],
+                    'Bachelor of Science in Social Work': [
+                        'Social Work Intern', 'Family Support Intern', 'Youth Services Intern', 'Community Outreach Intern',
+                        'Case Management Intern', 'Crisis Intervention Intern', 'Rehabilitation Intern', 'Social Services Intern',
+                        'Child Protection Intern', 'Mental Health Support Intern', 'Addiction Counseling Intern', 'Humanitarian Aid Intern',
+                        'Domestic Violence Support Intern', 'Elderly Care Intern', 'Community Welfare Intern'
+                    ],
+                    'Bachelor of Science in Psychology': [
+                        'Psychology Intern', 'Clinical Psychology Intern', 'Counseling Intern', 'Behavioral Psychology Intern',
+                        'Human Resources Intern', 'Organizational Psychology Intern', 'Mental Health Support Intern', 'Neuropsychology Intern',
+                        'Therapy Intern', 'School Psychology Intern', 'Forensic Psychology Intern', 'Health Psychology Intern',
+                        'Life Coaching Intern', 'Research Assistant Intern', 'Psychiatric Support Intern'
+                    ]
+                },
+                'College of Business and Accountancy': {
+                    'Bachelor of Science in Accountancy': [
+                        'Accounting Intern', 'Audit Intern', 'Tax Intern', 'Financial Analyst Intern', 'Budgeting Intern',
+                        'Management Accounting Intern', 'Internal Auditor Intern', 'External Auditor Intern', 'Bookkeeping Intern',
+                        'Cost Accounting Intern', 'Corporate Finance Intern', 'Risk Management Intern', 'Investment Intern',
+                        'Forensic Accounting Intern', 'Tax Preparation Intern'
+                    ],
+                    'Bachelor of Science in Management Accounting': [
+                        'Management Accountant Intern', 'Financial Analyst Intern', 'Cost Accounting Intern', 'Budgeting Intern',
+                        'Internal Audit Intern', 'Accounting Clerk Intern', 'Financial Reporting Intern', 'Business Planning Intern',
+                        'Investment Analyst Intern', 'Corporate Finance Intern', 'Management Consultant Intern', 'Tax Intern',
+                        'Business Strategy Intern', 'Operational Efficiency Intern', 'Payroll Intern'
+                    ],
+                    'Bachelor of Science in Business Administration': [
+                        'Business Analyst Intern', 'Human Resources Intern', 'Marketing Intern', 'Sales Intern', 'Operations Intern',
+                        'Business Development Intern', 'Project Management Intern', 'Supply Chain Intern', 'Public Relations Intern',
+                        'Event Planning Intern', 'Customer Service Intern', 'Product Management Intern', 'Corporate Communications Intern',
+                        'Brand Management Intern', 'Management Consultant Intern'
+                    ],
+                    'Bachelor of Science in Entrepreneurship': [
+                        'Startup Intern', 'Business Development Intern', 'Product Development Intern', 'Market Research Intern',
+                        'Venture Capital Intern', 'Small Business Intern', 'Social Media Intern', 'Sales Intern', 'Marketing Intern',
+                        'Financial Analyst Intern', 'Operations Intern', 'Supply Chain Management Intern', 'Customer Experience Intern',
+                        'E-Commerce Intern', 'Growth Hacking Intern'
+                    ],
+                    'Bachelor of Science in Public Administration': [
+                        'Public Policy Intern', 'Government Affairs Intern', 'Public Relations Intern', 'Legislative Intern',
+                        'Policy Analyst Intern', 'Nonprofit Management Intern', 'Community Outreach Intern', 'Public Health Intern',
+                        'Urban Planning Intern', 'Environmental Policy Intern', 'Public Affairs Intern', 'Human Resources Intern',
+                        'Public Relations Officer Intern', 'Civic Engagement Intern', 'Social Welfare Intern'
+                    ]
+                },
+                'College of Criminal Justice Education': {
+                    'Bachelor of Science in Criminology': [
+                        'Criminal Justice Intern', 'Police Intern', 'Crime Scene Investigator Intern', 'Forensic Science Intern',
+                        'Correctional Facility Intern', 'Legal Assistant Intern', 'Law Enforcement Intern', 'Security Services Intern',
+                        'Private Investigator Intern', 'Victim Advocacy Intern', 'Juvenile Justice Intern', 'Criminal Law Intern',
+                        'Public Safety Intern', 'Criminal Profiling Intern', 'Emergency Management Intern'
+                    ]
+                },
+                'College of Engineering, Architecture, and Technology': {
+                    'Bachelor of Science in Architecture': [
+                        'Architectural Intern', 'Urban Planning Intern', 'Construction Management Intern', 'Building Design Intern',
+                        'Sustainability Design Intern', 'Landscape Architecture Intern', 'Architectural Drafting Intern', 'Interior Design Intern',
+                        'Structural Engineering Intern', 'Project Management Intern', 'Urban Development Intern', 'Construction Surveying Intern',
+                        'Building Materials Intern', 'CAD Design Intern', 'Environmental Design Intern'
+                    ],
+                    'Bachelor of Science in Civil Engineering': [
+                        'Civil Engineering Intern', 'Structural Engineering Intern', 'Construction Project Intern', 'Geotechnical Engineering Intern',
+                        'Transportation Engineering Intern', 'Surveying Intern', 'Water Resources Engineering Intern', 'Environmental Engineering Intern',
+                        'Highway Design Intern', 'Municipal Engineering Intern', 'Bridge Engineering Intern', 'Site Development Intern',
+                        'Structural Design Intern', 'Building Codes and Regulations Intern', 'Engineering Research Intern'
+                    ],
+                    'Bachelor of Science in Electrical Engineering': [
+                        'Electrical Engineering Intern', 'Power Systems Engineering Intern', 'Circuit Design Intern', 'Electronics Intern',
+                        'Control Systems Intern', 'Energy Systems Intern', 'Telecommunications Engineering Intern', 'Renewable Energy Intern',
+                        'Automation Engineering Intern', 'Electrical Safety Intern', 'Robotics Engineering Intern', 'Instrumentation Engineering Intern',
+                        'Signal Processing Intern', 'Electrical Testing Intern', 'Electrical Project Management Intern'
+                    ],
+                    'Bachelor of Science in Mechanical Engineering': [
+                        'Mechanical Engineering Intern', 'Manufacturing Intern', 'Thermal Systems Intern', 'Product Design Intern',
+                        'Mechanical Drafting Intern', 'Robotics Engineering Intern', 'Fluid Dynamics Intern', 'Material Science Intern',
+                        'Automotive Engineering Intern', 'HVAC Systems Intern', 'Aerodynamics Intern', 'Energy Systems Intern',
+                        'Mechanical Testing Intern', '3D Modeling Intern', 'Engineering Design Intern'
+                    ],
+                    'Bachelor of Science in Petroleum Engineering': [
+                        'Petroleum Engineering Intern', 'Drilling Engineering Intern', 'Reservoir Engineering Intern', 'Production Engineering Intern',
+                        'Geology Intern', 'Energy Exploration Intern', 'Petroleum Geophysics Intern', 'Hydrocarbon Engineering Intern',
+                        'Oilfield Operations Intern', 'Environmental Compliance Intern', 'Energy Policy Intern', 'Offshore Engineering Intern',
+                        'Subsea Engineering Intern', 'Energy Sustainability Intern', 'Pipeline Engineering Intern'
+                    ]
+                },
+                'College of Hospitality Management and Tourism': {
+                    'Bachelor of Science in Hospitality Management': [
+                        'Hotel Management Intern', 'Event Planning Intern', 'Restaurant Management Intern', 'Food and Beverage Intern',
+                        'Tourism Management Intern', 'Customer Service Intern', 'Resort Management Intern', 'Front Desk Intern',
+                        'Catering Services Intern', 'Travel Agency Intern', 'Hospitality Marketing Intern', 'Tour Guide Intern',
+                        'Concierge Services Intern', 'Guest Relations Intern', 'Housekeeping Operations Intern'
+                    ],
+                    'Bachelor of Science in Tourism Management': [
+                        'Tourism Marketing Intern', 'Travel Agency Intern', 'Destination Management Intern', 'Event Planning Intern',
+                        'Tour Guide Intern', 'Hospitality Services Intern', 'Eco-Tourism Intern', 'Tourism Research Intern',
+                        'Sustainable Tourism Intern', 'Tourism Development Intern', 'Tour Operations Intern', 'Cultural Tourism Intern',
+                        'Cruise Operations Intern', 'International Tourism Intern', 'Event Coordination Intern'
+                    ]
+                },
+               'College of Nursing and Health Sciences': {
+                    'Bachelor of Science in Nursing': [
+                        'Nursing Intern', 'Pediatric Nursing Intern', 'Emergency Room Nursing Intern', 'Surgical Nursing Intern',
+                        'Geriatric Nursing Intern', 'Mental Health Nursing Intern', 'Community Health Nursing Intern', 'Obstetric Nursing Intern',
+                        'Critical Care Nursing Intern', 'Public Health Nursing Intern', 'Rehabilitation Nursing Intern', 'Cardiovascular Nursing Intern',
+                        'Oncology Nursing Intern', 'Diabetes Nursing Intern', 'Nursing Research Intern'
+                    ],
+                    'Bachelor of Science in Midwifery': [
+                        'Midwifery Intern', 'Obstetrics Intern', 'Postpartum Care Intern', 'Prenatal Care Intern', 'Newborn Care Intern',
+                        'Maternal Health Intern', 'Women’s Health Intern', 'Emergency Midwifery Care Intern', 'Family Planning Intern',
+                        'Midwifery Research Intern', 'Community Health Midwifery Intern', 'Clinical Midwifery Intern', 'Midwifery Education Intern',
+                        'Perinatal Care Intern', 'Public Health Midwifery Intern'
+                    ]
+                },
+                'College of Sciences': {
+                    'Bachelor of Science in Marine Biology': [
+                        'Marine Biology Intern', 'Aquatic Ecology Intern', 'Coral Reef Research Intern', 'Oceanography Intern',
+                        'Marine Conservation Intern', 'Fisheries Management Intern', 'Aquaculture Intern', 'Environmental Science Intern',
+                        'Marine Ecosystem Intern', 'Wildlife Rehabilitation Intern', 'Marine Species Identification Intern', 'Beach Management Intern',
+                        'Coastal Management Intern', 'Marine Education Intern', 'Research Assistant Intern'
+                    ],
+                    'Bachelor of Science in Computer Science': [
+                        'Software Development Intern', 'Data Science Intern', 'Cybersecurity Intern', 'Web Development Intern',
+                        'Mobile App Development Intern', 'Database Management Intern', 'AI Development Intern', 'Cloud Computing Intern',
+                        'Game Development Intern', 'IT Support Intern', 'Networking Intern', 'Machine Learning Intern',
+                        'Tech Support Intern', 'UX/UI Design Intern', 'Systems Engineering Intern'
+                    ],
+                    'Bachelor of Science in Environmental Science': [
+                        'Environmental Research Intern', 'Sustainability Intern', 'Ecology Intern', 'Climate Change Intern',
+                        'Water Quality Intern', 'Soil Science Intern', 'Wildlife Conservation Intern', 'Environmental Policy Intern',
+                        'Waste Management Intern', 'Air Quality Intern', 'Natural Resource Management Intern', 'Geospatial Science Intern',
+                        'Energy Conservation Intern', 'Environmental Impact Assessment Intern', 'Environmental Education Intern'
+                    ],
+                    'Bachelor of Science in Information Technology': [
+                        'IT Support Intern', 'Network Administration Intern', 'Database Administration Intern', 'Web Development Intern',
+                        'Software Testing Intern', 'Cloud Computing Intern', 'System Administration Intern', 'Cybersecurity Intern',
+                        'Mobile App Development Intern', 'Data Analytics Intern', 'Information Systems Intern', 'Tech Support Intern',
+                        'Business IT Intern', 'Project Management Intern', 'Digital Transformation Intern'
+                    ]
+                }, 
+                'College of Teacher Education': {
+                    'Bachelor of Elementary Education': [
+                        'Elementary School Teacher Intern', 'Special Education Intern', 'Child Development Intern', 'Early Childhood Education Intern',
+                        'Classroom Management Intern', 'Educational Research Intern', 'Literacy Development Intern', 'Curriculum Design Intern',
+                        'Teaching Assistant Intern', 'Primary Education Intern', 'Language Arts Education Intern', 'Math Education Intern',
+                        'Science Education Intern', 'Social Studies Education Intern', 'Educational Psychology Intern'
+                    ],
+                    'Bachelor of Secondary Education': [
+                        'Secondary School Teacher Intern', 'Subject Specialist Intern', 'Math Education Intern', 'English Education Intern',
+                        'Science Education Intern', 'History Education Intern', 'Physical Science Education Intern', 'Curriculum Development Intern',
+                        'Classroom Management Intern', 'Education Research Intern', 'Assessment and Evaluation Intern', 'School Administration Intern',
+                        'Guidance Counselor Intern', 'Technology Integration Intern', 'Student Affairs Intern'
+                    ],
+                    'Bachelor of Physical Education': [
+                        'Physical Education Teacher Intern', 'Sports Coaching Intern', 'Fitness Instructor Intern', 'Exercise Science Intern',
+                        'Sports Management Intern', 'Recreation Program Intern', 'Athletic Training Intern', 'Sports Event Coordination Intern',
+                        'Health Education Intern', 'Physical Activity Promotion Intern', 'Sports Psychology Intern', 'Kinesiology Intern',
+                        'Physical Fitness Intern', 'Sports Medicine Intern', 'Rehabilitation Intern'
+                    ]
+                },
+            };
+        
+            const preferredCollegeSelect = document.getElementById('id_preferred_college');
+            const preferredCourseSelect = document.getElementById('preferredCourse');
+            const titleInput = document.querySelector('input[name="title"]');
+            const feedbackMessage = document.getElementById('title-feedback-message');  // Placeholder for feedback
+        
+            // Function to update courses based on selected college
+            function updateCourses() {
+                const selectedCollege = preferredCollegeSelect.value;
+                const courses = collegeCourses[selectedCollege] || {};
+        
+                preferredCourseSelect.innerHTML = '<option value="">Select Course</option>';
+        
+                Object.keys(courses).forEach(function(course) {
+                    const option = document.createElement('option');
+                    option.value = course;
+                    option.textContent = course;
+                    preferredCourseSelect.appendChild(option);
+                });
+            }
+        
+            // Function to check title relevance as the user types
+            function checkTitleRelevance() {
+                const selectedCollege = preferredCollegeSelect.value;
+                const selectedCourse = preferredCourseSelect.value;
+                const enteredTitle = titleInput.value.toLowerCase();
+        
+                if (selectedCollege && selectedCourse && enteredTitle) {
+                    const relatedTerms = collegeCourses[selectedCollege]?.[selectedCourse] || [];
+                    const isRelevant = relatedTerms.some(term => enteredTitle.includes(term.toLowerCase()));
+        
+                    // Show feedback message if title is not relevant
+                    if (!isRelevant) {
+                        feedbackMessage.textContent = `The title does not seem relevant, Please include terms such as ${relatedTerms.join('", "')}.`;
+                        feedbackMessage.style.display = 'block';  // Show message
+                    } else {
+                        // Check for extra, non-relevant text
+                        const validTitle = relatedTerms.some(term => enteredTitle === term.toLowerCase());
+        
+                        if (!validTitle) {
+                            feedbackMessage.textContent = `This internship title is invalid. It should exactly match one of the related internships, such as "${relatedTerms.join('", "')}".`;
+                            feedbackMessage.style.display = 'block';  // Show message for invalid internship
+                        } else {
+                            // Clear feedback message if title is valid
+                            feedbackMessage.textContent = '';
+                            feedbackMessage.style.display = 'none';  // Hide message
+                        }
+                    }
+                } else {
+                    // Show message when title is missing or incomplete
+                    feedbackMessage.textContent = 'Please select a course and enter a title.';
+                    feedbackMessage.style.display = 'block';  // Show message
+                }
+            }
+        
+            // Event listener for college select change
+            preferredCollegeSelect.addEventListener('change', updateCourses);
+        
+            // Event listener for title input change
+            titleInput.addEventListener('input', checkTitleRelevance);
+        
+            updateCourses(); // Populate courses on page load
+        });
+        
+        
+        
 </script>
 
 {% endblock content %}

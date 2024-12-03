@@ -20,6 +20,7 @@
                     <th>Applicant</th>
                     <th>Course</th>
                     <th>College</th>
+                    <th>Score</th>
                     <th>Applied On</th>
                     <th>Status</th>
                     <th>Already Hired</th>
@@ -28,15 +29,7 @@
             </thead>
             <tbody>
                 {% for application in apps %}
-                    {% if application.is_hired %}
-                        {% if application.hiring_organization != organization.id %}
-                            <tr class="table-disabled">
-                        {% else %}
-                            <tr>
-                        {% endif %}
-                    {% else %}
-                        <tr>
-                    {% endif %}
+                    <tr>
                         <td>
                             {% if application.student.profile_picture %}
                                 <img src="{{ application.student.profile_picture.url }}" alt="Profile Picture" class="profile-img">
@@ -47,6 +40,14 @@
                         </td>
                         <td>{{ application.student.course }}</td>
                         <td>{{ application.student.college }}</td>
+                        <td>
+                            <span class="badge 
+                            {% if application.similarity_score > 80 %}badge-high
+                            {% elif application.similarity_score > 50 %}badge-medium
+                            {% else %}badge-low{% endif %}">
+                                {{ application.similarity_score }}%
+                            </span>
+                        </td>
                         <td>{{ application.applied_at|date:"F d, Y" }}</td>
                         <td>
                             <span class="badge 
@@ -64,16 +65,12 @@
                             {% endif %}
                         </td>
                         <td class="applicant-actions">
-                            {% if not application.is_hired or application.hiring_organization == organization.id %}
-                                <a href="{% url 'view_application' application.id %}" class="btn btn-primary">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
-                                <button type="button" class="btn btn-danger" onclick="openModal('{% url 'delete_application' application.id %}')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            {% else %}
-                                <span class="text-muted">Actions Disabled</span>
-                            {% endif %}
+                            <a href="{% url 'view_application' application.id %}" class="btn btn-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <button type="button" class="btn btn-danger" onclick="openModal('{% url 'delete_application' application.id %}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
                         </td>
                     </tr>
                 {% empty %}
@@ -82,6 +79,7 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            
         </table>
     </div>
     {% endfor %}
@@ -138,6 +136,21 @@
     body {
         font-family: 'Poppins', sans-serif;
     }
+    .badge-high {
+        background-color: #28a745; /* Green for high scores */
+        color: #fff;
+    }
+    
+    .badge-medium {
+        background-color: #ffc107; /* Yellow for medium scores */
+        color: #000;
+    }
+    
+    .badge-low {
+        background-color: #dc3545; /* Red for low scores */
+        color: #fff;
+    }
+    
 
     .application-list h2 {
         font-size: 2.5em; /* Larger, more prominent font size */

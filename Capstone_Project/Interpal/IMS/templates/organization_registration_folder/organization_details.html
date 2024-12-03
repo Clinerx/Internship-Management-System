@@ -6,24 +6,163 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Organization Registration</title>
     <link rel="stylesheet" href="{% static 'loginForm.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #f7f8fc, #e9efff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .registration-container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+            margin-top: 10px;
+            padding: 30px 40px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 30px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+
+            /* Other styles remain the same */
+
+            input[type="text"], input[type="email"], input[type="password"] {
+                width: 100%;
+                padding: 8px; /* Reduced padding */
+                border: 1px solid rgba(23, 33, 52, 0.667);
+                border-radius: 6px; /* Optional: adjust border radius to be smaller */
+                font-size: 14px; /* Reduced font size */
+                color: #333;
+                margin-bottom: 10px;
+                transition: all 0.3s ease;
+            }
+
+            input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+                border-color: #007bff;
+                outline: none;
+                margin-bottom: 10px;
+                box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+            }
+
+
+
+            button:hover {
+                background: linear-gradient(45deg, #0056b3, #007bff);
+                transform: translateY(-2px);
+            }
+
+
+
+        .name-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .name-container .form-group {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px; /* Slightly reduced padding for button */
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 6px; /* Adjusted for consistency with smaller input fields */
+            font-size: 15px;
+            color: #fff;
+            cursor: pointer;
+            margin: 15px 0;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #0056b3, #007bff);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .message p {
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .message p.error {
+            color: #f44336;
+        }
+
+        .message p.success {
+            color: #4caf50;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .registration-container {
+                padding: 20px;
+                margin-top: 50px;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="registration-container">
+     <div class="registration-container">
         <h2>Organization Registration</h2>
         <form action="{% url 'organization_details' %}" method="post">
             {% csrf_token %}
-
-            <!-- Company Name Field -->
-            <label for="company_name">Company Name:</label>
-            <input type="text" id="company_name" name="company_name" value="{{ company_name }}" required>
-
-            <!-- Employee First Name -->
-            <label for="first_name">Employee First Name:</label>
-            <input type="text" id="first_name" name="first_name" value="{{ first_name }}" required>
-
-            <!-- Employee Last Name -->
-            <label for="last_name">Employee Last Name:</label>
-            <input type="text" id="last_name" name="last_name" value="{{ last_name }}" required>
 
             <!-- Company Email -->
             <label for="company_email">Company Email:</label>
@@ -42,6 +181,20 @@
 
             {% if otp_confirmed %}
                 <!-- Shown after OTP is confirmed -->
+                 <!-- Company Name Field -->
+                <label for="company_name">Company Name:</label>
+                <input type="text" id="company_name" name="company_name" value="{{ company_name }}" required>
+
+                <label for="location">Location:</label>
+                <input type="text" id="location" name="location" value="{{ location }}" required>
+
+                <!-- Employee First Name -->
+                <label for="first_name">Employee First Name:</label>
+                <input type="text" id="first_name" name="first_name" value="{{ first_name }}" required>
+
+                <!-- Employee Last Name -->
+                <label for="last_name">Employee Last Name:</label>
+                <input type="text" id="last_name" name="last_name" value="{{ last_name }}" required>
                 <!-- Create Password -->
                 <label for="password">Create Password:</label>
                 <input type="password" id="password" name="password" required>

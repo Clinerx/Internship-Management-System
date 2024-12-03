@@ -9,12 +9,18 @@
             {% csrf_token %}
             <div class="form_column">
                 <div class="form_group">
-                    <label for="internshipTitle">{{ form.title.label_tag }}</label>
-                    {{ form.title }}
+                    <label for="internshipTitle">{{ form.preferred_college.label_tag }}</label>
+                    {{ form.preferred_college }}
                 </div>
                 <div class="form_group">
-                    <label for="location">{{ form.location.label_tag }}</label>
-                    {{ form.location }}
+                    <label for="internshipTitle">{{ form.preferred_course.label_tag }}</label>
+                    {{ form.preferred_course }}
+                </div>
+            </div>
+            <div class="form_column">
+                <div class="form_group">
+                    <label for="internshipTitle">{{ form.title.label_tag }}</label>
+                    {{ form.title }}
                 </div>
             </div>
 
@@ -22,10 +28,6 @@
                 <div class="form_group">
                     <label for="description">{{ form.description.label_tag }}</label>
                     {{ form.description }}
-                </div>
-                <div class="form_group">
-                    <label for="requirements">{{ form.requirements.label_tag }}</label>
-                    {{ form.requirements }}
                 </div>
             </div>
             <div class="form_column">
@@ -41,8 +43,8 @@
 
             <div class="form_column">
                 <div class="form_group">
-                    <label for="desiredExperience">{{ form.desired_experience.label_tag }}</label>
-                    {{ form.desired_experience }}
+                    <label for="desiredExperience">{{ form.required_experience.label_tag }}</label>
+                    {{ form.required_experience }}
                     <label for="maxApplicants">{{ form.max_applicants.label_tag }}</label>
                     {{ form.max_applicants }}
                 </div>

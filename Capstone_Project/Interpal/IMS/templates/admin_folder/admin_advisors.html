@@ -1,0 +1,111 @@
+<!-- templates/admin/advisors.html -->
+{% extends 'admin_folder/admin_base.html' %} 
+{% block content %}
+<div id="advisorsContent" class="section-card" >
+  <h3>Advisors</h3>
+
+  <button
+    class="btn btn-primary mb-3"
+    data-bs-toggle="modal"
+    data-bs-target="#addAdvisorModal"
+  >
+    Add New Advisor
+  </button>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Advisor Name</th>
+        <th>Department</th>
+        <th>Contact</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Dr. John Smith</td>
+        <td>Computer Science</td>
+        <td>john.smith@example.com</td>
+        <td>
+          <button class="btn btn-warning btn-sm">Edit</button>
+          <button class="btn btn-danger btn-sm delete-advisor-btn">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Ms. Emily Davis</td>
+        <td>Mathematics</td>
+        <td>emily.davis@example.com</td>
+        <td>
+          <button class="btn btn-warning btn-sm">Edit</button>
+          <button class="btn btn-danger btn-sm delete-advisor-btn">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <!-- Additional rows can be added dynamically -->
+    </tbody>
+  </table>
+</div>
+<!--for modal sa add ng advisor-->
+<div
+  class="modal fade"
+  id="addAdvisorModal"
+  tabindex="-1"
+  aria-labelledby="addAdvisorModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAdvisorModalLabel">Add New Advisor</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="addAdvisorForm">
+          <div class="mb-3">
+            <label for="advisorName" class="form-label">Advisor Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="advisorName"
+              placeholder="Enter advisor's name"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="department" class="form-label">Department</label>
+            <input
+              type="text"
+              class="form-control"
+              id="department"
+              placeholder="Enter department"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="contact" class="form-label">Contact</label>
+            <input
+              type="email"
+              class="form-control"
+              id="contact"
+              placeholder="Enter contact email"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Add Advisor</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

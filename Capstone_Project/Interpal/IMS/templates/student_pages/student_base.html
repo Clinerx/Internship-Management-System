@@ -472,7 +472,7 @@
     
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ml-auto">
-                {% if request.resolver_match.url_name in 'student_dashboard student_internships student_status about_us' %}
+                {% if request.resolver_match.url_name in 'student_dashboard student_internships student_status' %}
                     <div class="hori-selector">
                         <div class="left"></div>
                         <div class="right"></div>
@@ -487,9 +487,6 @@
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'student_status' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'student_status' %}"><i class="far fa-clone"></i>Internship Status</a>
-                </li>
-                <li class="nav-item {% if request.resolver_match.url_name == 'about_us' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'about_us' %}"><i class="fas fa-info-circle"></i>About Us</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="logout" href="#" onclick="openLogoutModal()" style="background-color: #3685fb; border-radius: 10px; color: #fff; margin-left: 20px;">
@@ -526,23 +523,6 @@
 
 
 
-    <!-- Notification Modal -->
-    <div class="notification-modal-overlay" id="notificationModal">
-        <div class="notification-modal">
-            <div class="notification-modal-header">
-                <h5>Notifications</h5>
-                <button onclick="closeNotificationModal()">Close</button>
-            </div>
-            <div class="notification-modal-body">
-                <ul>
-                    <li>Notification 1: Details here...</li>
-                    <li>Notification 2: Details here...</li>
-                    <li>Notification 3: Details here...</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
     <footer class="footer">
         <div class="footer__container">
             <!-- Logo and Description -->
@@ -550,23 +530,13 @@
                 <h3>InternPal<span>.</span></h3>
                 <p>Explore your dream internships within Palawan. Find your right destination here.</p>
             </div>
-    
-            <!-- Support Links -->
-            <div class="footer__col">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="#" onclick="openModal(event, 'termsConditionsModal')">Terms & Conditions</a></li>
-                    <li><a href="#" onclick="openModal(event, 'privacyPolicyModal')">Privacy Policy</a></li>
-                    <li><a href="mailto:psuinterpal@gmail.com">Contact Us</a></li>
-                </ul>
-            </div>
-    
+
             <!-- Address -->
             <div class="footer__col">
                 <h4>Address</h4>
                 <p><span>Location:</span> Sta. Monica, NHA Ville, Puerto Princesa City</p>
                 <p><span>Email:</span> <a href="mailto:psuinterpal@gmail.com">psuinterpal@gmail.com</a></p>
-                <p><span>Phone:</span> <a href="tel:+639123456789">09123456789</a></p>
+                <p><span>Phone:</span> <a href="tel:+63909-608-7338">0909-608-7338</a></p>
             </div>
     
             <!-- Social Media Links -->
@@ -610,13 +580,9 @@
     <script>window.location.href = "{% url 'login' %}";</script>
 {% endif %}
 
-   <!-- Bootstrap JS and dependencies -->
-   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-   <!-- Bootstrap 5 JS (Include this in the <head> or before the closing </body> tag) -->
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 
 <script>

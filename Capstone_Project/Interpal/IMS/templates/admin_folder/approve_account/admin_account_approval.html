@@ -1,0 +1,88 @@
+{% extends 'admin_folder/admin_base.html' %}
+{% block content %}
+<div class="section-card">
+  <h3>Account Approval</h3>
+  <p>Approve or decline intern accounts and requests.</p>
+
+  <div>
+    <!-- Table of students waiting for approval -->
+    <table class="table table-striped" id="approvalTable">
+      <thead>
+        <tr>
+          <th>Student no.</th>
+          <th>Name</th>
+          <th>Program</th>
+          <th>Corp. Email</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account in pending_accounts %}
+          <tr>
+            <td>{{ account.user.id }}</td>
+            <td>{{ account.user.first_name }} {{ account.user.last_name }}</td>
+            <td>{{ account.user.course }}</td>
+            <td>{{ account.user.email }}</td>
+            <td>
+              <!-- Buttons to trigger modals -->
+              <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal{{ account.user.id }}">
+                Approve
+              </button>
+              <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#declineModal{{ account.user.id }}">
+                Decline
+              </button>
+
+              <!-- Approve Modal -->
+              <div class="modal fade" id="approveModal{{ account.user.id }}" tabindex="-1" aria-labelledby="approveModalLabel{{ account.user.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="approveModalLabel{{ account.user.id }}">Confirm Approval</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      Are you sure you want to approve the account for {{ account.user.first_name }} {{ account.user.last_name }}?
+                    </div>
+                    <div class="modal-footer">
+                      <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ account.user.id }}">
+                        <button type="submit" name="action" value="approve" class="btn btn-success">Yes, Approve</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Decline Modal -->
+              <div class="modal fade" id="declineModal{{ account.user.id }}" tabindex="-1" aria-labelledby="declineModalLabel{{ account.user.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="declineModalLabel{{ account.user.id }}">Confirm Decline</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      Are you sure you want to decline the account for {{ account.user.first_name }} {{ account.user.last_name }}?
+                    </div>
+                    <div class="modal-footer">
+                      <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ account.user.id }}">
+                        <button type="submit" name="action" value="decline" class="btn btn-danger">Yes, Decline</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock content %}

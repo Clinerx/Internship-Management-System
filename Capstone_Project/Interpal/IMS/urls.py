@@ -46,6 +46,7 @@ urlpatterns = [
     path('home/', views.home, name='home'),
     path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
     
+    
     # * <<<<====================>>>>
     # ^ Student Status
     
@@ -93,7 +94,8 @@ urlpatterns = [
     path('admin/organization/<int:id>/edit/', views.admin_edit_organization, name='admin_edit_organization'),
     path('admin/organization/<int:id>/delete/', views.admin_delete_organization, name='admin_delete_organization'),
     
-    path('base/', views.admin_base, name='admin_base'),
+    path('admin/login/', views.admin_login, name='admin_login'),
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('departments/', views.admin_departments, name='admin_departments'),
     path('advisors/', views.admin_advisors, name='admin_advisors'),
     path('internship-dates/', views.admin_internship_dates, name='admin_internship_dates'),
@@ -103,4 +105,8 @@ urlpatterns = [
     path('view-internship/', views.admin_view_internship, name='admin_view_internship'),
     path('confirm-internship/', views.admin_confirm_internship, name='admin_confirm_internship'),
     
+    path('internship_procedure/', views.internship_procedures_view, name='internship_procedures_view'),
+
+    path('approve_list/', views.approve_list, name='approve_list'),
+    path('decline_list/', views.decline_list, name='decline_list'),
 ]

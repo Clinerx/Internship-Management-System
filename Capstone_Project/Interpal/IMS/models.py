@@ -4,6 +4,14 @@ from django.conf import settings  # This will allow us to reference the CustomUs
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 from cloudinary.models import CloudinaryField
+from django.core.exceptions import ValidationError
+
+def validate_image_extension(value):
+    """Validate that the uploaded file is an image."""
+    valid_extensions = ['jpg', 'jpeg', 'png', 'gif']
+    file_extension = value.name.split('.')[-1].lower()
+    if file_extension not in valid_extensions:
+        raise ValidationError('Only image files (jpg, jpeg, png, gif) are allowed.')
 # Custom User Manager
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
@@ -30,6 +38,18 @@ class CustomUserManager(BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
+    
+COLLEGE_CHOICES = [
+    ('College of Arts and Humanities', 'College of Arts and Humanities'),
+    ('College of Business and Accountancy', 'College of Business and Accountancy'),
+    ('College of Criminal Justice Education', 'College of Criminal Justice Education'),
+    ('College of Engineering, Architecture, and Technology', 'College of Engineering, Architecture, and Technology'),
+    ('College of Hospitality Management and Tourism', 'College of Hospitality Management and Tourism'),
+    ('College of Nursing and Health Sciences', 'College of Nursing and Health Sciences'),
+    ('College of Sciences', 'College of Sciences'),
+    ('College of Teacher Education', 'College of Teacher Education'),
+]
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(verbose_name='email', max_length=60, unique=True)
     first_name = models.CharField(max_length=30)
@@ -38,7 +58,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     school_name = models.CharField(max_length=255, blank=True, null=True)
-    college = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Modify the college field to use choices
+    college = models.CharField(max_length=255, choices=COLLEGE_CHOICES, blank=True, null=True)
+    
     course = models.CharField(max_length=255, blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(blank=True, null=True)
@@ -47,8 +70,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False)
     reset_token = models.CharField(max_length=32, null=True, blank=True)
     reset_otp = models.IntegerField(blank=True, null=True)
-    cor_picture = CloudinaryField('image', blank=True, null=True)
-    profile_picture = CloudinaryField('image', blank=True, null=True)
+    cor_picture = CloudinaryField('image', blank=True, null=True, folder='cor_pictures')
+    profile_picture = CloudinaryField('image', blank=True, null=True, folder='profile_picture')
     organization = models.OneToOneField(
         'Organization', 
         on_delete=models.SET_NULL, 
@@ -70,7 +93,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def skills_list(self):
         """Return a list of skills."""
         return [skill.strip().lower() for skill in (self.skills or "").split(",") if skill.strip()]
-
 
 
 
@@ -115,12 +137,14 @@ class Organization(models.Model):
     last_name = models.CharField(max_length=255)
     company_email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
+    location = models.CharField(max_length=200, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
     profile_picture = CloudinaryField('image', blank=True, null=True)
+    credential_upload = CloudinaryField('image', blank=True, null=True)
 
     objects = OrganizationManager()
 
@@ -138,11 +162,23 @@ class Organization(models.Model):
         return self.company_name
 
 class Internship(models.Model):
+    
+    COLLEGE_CHOICES = [
+        ('College of Arts and Humanities', 'College of Arts and Humanities'),
+        ('College of Business and Accountancy', 'College of Business and Accountancy'),
+        ('College of Criminal Justice Education', 'College of Criminal Justice Education'),
+        ('College of Engineering, Architecture, and Technology', 'College of Engineering, Architecture, and Technology'),
+        ('College of Hospitality Management and Tourism', 'College of Hospitality Management and Tourism'),
+        ('College of Nursing and Health Sciences', 'College of Nursing and Health Sciences'),
+        ('College of Sciences', 'College of Sciences'),
+        ('College of Teacher Education', 'College of Teacher Education'),
+    ]
+    
     title = models.CharField(max_length=200, null=True)
     organization = models.ForeignKey(
-        'Organization', 
-        on_delete=models.SET_NULL, 
-        null=True, 
+        'Organization',
+        on_delete=models.SET_NULL,
+        null=True,
         related_name='internships'
     )
     location = models.CharField(max_length=200, null=True)
@@ -150,9 +186,21 @@ class Internship(models.Model):
     requirements = models.TextField()
     application_process = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    max_applicants = models.PositiveIntegerField(default=1) 
+    max_applicants = models.PositiveIntegerField(default=1)
     required_skills = models.TextField(blank=True, null=True)
-    desired_experience = models.IntegerField(help_text="Years of experience", default=0)
+    required_experience = models.PositiveIntegerField(null=True, blank=True)
+    
+    # Add these two fields for preferred college and course
+    preferred_college = models.CharField(
+        max_length=255,
+        choices=COLLEGE_CHOICES,
+        null=True
+    )
+    preferred_course = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.title
@@ -163,6 +211,11 @@ class Internship(models.Model):
     def required_skills_list(self):
         """Return a list of required skills."""
         return [skill.strip().lower() for skill in (self.requirements or "").split(",") if skill.strip()]
+
+    def set_preferred_course(self):
+        """Set the preferred courses based on the selected college."""
+        if self.preferred_college in self.COURSE_CHOICES:
+            self.preferred_course = self.COURSE_CHOICES[self.preferred_college][0][0]
 
 
     
@@ -195,8 +248,8 @@ class Application(models.Model):
     student_last_name = models.CharField(max_length=255, null=True)
     student_college = models.CharField(max_length=255, null=True)
     student_course = models.CharField(max_length=255, null=True)
-    resume = CloudinaryField('resume', folder="resumes/", null=True)
-    application_letter = CloudinaryField('application_letter', folder="application_letters/", null=True)
+    resume = CloudinaryField('file', folder='resumes', blank=True, null=True)
+    application_letter = CloudinaryField('file', folder='application_letters', blank=True, null=True)
     applied_at = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
     
@@ -221,6 +274,8 @@ class Application(models.Model):
         return None
     
     
+    
+    
 class OrganizationIntern(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     student = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -235,3 +290,19 @@ class OrganizationIntern(models.Model):
             f"{self.internship.title} at {self.organization.name} "
             f"from {self.start_date} to {self.end_date}"
         )
+
+
+
+
+
+class AccountApproval(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, blank=True)  # Make user nullable
+    is_approved = models.BooleanField(default=False)  # False = Pending, True = Approved
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.organization:
+            return f"{self.organization.company_name} - {'Approved' if self.is_approved else 'Pending'}"
+        elif self.user:
+            return f"{self.user.username} - {'Approved' if self.is_approved else 'Pending'}"
+        return "Unknown Account"

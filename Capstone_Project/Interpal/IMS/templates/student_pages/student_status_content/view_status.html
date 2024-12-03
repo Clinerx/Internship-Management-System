@@ -25,9 +25,7 @@
 
     <div class="status-details mt-5 p-4 bg-light rounded shadow-sm">
         <p><strong>Current Status:</strong> {{ status_details.status_message }}</p>
-        <p><strong>Review Stage:</strong> {{ status_details.review_stage }}</p>
         <p><strong>Date of Submission:</strong> {{ status_details.submission_date|date:"F d, Y" }}</p>
-        <p><strong>Comments:</strong> {{ status_details.comments }}</p>
     </div>
 
     <a href="{% url 'student_status' %}" class="btn btn-primary mt-4 shadow">Back to Internship Status</a>

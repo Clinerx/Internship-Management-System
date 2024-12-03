@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 * {
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Poppins', sans-serif;
   background-color: #f4f4f9;
   display: flex;
   justify-content: center;
@@ -21,32 +22,57 @@ h2 {
 .form-group {
   margin-bottom: 15px;
 }
-.form-group label{
-  margin-bottom: 10px;
-}
-label {
+
+.form-group label {
   display: block;
   font-size: 14px;
   color: #555555;
+  margin-bottom: 10px;
 }
 
+/* Input fields with consistent height and padding */
 input[type="email"],
 input[type="password"] {
   width: 100%;
   padding: 10px;
-  
   border: 1px solid #cccccc;
   border-radius: 5px;
   font-size: 14px;
   outline: none;
   transition: border-color 0.3s ease;
+  height: 40px; /* Consistent height */
 }
 
+/* Focus styles */
 input[type="email"]:focus,
 input[type="password"]:focus {
   border-color: #007bff;
 }
 
+/* Password field with icon inside */
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  padding-right: 40px; /* Room for the icon */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  font-size: 16px; /* Adjust icon size if needed */
+}
+
+.toggle-password:hover {
+  color: #333;
+}
+
+/* Form options like remember me and forgot password */
 .form-options {
   display: flex;
   justify-content: space-between;
@@ -55,6 +81,7 @@ input[type="password"]:focus {
 }
 
 .remember-me {
+  font-size: 14px;
   display: flex;
   align-items: center;
 }
@@ -73,6 +100,7 @@ input[type="checkbox"] {
   text-decoration: underline;
 }
 
+/* Submit button styles */
 .btn {
   width: 100%;
   padding: 12px;
@@ -89,6 +117,7 @@ input[type="checkbox"] {
   background-color: #0056b3;
 }
 
+/* Sign-up text styles */
 .sign-up-text {
   text-align: center;
   margin-top: 20px;
@@ -105,25 +134,69 @@ input[type="checkbox"] {
   text-decoration: underline;
 }
 
-#formGroup{
+/* Consistency in form group container */
+#formGroup {
   margin-bottom: 10px;
 }
-#formGroup label{
+
+#formGroup label {
   text-align: center;
-  margin-bottom: 10px;
   font-size: 15px;
 }
-#formGroup select{
+
+#formGroup select {
   width: 100%;
   height: 30px;
 }
 
-#formContainer{
+#formContainer {
   background-color: #ffffff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   max-width: 400px;
   width: 100%;
+}
 
+.messages {
+  width: 2000px;
+  border: 1px solid black;
+}
+
+/* Container for password field with icon */
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  width: 100%;
+  padding-right: 40px;  /* Adjust padding to make room for the icon */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;           /* Position icon inside the input box */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;           /* Optional: color for icon */
+  font-size: 15px;      /* Adjust icon size as needed */
+}
+
+.toggle-password:hover {
+  color: #333;           /* Optional: icon color on hover */
+}
+
+/* Add this for password visibility */
+.input-password-visible {
+  height: 40px;           
+  border-radius: 5px;      /* Consistent height */
+  padding-right: 40px;          /* Space for the icon */
+  padding-left: 10px;  
+  font-size: 14px;        /* Left padding */
+  border: 1px solid #cccccc;    /* Default border */
+}
+
+.input-password-visible:focus {
+  border-color: #007bff;       /* Focus border color */
 }

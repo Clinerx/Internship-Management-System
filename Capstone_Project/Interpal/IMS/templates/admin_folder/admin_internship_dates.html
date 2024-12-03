@@ -1,0 +1,121 @@
+<!-- templates/admin/internship_dates.html -->
+{% extends 'admin_folder/admin_base.html' %} {% block content %}
+<!-- Internship Dates Content -->
+<!-- Internship Dates Content -->
+<div id="internshipDatesContent" class="section-card" >
+  <h3>Internship Dates</h3>
+  <p>Manage the internship schedule and track its progress.</p>
+
+  <!-- Add Button for New Internship Date -->
+  <button
+    class="btn btn-primary mb-3"
+    data-bs-toggle="modal"
+    data-bs-target="#addInternshipDateModal"
+  >
+    Add New Internship Date
+  </button>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Internship Title</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Software Development Internship</td>
+        <td>2024-06-01</td>
+        <td>2024-08-31</td>
+        <td>
+          <button class="btn btn-warning btn-sm">Edit</button>
+          <button class="btn btn-danger btn-sm delete-internship-btn">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Data Science Internship</td>
+        <td>2024-07-15</td>
+        <td>2024-09-15</td>
+        <td>
+          <button class="btn btn-warning btn-sm">Edit</button>
+          <button class="btn btn-danger btn-sm delete-internship-btn">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Marketing Internship</td>
+        <td>2024-05-01</td>
+        <td>2024-07-30</td>
+        <td>
+          <button class="btn btn-warning btn-sm">Edit</button>
+          <button class="btn btn-danger btn-sm delete-internship-btn">
+            Delete
+          </button>
+        </td>
+      </tr>
+      <!-- Additional rows can be added dynamically -->
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal for Adding New Internship Date -->
+<div
+  class="modal fade"
+  id="addInternshipDateModal"
+  tabindex="-1"
+  aria-labelledby="addInternshipDateModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addInternshipDateModalLabel">
+          Add New Internship Date
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="addInternshipDateForm">
+          <div class="mb-3">
+            <label for="internshipTitle" class="form-label"
+              >Internship Title</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="internshipTitle"
+              placeholder="Enter internship title"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="startDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="startDate" required />
+          </div>
+          <div class="mb-3">
+            <label for="endDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="endDate" required />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Add Internship Date
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

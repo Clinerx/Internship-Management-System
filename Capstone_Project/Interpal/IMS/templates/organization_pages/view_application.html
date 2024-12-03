@@ -3,6 +3,8 @@
 {% block title %}Applicant Details & Update Status{% endblock %}
 {% load static %}
 {% block content %}
+{% load custom_filters %}
+
 <div class="container my-5">
     <h2 class="text-center mb-4">Application Details for {{ application.internship.title }}</h2>
     
@@ -31,23 +33,66 @@
     </div>
 
     <!-- Uploaded Files -->
-    {% if application.resume %}
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-info text-white">
-                <h5>Uploaded Documents</h5>
-            </div>
-            <div class="card-body">
-                <ul>
-                    <li><a href="{{ application.resume.url }}" target="_blank">Resume</a></li>
-                    {% if application.cover_letter %}
-                        <li><a href="{{ application.cover_letter.url }}" target="_blank">Cover Letter</a></li>
-                    {% endif %}
-                </ul>
-            </div>
+    {% if application.resume or application.application_letter %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <h5>Uploaded Documents</h5>
         </div>
-    {% else %}
-        <div class="alert alert-warning">No files uploaded by the applicant.</div>
-    {% endif %}
+        <div class="card-body">
+            <ul>
+                {% if file_details.resume.url %}
+                <li class="mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5>Resume</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if file_details.resume.is_pdf %}
+                            <iframe 
+                                src="{{ file_details.resume.url }}" 
+                                width="100%" 
+                                height="500px" 
+                                style="border: none;">
+                            </iframe>
+                            <p><a href="{{ file_details.resume.url }}" download>Download Resume</a></p> <!-- Download link -->
+                            {% else %}
+                            <p>Preview not available. <a href="{{ file_details.resume.url }}" target="_blank">Download Resume</a></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+                {% endif %}
+    
+                {% if file_details.application_letter.url %}
+                <li class="mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5>Application Letter</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if file_details.application_letter.is_pdf %}
+                            <iframe 
+                                src="{{ file_details.application_letter.url }}" 
+                                width="100%" 
+                                height="500px" 
+                                style="border: none;">
+                            </iframe>
+                            <p><a href="{{ file_details.application_letter.url }}" download>Download Application Letter</a></p> <!-- Download link -->
+                            {% else %}
+                            <p>Preview not available. <a href="{{ file_details.application_letter.url }}" target="_blank">Download Application Letter</a></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-warning">No files uploaded by the applicant.</div>
+{% endif %}
+
+    
 
     <!-- Stepper and Update Status -->
     <div class="card shadow-sm mb-4">
@@ -91,78 +136,111 @@
 
     <!-- Email for Interview Scheduled -->
     {% if application.status == 'Interview Scheduled' %}
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5>Send Interview Invitation</h5>
-            </div>
-            <div class="card-body">
-                <form method="post" action="{% url 'send_interview_email' application.id %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="emailMessage">Message:</label>
-                        <textarea id="emailMessage" name="emailMessage" class="form-control" rows="4" placeholder="Enter your message here..."></textarea>
-                    </div>
-                    <input type="hidden" name="organizationEmail" value="{{ application.organization.company_email }}">
-                    <input type="hidden" name="studentEmail" value="{{ application.student.email }}">
-                    <button type="submit" class="btn btn-success mt-3">Send Email</button>
-                </form>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Send Interview Invitation</h5>
+        </div>
+        <div class="card-body">
+            <form id="interviewForm" method="post" action="{% url 'send_interview_email' application.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="emailMessage">Message:</label>
+                    <!-- Pre-set email message -->
+                    <textarea id="emailMessage" name="emailMessage" class="form-control" rows="4" placeholder="Enter your message here...">
+        Dear {{ application.student.first_name }},
+
+        We are pleased to inform you that your interview has been scheduled. Please find the details below:
+
+        [Insert Interview Date, Time, Location, and any further instructions.]
+
+        Best regards,
+        {{ application.organization.name }}
+        </textarea>
+                </div>
+                <input type="hidden" name="organizationEmail" value="{{ application.organization.company_email }}">
+                <input type="hidden" name="studentEmail" value="{{ application.student.email }}">
+                <button type="button" class="btn btn-success mt-3" data-toggle="modal" data-target="#confirmationModal">Send Email</button>
+            </form>
+        </div>
+    </div>
+
+        <!-- Modal -->
+        <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirm Email</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to send this interview invitation email to {{ application.student.first_name }}?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <!-- Confirm Button triggers form submission -->
+                    <button type="button" class="btn btn-primary" id="confirmSendButton">Confirm</button>
+                </div>
             </div>
         </div>
-    {% endif %}
+    </div>
+
+    
+{% endif %}
 
     <!-- Confirmation Step -->
-            {% if application.status == 'Confirmation' %}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-danger text-white">
-                    <h5>Confirm Student's Response</h5>
-                </div>
-                <div class="card-body text-center">
-                    <p class="mb-4">You have reached the final stage of the application. Please confirm the student's response by approving or declining.</p>
-                    
-                    <div class="d-flex justify-content-center gap-4">
-                        <!-- Approve Button -->
-                        <form method="post" action="{% url 'view_application' application.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="status" value="Hired">
-                            <button type="submit" class="btn btn-success btn-lg">Approve</button>
-                        </form>
+    {% if application.status == 'Confirmation' %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5>Confirm Student's Response</h5>
+        </div>
+        <div class="card-body text-center">
+            <p class="mb-4">You have reached the final stage of the application. Please confirm the student's response by approving or declining.</p>
+            
+            <div class="d-flex justify-content-center gap-4">
+                <!-- Approve Button -->
+                <button type="button" class="btn btn-success btn-lg" onclick="showConfirmationModal('approve')">Approve</button>
 
-                        <!-- Decline Button -->
-                        <form method="post" action="{% url 'view_application' application.id %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="status" value="Rejected">
-                            <button type="submit" class="btn btn-danger btn-lg">Decline</button>
-                        </form>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <small class="text-muted">Please ensure all necessary checks are done before finalizing the student's status.</small>
-                    </div>
-                </div>
+                <!-- Decline Button -->
+                <button type="button" class="btn btn-danger btn-lg" onclick="showConfirmationModal('decline')">Decline</button>
             </div>
-        {% endif %}
+            
+            <div class="mt-4">
+                <small class="text-muted">Please ensure all necessary checks are done before finalizing the student's status.</small>
+            </div>
+        </div>
+    </div>
 
-        <!-- Show Start and End Dates Form if Hired -->
-        {% if application.status == 'Hired' %}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5>Internship Details</h5>
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="card-body">
-                    <form method="post" action="{% url 'view_application' application.id %}">
+                <div class="modal-body">
+                    Are you sure you want to <span id="actionText"></span> the student's application?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <form id="confirmationForm" method="post" action="{% url 'view_application' application.id %}">
                         {% csrf_token %}
-                        <div class="form-group">
-                            <label for="start_date">Internship Start Date:</label>
-                            <input type="date" name="start_date" id="start_date" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="end_date">Internship End Date:</label>
-                            <input type="date" name="end_date" id="end_date" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary mt-3">Save Internship Dates</button>
+                        <input type="hidden" name="status" id="statusInput">
+                        <button type="submit" class="btn btn-primary">Confirm</button>
                     </form>
                 </div>
             </div>
+        </div>
+    </div>
+{% endif %}
+
+        <!-- Show Start and End Dates Form if Hired -->
+        {% if application.status == 'Hired' %}
         {% endif %}
 
 
@@ -386,6 +464,37 @@
         document.getElementById("status").value = nextStatus;
         document.getElementById("statusUpdateForm").submit();
     }
+
+    function showConfirmationModal(action) {
+        let actionText = '';
+        let statusValue = '';
+    
+        if (action === 'approve') {
+            actionText = 'approve';
+            statusValue = 'Hired';
+        } else if (action === 'decline') {
+            actionText = 'decline';
+            statusValue = 'Rejected';
+        }
+    
+        // Set the action text in the modal
+        document.getElementById('actionText').textContent = actionText.charAt(0).toUpperCase() + actionText.slice(1);
+    
+        // Set the hidden input field value based on the action
+        document.getElementById('statusInput').value = statusValue;
+    
+        // Show the modal
+        $('#confirmationModal').modal('show');
+    }
+
+    document.getElementById('confirmSendButton').addEventListener('click', function () {
+        // Submit the form associated with the email
+        document.getElementById('interviewForm').submit();
+    });
+    
+
+
+    
 </script>
 
 {% endblock content %}
