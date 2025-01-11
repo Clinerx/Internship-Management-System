@@ -285,6 +285,7 @@
             font-size: 0.75rem; /* Smaller font size for paragraphs */
             margin-bottom: 1rem;
             cursor: pointer;
+            color: white;
             transition: 0.3s;
         }
         
@@ -433,6 +434,9 @@
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == 'organization_applicant' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'organization_applicant' %}"><i class="bx bx-folder icon"></i>Applicants</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'organization_interns' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'organization_interns' %}"><i class="bx bx-user icon"></i>Interns</a>
                 </li>
                 <div class="dark-logout-btn">
                 </div>

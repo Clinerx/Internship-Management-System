@@ -1,105 +1,78 @@
-import re
+import math
 
 def calculate_cosine_similarity(student, internship):
     """
-    Calculates an optimized similarity score between a student and an internship.
-    If internship skills or other details are invalid or nonsensical, assigns a low score.
-    If the internship doesn't match the required criteria (course, college, and skills), assigns a 0% score.
+    Calculates a similarity score using cosine similarity between a student and an internship.
     """
-    
-    def is_valid_skills(skills):
-        """
-        Validates the skills field to ensure it is not nonsensical.
-        Criteria: Minimum length, presence of realistic skills, and no gibberish.
-        """
-        if not skills or len(skills.strip()) < 3:
-            return False
-        
-        # Basic regex to check if the skills contain random characters like gibberish
-        if re.match(r'^[a-zA-Z0-9]+$', skills.strip()):
-            # If the string only contains alphanumeric characters with no real spaces or separators,
-            # we assume it could be gibberish
-            return False
-        
-        # Additional validation logic (e.g., checking for common skills)
-        return True
 
-    def is_valid_internship(internship):
-        """
-        Validates the internship details to ensure they are not nonsensical or missing.
-        """
-        essential_fields = [
-            internship.required_skills,
-            internship.preferred_college,
-            internship.preferred_course
-        ]
-        
-        # Check if any essential field is missing or nonsensical
-        for field in essential_fields:
-            if not field or len(field.strip()) < 3:
-                return False
-        
-        # Specifically validate skills
-        if not is_valid_skills(internship.required_skills):
-            return False
-        
-        return True
+    def vectorize_skills(student_skills, internship_skills):
+        """Create binary vectors for skills."""
+        all_skills = set(student_skills) | set(internship_skills)  # Union of all skills
+        student_vector = [1 if skill in student_skills else 0 for skill in all_skills]
+        internship_vector = [1 if skill in internship_skills else 0 for skill in all_skills]
+        return student_vector, internship_vector
 
-    # 1. Check if internship is not recommended (course, college, and skills mismatch)
-    if (student.college != internship.preferred_college or
-        student.course != internship.preferred_course or
-        not is_valid_skills(internship.required_skills)):
-        return 0.0  # Return 0% score if the internship doesn't match required criteria
+    def cosine_similarity(vec1, vec2):
+        """Calculate cosine similarity between two vectors."""
+        dot_product = sum(a * b for a, b in zip(vec1, vec2))
+        magnitude1 = math.sqrt(sum(a ** 2 for a in vec1))
+        magnitude2 = math.sqrt(sum(b ** 2 for b in vec2))
+        if magnitude1 == 0 or magnitude2 == 0:
+            return 0.0  # Avoid division by zero
+        return dot_product / (magnitude1 * magnitude2)
 
-    # Check internship validity
-    if not is_valid_internship(internship):
-        return 20.0  # Return the minimum matching score for invalid internships
+    def normalize_experience(exp, max_exp):
+        """Normalize experience to a scale of 0 to 1."""
+        return exp / max_exp if max_exp > 0 else 0
 
-    # 2. Skills matching
+    # Extract and clean skills
     student_skills = set(skill.strip().lower() for skill in (student.skills or '').split(',') if skill.strip())
     internship_skills = set(skill.strip().lower() for skill in (internship.required_skills or '').split(',') if skill.strip())
 
-    if student_skills and internship_skills:
-        skill_overlap = len(student_skills & internship_skills) / len(internship_skills)
-        skill_overlap = min(skill_overlap + 0.1, 1.0)  # Add slight boost for partial matches
-    else:
-        skill_overlap = 0.0  # Strong penalty if skills are nonsensical or missing
+    # Vectorize skills
+    student_skill_vector, internship_skill_vector = vectorize_skills(student_skills, internship_skills)
 
-    # 3. Experience matching
+    # Calculate skill similarity
+    skill_similarity = cosine_similarity(student_skill_vector, internship_skill_vector)
+
+    # College similarity (binary: match = 1, no match = 0)
+    college_similarity = 1.0 if student.college == internship.preferred_college else 0.0
+
+    # Course similarity (binary: match = 1, no match = 0)
+    course_similarity = 1.0 if student.course == internship.preferred_course else 0.0
+
+    # If neither college nor course aligns, exclude this internship
+    if college_similarity == 0.0 and course_similarity == 0.0:
+        return 0.0
+
+    # Experience similarity (scaled and treated as a single-dimension vector)
     student_exp = student.experience or 0
     internship_exp = internship.required_experience or 0
-    if student_exp > 0 and internship_exp > 0:
-        exp_match = 1 - abs(student_exp - internship_exp) / max(student_exp, internship_exp)
-    else:
-        exp_match = 0.5  # Neutral score if experience is unspecified
+    normalized_student_exp = normalize_experience(student_exp, max(student_exp, internship_exp))
+    normalized_internship_exp = normalize_experience(internship_exp, max(student_exp, internship_exp))
+    experience_similarity = cosine_similarity([normalized_student_exp], [normalized_internship_exp])
 
-    # 4. College matching
-    college_match = 1.0 if student.college == internship.preferred_college else 0.8
-
-    # 5. Course matching
-    course_match = 1.0 if student.course == internship.preferred_course else 0.8
-
-    # Weight distribution
+    # Combine similarities with weights
     weights = {
-        'skills': 0.5,    # Skills are critical
-        'experience': 0.2,  # Experience is moderately important
-        'college': 0.15,   # College matching
-        'course': 0.15     # Course matching
+        'skills': 0.4,
+        'college': 0.3,
+        'course': 0.2,
+        'experience': 0.1
     }
 
-    # Final weighted score
-    weighted_similarity = (
-        weights['skills'] * skill_overlap +
-        weights['experience'] * exp_match +
-        weights['college'] * college_match +
-        weights['course'] * course_match
+    overall_similarity = (
+        weights['skills'] * skill_similarity +
+        weights['college'] * college_similarity +
+        weights['course'] * course_similarity +
+        weights['experience'] * experience_similarity
     )
 
-    # Normalize the score to range 50-100
-    normalized_score = 50 + weighted_similarity * 50
+    # Scale the score to range 50-100
+    final_score = 50 + overall_similarity * 50
 
-    # Additional penalty for nonsensical skills (if missed earlier)
-    if not is_valid_skills(internship.required_skills):
-        normalized_score *= 0.4  # Apply a 60% penalty for nonsensical skills
+    # Ensure strong scores for college and course alignment
+    if college_similarity == 1.0 and course_similarity == 1.0:
+        final_score = max(final_score, 80)  # Boost for full alignment
 
-    return round(normalized_score, 2)
+    return round(final_score, 2)
+

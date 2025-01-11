@@ -22,33 +22,62 @@ class CustomUserCreationForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         allowed_domain = 'psu.palawan.edu.ph'
-        
+
         # Extract the domain part of the email
         domain = email.split('@')[-1] if email else ""
-        
+
         # Validate domain
         if domain != allowed_domain:
             raise ValidationError(f"Registration is only allowed with '{allowed_domain}' email addresses.")
-        
+
+        # Check if the email is already in use
+        if CustomUser.objects.filter(email=email).exists():
+            raise ValidationError("An account with this email address already exists.")
+
         return email
+
+
+
+
     
 class OrganizationRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
-    confirm_password = forms.CharField(widget=forms.PasswordInput())
+    password = forms.CharField(
+        widget=forms.PasswordInput(), 
+        required=False, 
+        min_length=6,  # Optional: Set minimum length directly here
+        error_messages={'min_length': 'Password must be at least 6 characters long.'}
+    )
+    confirm_password = forms.CharField(widget=forms.PasswordInput(), required=False)
     otp = forms.CharField(max_length=6, required=False)
 
     class Meta:
         model = Organization
         fields = ['company_name', 'first_name', 'last_name', 'location', 'company_email', 'otp', 'password', 'confirm_password']
 
+    def __init__(self, *args, **kwargs):
+        initial_data = kwargs.get('initial', {})
+        data = kwargs.get('data', {})
+        if 'company_email' in data:  # Pre-fill email from POST data
+            initial_data['company_email'] = data.get('company_email')
+        kwargs['initial'] = initial_data
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
 
-        if password != confirm_password:
-            raise forms.ValidationError("Passwords do not match.")
+        # Check if the password is at least 6 characters long
+        if password and len(password) < 6:
+            self.add_error('password', "Password must be at least 6 characters long.")
+
+        # Check if passwords match
+        if password and confirm_password and password != confirm_password:
+            self.add_error('confirm_password', "Passwords do not match.")
+            
         return cleaned_data
+
+
 
 
 class InternshipForm(forms.ModelForm):

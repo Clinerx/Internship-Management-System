@@ -4,7 +4,7 @@
 {% block header %}Internships Status{% endblock %}
 {% block content %}
 
-<!-- Delete Confirmation Modal -->
+<!-- Delete Confirmation Modal (Single Application) -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -20,7 +20,29 @@
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Yes, Delete</button>
                 </form>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete All Applications Confirmation Modal -->
+<div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAllModalLabel">Confirm Delete All</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete all selected applications?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteAllForm" method="POST" action="{% url 'delete_selected_applications' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Delete All</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteAllButton">Cancel</button>
             </div>
         </div>
     </div>
@@ -63,7 +85,7 @@
     <!-- Internship Table -->
     <form method="POST" action="{% url 'delete_selected_applications' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger mb-3 delete-selected-btn" style="display: none;">Delete Selected</button>
+        <button type="button" class="btn btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#deleteAllModal" style="display: none;" id="deleteSelectedBtn">Delete Selected</button>
         
         <div class="table-responsive">
             <table class="table table-bordered align-middle text-center">
@@ -106,7 +128,6 @@
                                 <i class="bx bx-info-circle"></i> View Status
                             </a>
                         </td>
-                        
                     </tr>
                     {% empty %}
                     <tr>
@@ -308,7 +329,6 @@
 }
 
 </style>
-
 <script>
     window.onload = function() {
         const notification = document.getElementById('notification');
@@ -326,14 +346,12 @@
     document.addEventListener("DOMContentLoaded", function() {
         const selectAllCheckbox = document.getElementById('select-all');
         const checkboxes = document.querySelectorAll('.application-checkbox');
-        const deleteSelectedButton = document.querySelector('.delete-selected-btn');
+        const deleteSelectedButton = document.getElementById('deleteSelectedBtn');
     
         function toggleDeleteButton() {
-            // Show the delete button if any checkbox is checked
             deleteSelectedButton.style.display = Array.from(checkboxes).some(checkbox => checkbox.checked) ? 'block' : 'none';
         }
     
-        // Toggle checkboxes when "Select All" is clicked
         selectAllCheckbox.addEventListener('change', function() {
             checkboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
@@ -341,25 +359,14 @@
             toggleDeleteButton();
         });
     
-        // Toggle the delete button when individual checkboxes are clicked
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', toggleDeleteButton);
-        })
+        });
     });
-
-    document.addEventListener("DOMContentLoaded", function () {
-        // Add the fade-in class to the main container on page load
-        const container = document.querySelector('.container');
-        if (container) {
-            container.classList.add('fade-in');
-        }
-    });
-
-
-
 
     document.addEventListener("DOMContentLoaded", function () {
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const deleteAllModal = new bootstrap.Modal(document.getElementById('deleteAllModal'));
         const modalMessage = document.getElementById('modalMessage');
         const deleteForm = document.getElementById('deleteForm');
     
@@ -373,6 +380,16 @@
                 deleteForm.action = deleteUrl;
                 deleteModal.show();
             });
+        });
+    
+        // Close modal when cancel button is clicked
+        document.getElementById('cancelDeleteButton').addEventListener('click', function () {
+            deleteModal.hide();
+        });
+    
+        // Close modal for deleting all applications
+        document.getElementById('cancelDeleteAllButton').addEventListener('click', function () {
+            deleteAllModal.hide();
         });
     });
 </script>

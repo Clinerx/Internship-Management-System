@@ -68,6 +68,8 @@
                 <div class="internship-card">
                     <div class="card-header">
                         <h5>{{ internship.title }}</h5>
+                        <p><strong>Preferred Course: </strong>{{internship.preferred_course}}</p>
+                        <p><strong>Available Slot: </strong>{{internship.max_applicants}}</p>
                         <p class="organization-name">{{ internship.organization.company_name }}</p>
                     </div>
                     <div class="location">
@@ -82,6 +84,11 @@
                             {% endif %}">
                             Score: {{ score|floatformat:2 }}
                         </span>
+                        <p class="alignment-status">
+                            {% if internship.preferred_college == student.college and internship.preferred_course != student.course %}
+                                Matches college but not course.
+                            {% endif %}
+                        </p>
                         <a href="{% url 'internship_detail' internship.id %}" class="btn">View Details</a>
                     </div>
                 </div>
@@ -92,7 +99,6 @@
             {% endfor %}
         </div>
     </div>
-    
     
     
     

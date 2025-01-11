@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <title>Student Registration</title>
+
     <style>
         /* Global Styles */
         body {
@@ -173,6 +176,13 @@
             border: 1px solid #f5c6cb;
         }
         
+        .valid {
+            color: green;
+        }
+        .invalid {
+            color: red;
+        }
+        
     </style>
 </head>
 <body>
@@ -208,7 +218,11 @@
                     <label for="otp">Enter OTP</label>
                     <input type="text" name="otp" id="otp" class="form-control" required>
                 </div>
-                <button type="submit" name="confirm_otp" class="submit-btn">Confirm OTP</button>
+                
+                <div class="form-section" style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="submit" name="confirm_otp" class="submit-btn">Confirm OTP</button>
+                    <button type="submit" name="request_otp" class="submit-btn">Request OTP</button>
+                </div>
             </div>
             {% elif otp_confirmed %}
             <!-- Account Credentials Section -->
@@ -225,8 +239,17 @@
                 </div>
                 <div class="form-group">
                     <label for="phone_number">Phone Number</label>
-                    {{ form.phone_number }}
+                    <input 
+                        type="tel" 
+                        id="phone_number" 
+                        name="phone_number" 
+                        placeholder="+63 912 345 6789" 
+                        pattern="^(\+63|0)9\d{9}$" 
+                        title="Please enter a valid Philippine phone number (e.g., +63 912 345 6789 or 0912 345 6789)" 
+                        value="{{ form.phone_number.value|default:'' }}" 
+                        required>
                 </div>
+                
                 <div class="address-container">
                     <div class="form-group">
                         <label for="address">Address</label>
@@ -234,8 +257,8 @@
                     </div>
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth</label>
-                        {{ form.date_of_birth }}
-                    </div>
+                        <input type="date" id="date_of_birth" name="date_of_birth" value="{{ form.date_of_birth.value|default:'' }}" required>
+                    </div>   
                 </div>
             </div>
 
@@ -284,14 +307,42 @@
                 <div class="address-container">
                     <div class="form-group">
                         <label for="password1">Password</label>
-                        {{ form.password1 }}
+                        <div style="position: relative;" class="form-group">
+                            {{ form.password1 }}
+                            <i class="fas fa-eye" id="togglePassword1" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"></i>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="password2">Confirm Password</label>
-                        {{ form.password2 }}
+                        <div style="position: relative;" class="form-group">
+                            {{ form.password2 }}
+                            <i class="fas fa-eye" id="togglePassword2" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;"></i>
+                        </div>
                     </div>
                 </div>
+                <div class="password-help-container">
+                    <h5 class="form-text">
+                        <i class="fas fa-check-circle" id="lengthCheck" style="margin-right: 5px;"></i>
+                        Password must be at least 8 characters long.
+                    </h5>
+                    <h5 class="form-text">
+                        <i class="fas fa-check-circle" id="lettersCheck" style="margin-right: 5px;"></i>
+                        Password must contain at least 5 letters.
+                    </h5>
+                    <h5 class="form-text">
+                        <i class="fas fa-check-circle" id="numbersCheck" style="margin-right: 5px;"></i>
+                        Password must contain at least 3 numbers.
+                    </h5>
+                    <h5 class="form-text">
+                        <i class="fas fa-check-circle" id="sequenceCheck" style="margin-right: 5px;"></i>
+                        Password must not contain common number combinations like "123...".
+                    </h5>
+                </div>
+                
+                
             </div>
+            
+            
             <button type="submit" name="register" class="submit-btn">Register</button>
             {% endif %}
 
@@ -380,6 +431,110 @@
         
         // Add event listener to update courses when college changes
         document.getElementById('college').addEventListener('change', updateCourses);
+
+
+
+         // Password Validation Script
+    const password1 = document.querySelector('#id_password1');
+    const password2 = document.querySelector('#id_password2');
+    const passwordError = document.querySelector('#passwordError');
+    const passwordMismatch = document.querySelector('#passwordMismatch');
+    
+    function validatePassword() {
+        const passwordValue = password1.value;
+        const passwordRegex = /^[a-zA-Z0-9]+$/;
+
+        // Check password requirements
+        if (passwordValue.length < 9 || !passwordRegex.test(passwordValue)) {
+            passwordError.style.display = 'block';
+        } else {
+            passwordError.style.display = 'none';
+        }
+
+        // Check if passwords match
+        if (password1.value !== password2.value) {
+            passwordMismatch.style.display = 'block';
+        } else {
+            passwordMismatch.style.display = 'none';
+        }
+    }
+
+    // Attach event listeners
+    password1.addEventListener('input', validatePassword);
+    password2.addEventListener('input', validatePassword);
+
+
+
+     // Get password fields and toggle icons
+     document.addEventListener("DOMContentLoaded", function () {
+        const togglePassword1 = document.getElementById("togglePassword1");
+        const password1 = document.getElementById("id_password1"); // Adjust the ID if it's different in your rendered form
+    
+        const togglePassword2 = document.getElementById("togglePassword2");
+        const password2 = document.getElementById("id_password2"); // Adjust the ID if it's different in your rendered form
+    
+        togglePassword1.addEventListener("click", function () {
+            const type = password1.getAttribute("type") === "password" ? "text" : "password";
+            password1.setAttribute("type", type);
+            this.classList.toggle("fa-eye-slash");
+        });
+    
+        togglePassword2.addEventListener("click", function () {
+            const type = password2.getAttribute("type") === "password" ? "text" : "password";
+            password2.setAttribute("type", type);
+            this.classList.toggle("fa-eye-slash");
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const passwordField = document.getElementById("id_password1"); // Replace with the correct ID for the password field if needed.
+        const lengthCheck = document.getElementById("lengthCheck");
+        const lettersCheck = document.getElementById("lettersCheck");
+        const numbersCheck = document.getElementById("numbersCheck");
+        const sequenceCheck = document.getElementById("sequenceCheck");
+    
+        passwordField.addEventListener("input", function () {
+            const password = passwordField.value;
+
+            // Check length
+            if (password.length >= 8) {
+                lengthCheck.classList.add("valid");
+                lengthCheck.classList.remove("invalid");
+            } else {
+                lengthCheck.classList.add("invalid");
+                lengthCheck.classList.remove("valid");
+            }
+
+            // Check letters (at least 5)
+            const letterCount = (password.match(/[a-zA-Z]/g) || []).length;
+            if (letterCount >= 5) {
+                lettersCheck.classList.add("valid");
+                lettersCheck.classList.remove("invalid");
+            } else {
+                lettersCheck.classList.add("invalid");
+                lettersCheck.classList.remove("valid");
+            }
+
+            // Check numbers (at least 3)
+            const numberCount = (password.match(/\d/g) || []).length;
+            if (numberCount >= 3) {
+                numbersCheck.classList.add("valid");
+                numbersCheck.classList.remove("invalid");
+            } else {
+                numbersCheck.classList.add("invalid");
+                numbersCheck.classList.remove("valid");
+            }
+
+            // Check sequence "123"
+            if (!password.includes("123")) {
+                sequenceCheck.classList.add("valid");
+                sequenceCheck.classList.remove("invalid");
+            } else {
+                sequenceCheck.classList.add("invalid");
+                sequenceCheck.classList.remove("valid");
+            }
+        });
+    });
     </script>
 </body>
 </html>

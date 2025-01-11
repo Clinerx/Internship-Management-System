@@ -68,16 +68,22 @@
                     </p>
                 </form>
             </div>
+
+            
         </div>
 
-        <!-- Notification Container -->
-        <div id="notification-container"></div>
+        
 
         <!-- Right Side Container (Only visible on larger screens) -->
         <div class="right-side-container">
             <div class="img-container">
+                <img src="{% static 'img/header-2.jpg'%}" alt="" >
             </div>
         </div>
+        
+        
+
+
     
         <script>
             function togglePassword() {
@@ -119,20 +125,21 @@
                 }, 2000);  // 5-second duration
             }
             
-            // Handle notifications on page load
             window.onload = function() {
                 {% if messages %}
                     {% for message in messages %}
-                        {% if 'error' in message.tags %}
-                            showNotification("{{ message }}", "error");
-                        {% else %}
-                            // Trigger sAuccess notification with redirect after 5 seconds
-                            showNotification("{{ message }}", "success", true);
+                        {% if 'login' in message.tags %}
+                            {% if 'error' in message.tags %}
+                                showNotification("{{ message }}", "error");
+                            {% else %}
+                                // Trigger success notification with redirect after 2 seconds
+                                showNotification("{{ message }}", "success", true);
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 {% endif %}
             };
-            
+
             // Remove duplicate notifications
             document.addEventListener("DOMContentLoaded", function() {
                 const notificationContainer = document.getElementById("notification-container");
@@ -191,19 +198,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 100vh; /* Ensure full screen height */
         }
         
         /* Background Image Container behind the form */
         .background-image-container {
             position: absolute;
             top: 85px;
-            left: 25%;
+            left: 13%;
             border-radius: 20px;
             width: 60%;
             height: 80%;
             border: 1px solid 919191;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            background-color: white ;
+            background-color: white;
             z-index: 0;
         }
         
@@ -214,36 +222,54 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             max-width: 350px;
-            width: 100%
+            width: 100%;
             position: relative;
             z-index: 100;
-            left: -50px;
+            right: -620px; /* Adjust position to the right */
         }
         
         /* Right Side Container */
-        .right-side-container {
+         .right-side-container {
             position: relative;
-            left: 30px;
-            top: 10px;
+            right: 340px; /* Adjust position to the left */
+            top: 15px;
             z-index: 2;
             width: 40em;
-            object-fit: cover;
+            padding: 25px;
             height: 90vh;
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
         
+        /* Right Side Container heading */
         .right-side-container h3 {
             font-size: 1.8em;
             margin-bottom: 10px;
         }
         
+        /* Right Side Container paragraph */
         .right-side-container p {
             font-size: 1em;
             color: #555;
         }
+        .right-side-container .img-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            overflow: hidden; /* Ensures the image fits within the container's rounded corners */
+        }
+        .right-side-container .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the image fills the container without distortion */
+            border-radius: 10px; /* Optional: to match the container's rounded corners */
+            image-rendering: crisp-edges; /* For non-scaling blur */
+            image-rendering: -webkit-optimize-contrast; /* Enhance for Webkit browsers */
+    
+        }
         
+        /* Responsiveness */
         @media screen and (max-width: 768px) {
             
             /* Hide other containers */
@@ -255,6 +281,7 @@
             /* Full width for the form */
             .form-container {
                 width: 100%;
+                right: 0;
             }
     
             /* Center form vertically and horizontally */

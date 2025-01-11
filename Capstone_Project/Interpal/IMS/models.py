@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 from cloudinary.models import CloudinaryField
 from django.core.exceptions import ValidationError
+from django.urls import reverse  # Import reverse for URL generation
 
 def validate_image_extension(value):
     """Validate that the uploaded file is an image."""
@@ -208,6 +209,10 @@ class Internship(models.Model):
     def get_applications(self):
         return self.applications.all()
 
+    def get_absolute_url(self):
+        """Return the URL for the internship's detail page."""
+        return reverse('internship_detail', args=[str(self.id)])
+    
     def required_skills_list(self):
         """Return a list of required skills."""
         return [skill.strip().lower() for skill in (self.requirements or "").split(",") if skill.strip()]
@@ -296,13 +301,34 @@ class OrganizationIntern(models.Model):
 
 
 class AccountApproval(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True, blank=True)  # Make user nullable
+    user = models.OneToOneField('CustomUser', on_delete=models.CASCADE, null=True, blank=True)  # Make user nullable
     is_approved = models.BooleanField(default=False)  # False = Pending, True = Approved
+    email = models.EmailField(null=True, blank=True)  # Email field for notifications
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        if self.organization:
-            return f"{self.organization.company_name} - {'Approved' if self.is_approved else 'Pending'}"
-        elif self.user:
+        if self.user:
             return f"{self.user.username} - {'Approved' if self.is_approved else 'Pending'}"
-        return "Unknown Account"
+        return f"Unknown Account - {'Approved' if self.is_approved else 'Pending'}"
+
+class OrganizationApproval(models.Model):
+    organization = models.OneToOneField('Organization', on_delete=models.CASCADE)  # Reference to the organization
+    is_approved = models.BooleanField(default=False)  # Approval status
+    email = models.EmailField(null=True, blank=True)  # Email field for notifications
+    approval_date = models.DateTimeField(null=True, blank=True)  # When approval was granted
+    created_at = models.DateTimeField(auto_now_add=True)  # Record creation timestamp
+
+    def __str__(self):
+        return f"{self.organization.company_name} - {'Approved' if self.is_approved else 'Pending'}"
+
+    def approve(self):
+        """Approve the organization account."""
+        self.is_approved = True
+        self.approval_date = now()
+        self.save()
+
+    def revoke_approval(self):
+        """Revoke the approval."""
+        self.is_approved = False
+        self.approval_date = None
+        self.save()

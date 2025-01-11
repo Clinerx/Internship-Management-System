@@ -42,7 +42,7 @@
                         <td>{{ application.student.college }}</td>
                         <td>
                             <span class="badge 
-                            {% if application.similarity_score > 80 %}badge-high
+                            {% if application.similarity_score > 79 %}badge-high
                             {% elif application.similarity_score > 50 %}badge-medium
                             {% else %}badge-low{% endif %}">
                                 {{ application.similarity_score }}%
@@ -136,6 +136,7 @@
     body {
         font-family: 'Poppins', sans-serif;
     }
+    
     .badge-high {
         background-color: #28a745; /* Green for high scores */
         color: #fff;
@@ -151,7 +152,6 @@
         color: #fff;
     }
     
-
     .application-list h2 {
         font-size: 2.5em; /* Larger, more prominent font size */
         font-weight: bold; /* Make it stand out */
@@ -161,7 +161,7 @@
         margin-top: 130px;
         text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
     }
-
+    
     .internship-folder {
         margin-bottom: 30px;
         border: 1px solid #ddd;
@@ -170,87 +170,80 @@
         border-radius: 10px;
         background-color: #f9f9f9;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow-y: auto; /* Enables vertical scrolling */
+        max-height: 400px; /* Limit the height for better visibility */
+        overflow-x: auto; /* Enables horizontal scrolling */
     }
-
+    
     .application-table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 10px;
     }
-
+    
     .application-table th, .application-table td {
         padding: 10px;
         text-align: left;
         border-bottom: 1px solid #ddd;
     }
-
+    
     .application-table th {
         background-color: #007bff;
         color: white;
     }
-
+    
     .table-disabled {
         background-color: #f0f0f0;
         color: #999;
     }
-
+    
     .badge {
         padding: 5px 10px;
         border-radius: 5px;
         font-size: 12px;
     }
-
-    .status-approved {
+    
+    .badge-hired {
         background-color: #28a745;
         color: white;
     }
-
-    .status-rejected {
-        background-color: #dc3545;
-        color: white;
-    }
-
-    .status-pending {
-        background-color: #ffc107;
-        color: black;
-    }
-
-    .badge-hired {
-        background-color: #17a2b8;
-        color: white;
-    }
-
+    
     .badge-not-hired {
         background-color: #6c757d;
         color: white;
     }
-
+    
     .applicant-actions .btn {
+        display: flex;
+        align-items: center;
         font-size: 14px;
+        width: 100%;
         padding: 5px 10px;
+        margin-top: 5px;
+        text-align: left;
         border-radius: 4px;
         text-decoration: none;
         color: white;
     }
-
+    
     .btn-primary {
         background-color: #007bff;
         border: none;
     }
-
+    
     .btn-primary:hover {
         background-color: #0056b3;
     }
-
+    
     .btn-danger {
         background-color: #e74c3c;
         border: none;
     }
-
+    
     .btn-danger:hover {
         background-color: #c0392b;
     }
-
+    
     .profile-img {
         width: 40px;
         height: 40px;
@@ -258,6 +251,8 @@
         object-fit: cover;
         margin-right: 10px;
     }
+    
+    
 
     @keyframes modal-show {
         from {
@@ -271,68 +266,67 @@
     }
 
     /* Responsive Design */
-    @media (max-width: 768px) {
-        .internship-folder {
-            margin-inline: 10px;
-           
-        }
-        
-        .internship-folder {
-            padding: 10px;
-        }
-
-        .application-table {
-            display: block;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        .application-table th, .application-table td {
-            font-size: 12px;
-            padding: 8px;
-        }
-
-        .application-list h2 {
-            font-size: 1.5rem;
-        }
-
-        .profile-img {
-            width: 30px;
-            height: 30px;
-        }
-
-        .badge {
-            font-size: 10px;
-            padding: 3px 5px;
-        }
-
-        .btn {
-            font-size: 12px;
-            padding: 5px;
-        }
-
-        .modal-content {
-            width: 90%;
-            padding: 15px;
-        }
+@media (max-width: 768px) {
+    .internship-folder {
+        margin-inline: 10px;
+        padding: 10px;
     }
 
-    @media (max-width: 480px) {
-        .application-list h2 {
-            font-size: 1.2rem;
-        }
-
-        .btn {
-            font-size: 10px;
-            padding: 4px;
-        }
-
-        .profile-img {
-            width: 25px;
-            height: 25px;
-        }
+    .application-list h3 {
+        font-size: 20px; /* Adjusted header font size */
     }
     
+    .application-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .application-table th, .application-table td {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .application-list h2 {
+        font-size: 1.5rem;
+    }
+
+    .profile-img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .badge {
+        font-size: 10px;
+        padding: 3px 5px;
+    }
+
+    .btn {
+        font-size: 12px;
+        padding: 5px;
+    }
+
+    .modal-content {
+        width: 90%;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .application-list h2 {
+        font-size: 1.2rem;
+    }
+
+    .btn {
+        font-size: 10px;
+        padding: 4px;
+    }
+
+    .profile-img {
+        width: 25px;
+        height: 25px;
+    }
+}
 </style>
 
 {% endblock content %}
