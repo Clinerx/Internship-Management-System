@@ -1,9 +1,14 @@
 import random
+import smtplib
+import dns.resolver
+from .utils import calculate_cosine_similarity
+from cloudinary.utils import cloudinary_url
 from functools import wraps
 from random import randint
-
 from django.views.decorators.cache import cache_control
 from django.db.models.functions import TruncMonth
+from mimetypes import guess_type
+from django.conf import settings
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import user_passes_test
@@ -22,13 +27,22 @@ import cloudinary.uploader
 from django.db.models import Q
 from django.utils.timezone import now
 from django.utils import timezone
+from random import randint
+from django.core.mail import send_mail
+from django.contrib.auth.hashers import make_password
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import CustomUserCreationForm
+from .models import AccountApproval, UserVisit
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseNotFound
 from django.utils.crypto import get_random_string
+from django.core.mail import EmailMessage
+
 
 from collections import defaultdict
 
-from .forms import CustomUserCreationForm, InternshipForm, ProfileForm
-from .models import CustomUser, Internship, Organization, UserVisit, Application
+from .forms import CustomUserCreationForm, InternshipForm, ProfileForm, ProfileFormOrg, ApplicationForm
+from .models import CustomUser, Internship, Organization, UserVisit, Application, OrganizationIntern, AccountApproval, OrganizationApproval
 
 
 
@@ -107,25 +121,36 @@ def organization_login_required(view_func):
         return redirect('login')
     return _wrapped_view
 
-# Organization dashboard
+from django.contrib.auth.hashers import make_password
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from .models import Organization, OrganizationApproval
+from random import randint
 
-# Organization registration process
 def organization_registration(request):
     if request.method == 'POST':
         company_email = request.POST.get('company_email')
         company_name = request.POST.get('company_name')
+        location = request.POST.get('location')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
 
         context = {
-            'email': company_email,
+            'company_email': company_email,
             'company_name': company_name,
+            'location': location,
             'first_name': first_name,
             'last_name': last_name,
         }
 
+        # Check for required fields
         if not company_email:
             context['error_message'] = 'Company email is required.'
+            return render(request, 'organization_registration_folder/organization_details.html', context)
+
+        # Check if the email is already registered
+        if Organization.objects.filter(company_email=company_email).exists():
+            context['error_message'] = 'This company email is already in use.'
             return render(request, 'organization_registration_folder/organization_details.html', context)
 
         # OTP request
@@ -136,7 +161,7 @@ def organization_registration(request):
             send_mail(
                 'Your OTP Code',
                 f'Your OTP code is {otp}. It is valid for 10 minutes.',
-                'your-email@gmail.com',
+                'psuinterpal@gmail.com',
                 [company_email],
                 fail_silently=False,
             )
@@ -160,22 +185,41 @@ def organization_registration(request):
         elif 'register' in request.POST:
             password = request.POST.get('password')
             confirm_password = request.POST.get('confirm_password')
-            if password == confirm_password:
-                hashed_password = make_password(password)
-                Organization.objects.create(
-                    company_name=company_name,
-                    first_name=first_name,
-                    last_name=last_name,
-                    company_email=company_email,
-                    password=hashed_password
-                )
-                return redirect('success')
-            else:
+            
+            # Validate passwords
+            if password != confirm_password:
                 context['error_message'] = 'Passwords do not match.'
                 context['otp_confirmed'] = True
                 return render(request, 'organization_registration_folder/organization_details.html', context)
+            
+            if len(password) < 6:
+                context['error_message'] = 'Password must be at least 6 characters long.'
+                context['otp_confirmed'] = True
+                return render(request, 'organization_registration_folder/organization_details.html', context)
+
+            # Hash the password and create the organization
+            hashed_password = make_password(password)
+            organization = Organization.objects.create(
+                company_name=company_name,
+                location=location,
+                first_name=first_name,
+                last_name=last_name,
+                company_email=company_email,
+                password=hashed_password
+            )
+
+            # Add organization to approval queue
+            OrganizationApproval.objects.create(
+                organization=organization,
+                is_approved=False,
+                email=company_email
+            )
+
+            # Redirect to success page
+            return redirect('success')
 
     return render(request, 'organization_registration_folder/organization_details.html')
+
 
 # Organization registration template
 def organization_template(request):
@@ -247,71 +291,200 @@ def reset_password_confirm(request, token):
 # Success page after organization registration
 def success_view(request):
     return render(request, 'organization_registration_folder/success_page.html')
+def success_view_student(request):
+    return render(request, 'student_registration_folder/success_page.html')
 
-# Student registration
+def verify_email(email):
+    domain = "psu.palawan.edu.ph"
+    
+    # Check if email belongs to the specific domain
+    if not email.endswith(f"@{domain}"):
+        return "Invalid domain for this email"
+    
+    try:
+        # Check MX records for the domain
+        mx_records = dns.resolver.resolve(domain, 'MX')
+        mail_server = mx_records[0].exchange.to_text()
+        
+        # Perform SMTP check
+        with smtplib.SMTP(mail_server, 25, timeout=10) as smtp:
+            smtp.helo("example.com")  # Identify the client
+            smtp.mail("test@example.com")  # Fake sender
+            code, message = smtp.rcpt(email)  # Test recipient
+            smtp.quit()
+            if code == 250:
+                return "Email exists"
+            else:
+                return "Email does not exist or is rejected"
+    except Exception as e:
+        return f"Error occurred: {e}"
+    
 def student_register(request):
     if request.method == 'POST':
+        # Retrieve form data
         form = CustomUserCreationForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Save the user
-            user = form.save()
+        email = request.POST.get('email')
 
-            # Upload profile picture to Cloudinary if available
-            profile_picture = form.cleaned_data.get('profile_picture')
-            if profile_picture:
-                upload_result = cloudinary.uploader.upload(profile_picture, folder="student_profiles/")
-                user.profile.image_url = upload_result.get('secure_url')
-                user.profile.save()
+        # Default context
+        context = {'form': form}
 
-            # Increment visit count
-            visit, created = UserVisit.objects.get_or_create(id=1)
-            visit.count += 1
-            visit.save()
+        # Step 1: OTP Request
+        if 'request_otp' in request.POST:
+            if email:
+                # Check if email already exists
+                if User.objects.filter(email=email).exists():
+                    context['error_message'] = 'This email is already in use.'
+                    return render(request, 'student_registration_folder/student_profile_details.html', context)
 
-            # Authenticate and log the user in
-            email = form.cleaned_data.get('email')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(email=email, password=raw_password)
-            login(request, user)
-            messages.success(request, f'Account created for {email}')
-            return redirect('login')
-        else:
-            messages.error(request, 'There was an error with your registration. Please try again.')
-    else:
-        form = CustomUserCreationForm()
-        
+                # Validate domain and email existence
+                email_check = verify_email(email)  # Your email verification function
+                if email_check != "Email exists":
+                    context['error_message'] = f'Invalid email: {email_check}'
+                    return render(request, 'student_registration_folder/student_profile_details.html', context)
+
+                # Generate and store OTP
+                otp = randint(100000, 999999)
+                request.session['otp'] = otp
+                request.session['email'] = email
+                try:
+                    send_mail(
+                        'Your OTP Code',
+                        f'Your OTP code is {otp}. It is valid for 10 minutes.',
+                        'psuinterpal@gmail.com',
+                        [email],
+                        fail_silently=False,
+                    )
+                    context['otp_message'] = 'OTP has been sent to your email!'
+                    context['otp_requested'] = True
+                except Exception as e:
+                    context['error_message'] = f'Failed to send OTP: {e}'
+            else:
+                context['error_message'] = 'Email is required to request an OTP.'
+            return render(request, 'student_registration_folder/student_profile_details.html', context)
+
+        # Step 2: OTP Confirmation
+        elif 'confirm_otp' in request.POST:
+            entered_otp = request.POST.get('otp')
+            stored_otp = request.session.get('otp')
+            if entered_otp == str(stored_otp):
+                request.session['otp_confirmed'] = True
+                context['otp_confirmed'] = True
+                context['otp_message'] = 'OTP confirmed. You can now complete the registration.'
+            else:
+                context['error_message'] = 'Invalid OTP. Please try again.'
+                context['otp_requested'] = True
+            return render(request, 'student_registration_folder/student_profile_details.html', context)
+
+        # Step 3: Final Registration
+        elif 'register' in request.POST:
+            if request.session.get('otp_confirmed', False) and form.is_valid():
+                try:
+                    # Double-check email existence
+                    if User.objects.filter(email=email).exists():
+                        context['error_message'] = 'This email is already in use.'
+                        context['otp_confirmed'] = True
+                        return render(request, 'student_registration_folder/student_profile_details.html', context)
+
+                    # Password validation
+                    password1 = form.cleaned_data.get('password1')
+                    password2 = form.cleaned_data.get('password2')
+                    if password1 != password2:
+                        context['error_message'] = "Passwords do not match. Please try again."
+                        context['otp_confirmed'] = True
+                        return render(request, 'student_registration_folder/student_profile_details.html', context)
+
+                    # Save user and related data
+                    user = form.save(commit=False)
+                    user.password = make_password(form.cleaned_data['password1'])
+                    user.save()
+
+                    AccountApproval.objects.create(user=user, is_approved=False, email=email)
+                    
+                    # Increment visit count
+                    visit, created = UserVisit.objects.get_or_create(id=1)
+                    visit.count += 1
+                    visit.save()
+
+                    # Notify admin
+                    send_mail(
+                        'New Account Registration Awaiting Approval',
+                        f'A new account with the email {email} has been registered and is awaiting approval.',
+                        'psuinterpal@gmail.com',
+                        ['psuinterpal@gmail.com'],
+                        fail_silently=False,
+                    )
+
+                    # Clear session data
+                    request.session.pop('otp', None)
+                    request.session.pop('otp_confirmed', None)
+                    request.session.pop('email', None)
+
+                    messages.success(request, 'Account created successfully! Your account is awaiting approval. Please log in after approval.')
+                    return redirect('success_student')
+                except Exception as e:
+                    context['error_message'] = f'Error during registration: {e}'
+                    context['otp_confirmed'] = True
+            else:
+                context['error_message'] = 'Please complete the OTP confirmation or fix form errors.'
+                context['otp_confirmed'] = True
+            return render(request, 'student_registration_folder/student_profile_details.html', context)
+
+    # GET request or initial load
+    form = CustomUserCreationForm()
     return render(request, 'student_registration_folder/student_profile_details.html', {'form': form})
 
+
+
+
+
+
 def student_login(request):
-    # Check if a user is already authenticated
+    # If the user is already authenticated, redirect them to the dashboard
     if request.user.is_authenticated:
         email = request.GET.get('email')
         if email and email != request.user.email:
-            logout(request)
+            logout(request)  # Logout if the email in the query string differs
         else:
             return redirect('student_dashboard')
 
     if request.method == 'POST':
-        email = request.POST.get('email', '')
-        password = request.POST.get('password', '')
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        # Validate that both fields are entered
+        if not email or not password:
+            messages.error(request, 'Please enter both email and password.', extra_tags='login')
+            return render(request, 'reset_folder/student_login.html', {'email': email})
 
         try:
+            # Check if the email exists in the CustomUser model
             user = CustomUser.objects.get(email=email)
-            user = authenticate(request, email=email, password=password)
             
+            # Authenticate the user
+            user = authenticate(request, email=email, password=password)
             if user is not None:
+                # Check account approval status
+                try:
+                    approval = AccountApproval.objects.get(user=user)
+                    if not approval.is_approved:
+                        messages.error(request, 'Your account is not approved yet. Please wait for approval.', extra_tags='login')
+                        return render(request, 'reset_folder/student_login.html', {'email': email})
+                except AccountApproval.DoesNotExist:
+                    messages.error(request, 'Account approval pending.', extra_tags='login')
+                    return render(request, 'reset_folder/student_login.html', {'email': email})
+                
+                # If approved, log in the user
                 login(request, user)
-                messages.success(request, 'Login successful! Redirecting to your dashboard...')
-                return render(request, 'reset_folder/student_login.html', {'email': email, 'redirect': True})
+                messages.success(request, 'Login successful! Redirecting to your dashboard...', extra_tags='login')
+                return redirect('student_dashboard')  # Adjust to your actual dashboard route
             else:
-                messages.error(request, 'Invalid email or password for student account.')
+                messages.error(request, 'Invalid email or password for student account.', extra_tags='login')
 
         except CustomUser.DoesNotExist:
-            messages.error(request, 'No student account found with this email.')
+            messages.error(request, 'No student account found with this email.', extra_tags='login')
 
+    # Render the login page for GET requests or after errors
     return render(request, 'reset_folder/student_login.html')
-
-
 
 
 def organization_login(request):
@@ -319,10 +492,22 @@ def organization_login(request):
         email = request.POST.get('company_email', '')
         password = request.POST.get('password', '')
 
-        # Organization login logic
         try:
+            # Fetch the organization by email
             organization = Organization.objects.get(company_email=email)
-            if organization.check_password(password):  # Use secure password check
+
+            # Check if the organization's account is approved
+            try:
+                approval = OrganizationApproval.objects.get(organization=organization)
+                if not approval.is_approved:
+                    messages.error(request, 'Your account is not yet approved. Please wait a moment.')
+                    return render(request, 'reset_folder/organization_login.html', {'email': email})
+            except OrganizationApproval.DoesNotExist:
+                messages.error(request, 'Your account approval is pending. Please wait for admin approval.')
+                return render(request, 'reset_folder/organization_login.html', {'email': email})
+
+            # Validate password
+            if organization.check_password(password):  # Secure password check
                 # Set session variables for organization login
                 request.session['organization_id'] = organization.id
                 request.session['organization_name'] = organization.company_name
@@ -333,11 +518,11 @@ def organization_login(request):
         except Organization.DoesNotExist:
             messages.error(request, 'No organization account found with this email.')
 
-        # If login fails, re-render the form with the entered data
+        # Re-render the form with the entered email
         return render(
             request, 
             'reset_folder/organization_login.html', 
-            {'email': email}  # Pass the email back to the form
+            {'email': email}  # Pass email back to the form
         )
 
     return render(request, 'reset_folder/organization_login.html')
@@ -346,7 +531,7 @@ def organization_login(request):
 # User logout
 def user_logout(request):
     logout(request)
-    return redirect('login')
+    return redirect('index')
 
 # Visit tracking
 def visit_tracker(request):
@@ -359,7 +544,6 @@ def visit_tracker(request):
 
 
 # * Student Pages =============================
-
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 @login_required(login_url='login')
 def student_dashboard(request):
@@ -398,12 +582,27 @@ def student_dashboard(request):
     for item in user_data:
         user_counts[item['month'] - 1] = item['count']
 
-    # Recommended internships logic
-    user_applications = Application.objects.filter(student=request.user)
-    applied_internship_ids = user_applications.values_list('internship_id', flat=True)
+    # Calculate internship recommendations for the logged-in user
+    recommendations = []
+    if request.user.is_authenticated and not request.user.is_admin:
+        # Get internships that match both college and course
+        relevant_internships = Internship.objects.filter(
+            preferred_college=request.user.college,
+            preferred_course=request.user.course
+        )
 
-    # Example filter: recommend internships that the student hasn't applied to
-    recommended_internships = Internship.objects.exclude(id__in=applied_internship_ids).order_by('-created_at')[:5]
+        # Also get internships that match only the college
+        matching_college_internships = Internship.objects.filter(
+            preferred_college=request.user.college
+        ).exclude(preferred_course=request.user.course)  # Exclude if course doesn't match
+
+        # Combine both lists and calculate similarity
+        all_internships = list(relevant_internships) + list(matching_college_internships)
+        recommendations = [
+            (internship, calculate_cosine_similarity(request.user, internship))
+            for internship in all_internships
+        ]
+        recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)[:5]  # Limit to top 5 matches
 
     # Context for template rendering
     context = {
@@ -416,41 +615,42 @@ def student_dashboard(request):
         'organizations': organizations,
         'org_counts': org_counts,
         'user_counts': user_counts,
-        'recommended_internships': recommended_internships,  # Pass to the context
+        'recommendations': recommendations,
     }
     
     return render(request, 'student_pages/student_dashboard.html', context)
+
 
 # * <<<<<<<============================================>>>> 
 # ^ Student Internship
 
 @login_required(login_url='login')
 def student_internships(request):
+    # Fetch internships
     internships_list = Internship.objects.all().order_by('-created_at')
-    paginator = Paginator(internships_list, 9)  # Display 6 internships per page
+    paginator = Paginator(internships_list, 9)  # Display 9 internships per page
     page_number = request.GET.get('page')
     internships = paginator.get_page(page_number)
-    
-    organization_id = request.session.get('organization_id')
-    org = None
 
-    if organization_id:
-        org = get_object_or_404(Organization, id=organization_id)
+    # Fetch user data
+    student = request.user
+    student_skills = student.skills  # Assumes `skills` field exists on the user model
+    applied_internship_ids = Application.objects.filter(student=student).values_list('internship_id', flat=True)
 
-    # Check for the application submission notification flag
-    application_submitted = request.session.pop('application_submitted', False)  # Retrieve and clear flag
+    # Calculate similarity scores
+    internship_scores = []
+    for internship in internships:
+        similarity_score = calculate_cosine_similarity(student, internship)
+        internship_scores.append({'internship': internship, 'similarity_score': similarity_score})
 
-    # Get all applications for the current user
-    user_applications = Application.objects.filter(student=request.user)
-    applied_internship_ids = user_applications.values_list('internship_id', flat=True)
+    # Sort internships by similarity score
+    internship_scores = sorted(internship_scores, key=lambda x: x['similarity_score'], reverse=True)
 
     context = {
-        'internships': internships,  # Pass the paginated internships
-        'org': org,
-        'user': request.user,
+        'internships': internships,
+        'internship_scores': internship_scores,
+        'applied_internship_ids': applied_internship_ids,
         'dark_mode': request.session.get('dark_mode', False),
-        'application_submitted': application_submitted,  # Pass flag to template
-        'applied_internship_ids': applied_internship_ids  # Pass IDs of applied internships
     }
     return render(request, 'student_pages/student_internships.html', context)
 
@@ -485,43 +685,104 @@ def edit_profile(request):
     return render(request, 'student_pages/edit_profile.html', context)
 
 
+@organization_login_required
+def edit_profile_org(request):
+    # Fetch the logged-in organization's profile using the organization_id from session
+    organization_id = request.session.get('organization_id')
+    if not organization_id:
+        messages.error(request, 'Organization not found.')
+        return redirect('login')
+    
+    try:
+        org = Organization.objects.get(id=organization_id)
+    except Organization.DoesNotExist:
+        messages.error(request, 'Organization not found.')
+        return redirect('login')
+    
+    if request.method == 'POST':
+        form = ProfileFormOrg(request.POST, request.FILES, instance=org)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('organization_dashboard')
+    else:
+        form = ProfileFormOrg(instance=org)
+
+    context = {
+        'form': form,
+        'organization': org,
+    }
+    return render(request, 'organization_pages/edit_profile_org.html', context)
+
+
+
 
 # * <<<<<<<============================================>>>> 
 # ^ Student Status Content
-
+def apply_to_internship(request):
+    if request.method == 'POST':
+        form = ApplicationForm(request.POST, request.FILES)
+        if form.is_valid():
+            application = form.save(commit=False)
+            application.student = request.user
+            application.save()
+            return redirect('success_page')  # Replace with your success page
+    else:
+        form = ApplicationForm()
+    return render(request, 'apply.html', {'form': form})
 
 @login_required(login_url='login')
 def internship_apply(request, internship_id):
     internship = get_object_or_404(Internship, id=internship_id)
+    student = request.user  # Assuming the user is authenticated as a student
 
-    # Check if the student already applied
-    already_applied = Application.objects.filter(internship=internship, student=request.user).exists()
+    # Check if the student has already applied to this internship
+    already_applied = Application.objects.filter(internship=internship, student=student).exists()
 
-    # Check available slots before allowing application
-    if internship.max_applicants > 0 and not already_applied:
-        if request.method == 'POST':
-            Application.objects.create(
-                internship=internship,
-                organization=internship.organization,
-                student=request.user,
-            )
-            # Decrease max_applicants by 1
+    # Count the number of applications the student has made to this organization
+    applications_count = Application.objects.filter(
+        student=student, internship__organization=internship.organization
+    ).count()
+
+    # Check if the student can apply
+    can_apply = internship.max_applicants > 0 and not already_applied and applications_count < 3
+
+    if request.method == 'POST':
+        form = ApplicationForm(request.POST, request.FILES)
+        if can_apply and form.is_valid():
+            # Save the application along with file uploads
+            application = form.save(commit=False)
+            application.internship = internship
+            application.organization = internship.organization
+            application.student = student
+            application.save()
+
+            # Reduce the number of available slots for the internship
             internship.max_applicants -= 1
             internship.save()
 
-            # Set session flag to show notification and redirect
-            request.session['application_submitted'] = True
+            # Notify success and redirect
+            messages.success(request, "Your application has been submitted successfully.")
             return redirect('student_internships')
-    elif already_applied:
-        messages.info(request, "You have already applied for this internship.")
+        else:
+            # Notify why the application failed
+            if not can_apply:
+                messages.error(request, "You cannot apply for this internship due to application limits or availability.")
+            elif not form.is_valid():
+                messages.error(request, "There was an error with your submission. Please check your inputs.")
     else:
-        messages.warning(request, "No available slots for this internship.")
+        form = ApplicationForm()
 
+    # Context for the template
     context = {
         'internship': internship,
-        'already_applied': already_applied
+        'form': form,
+        'already_applied': already_applied,
+        'applications_count': applications_count,
+        'can_apply': can_apply,
     }
     return render(request, 'student_pages/student_internship_content/internship_apply.html', context)
+
 
 @login_required(login_url='login')
 def student_status(request):
@@ -581,27 +842,52 @@ def delete_applications(request, application_id=None):
     return redirect('student_status')
 
 
-# Student view to display the current status of their application
 def view_status(request, application_id):
     application = get_object_or_404(Application, id=application_id)
-    # Determine completed stages up to the current status
-    stages = ["Pending", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
-    completed_stages = stages[:stages.index(application.status) + 1]
-    
+
+    # Define the base stages of the application process
+    stages = ["Pending", "In Review", "Interview Scheduled", "Confirmation", "Hired"]
+
+    # Replace "Phantom Hired" with the actual final status
+    if application.status == "Hired":
+        stages[-1] = "Hired"
+    elif application.status == "Rejected":
+        stages[-1] = "Rejected"
+
+    # Determine the stages completed based on the current status
+    if application.status in stages:
+        completed_stages = stages[:stages.index(application.status) + 1]
+    else:
+        completed_stages = []
+
+    # Add custom messages for the final stages
+    if application.status == "Hired":
+        status_message = "Congratulations! You have been hired for the position."
+    elif application.status == "Rejected":
+        status_message = "We regret to inform you that your application has been rejected."
+    else:
+        status_message = f"Your application is currently in the '{application.status}' stage."
+
+    # Prepare status details for rendering
     status_details = {
         "status": application.status,
         "review_stage": application.review_stage,
         "submission_date": application.applied_at,
         "comments": application.comments,
-        "completed_stages": completed_stages
+        "completed_stages": completed_stages,
+        "status_message": status_message,  # Custom message based on the current status
     }
-    
+
     context = {
         'application': application,
         'status_details': status_details,
-        'stages': stages
+        'stages': stages,
     }
     return render(request, 'student_pages/student_status_content/view_status.html', context)
+
+
+
+
 
 
 
@@ -616,47 +902,85 @@ def about_us(request):
 
 # * <<<<<<<============================================>>>> 
 # ^ organization pages ============================
+# Define a posting limit (you can set this in settings.py)
+# Set the posting limit from settings, with a default value of 5
+POSTING_LIMIT = getattr(settings, 'INTERNSHIP_POSTING_LIMIT', 5)
 
 @organization_login_required
 def organization_post(request):
-    # Check if 'organization_id' is in session
+    # Get the organization ID from the session
     organization_id = request.session.get('organization_id')
     if not organization_id:
         messages.error(request, "No organization is currently logged in.")
-        return redirect('login')  # Redirect to login or an appropriate page
+        return redirect('login')  # Redirect to login if no organization is found
 
     # Fetch the organization object
-    organization = Organization.objects.get(id=organization_id)
+    try:
+        organization = Organization.objects.get(id=organization_id)
+    except Organization.DoesNotExist:
+        messages.error(request, "The logged-in organization does not exist.")
+        return redirect('login')  # Redirect to login if the organization is invalid
+
+    # Check if a new internship was successfully posted
     internship_posted = request.session.pop('internship_posted', False)
 
+    # Fetch all internships posted by this organization
+    internships_list = Internship.objects.filter(organization=organization)
+    current_postings_count = internships_list.count()
+
+    # Calculate the remaining postings
+    remaining_postings = POSTING_LIMIT - current_postings_count
+
     if request.method == 'POST':
+        # Prevent new posts if the posting limit is reached
+        if current_postings_count >= POSTING_LIMIT:
+            messages.error(request, f"You have reached the posting limit of {POSTING_LIMIT} internships.")
+            return redirect('organization_post')
+
+        # Process the form submission
         form = InternshipForm(request.POST)
         if form.is_valid():
             internship = form.save(commit=False)
             internship.organization = organization
             internship.organization_name = organization.company_name
             internship.save()
+
+            # Indicate successful posting
             request.session['internship_posted'] = True
+            messages.success(request, "Internship posted successfully!")
+
+            # Send email notifications
+            subject = f"New Internship Posted by {organization.company_name}"
+            message = (
+                f"{organization.company_name} has posted a new internship: {internship.title}.\n"
+                f"Click here to view: {request.build_absolute_uri(internship.get_absolute_url())}"
+            )
+            recipient_list = [user.email for user in User.objects.all() if user.email]
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
+
             return redirect('organization_post')
+        else:
+            messages.error(request, "There was an error in your form submission.")
     else:
         form = InternshipForm()
 
-    internships_list = Internship.objects.filter(organization=organization)
-    paginator = Paginator(internships_list, 5)
+    # Paginate the internships list
+    paginator = Paginator(internships_list, 5)  # Show 5 internships per page
     page_number = request.GET.get('page')
     internships = paginator.get_page(page_number)
     start_number = (internships.number - 1) * paginator.per_page
 
+    # Render the organization posting page
     return render(request, 'organization_pages/organization_posting.html', {
         'form': form,
         'internships': internships,
         'org': organization,
         'internship_posted': internship_posted,
-        'start_number': start_number
+        'start_number': start_number,
+        'current_postings_count': current_postings_count,
+        'posting_limit': POSTING_LIMIT,
+        'remaining_postings': remaining_postings,
     })
-
-
-   
 
 @organization_login_required
 def view_internship(request, internship_id):
@@ -709,7 +1033,6 @@ def delete_internship(request, internship_id):
 
     return render(request, 'organization_pages/delete_internship.html', {'internship': internship})
 
-
 @organization_login_required
 def organization_interns(request):
     # Check if 'organization_id' is in session
@@ -718,21 +1041,22 @@ def organization_interns(request):
         messages.error(request, "No organization is currently logged in.")
         return redirect('login')
 
-    # Fetch organization and related users
-    users = CustomUser.objects.all()
+    # Get the organization
     org = Organization.objects.get(id=organization_id)
 
+    # Fetch interns and their related internship details
+    interns = OrganizationIntern.objects.filter(organization=org).select_related('student', 'internship')
+
     context = {
-        'users': users,
+        'interns': interns,
         'org': org,
     }
     return render(request, 'organization_pages/organization_interns.html', context)
 
-# * ================ Application =========================
 
 @organization_login_required
 def organization_applicant(request):
-    # Retrieve the organization either from the session or the logged-in user
+    # Retrieve the organization based on session or user
     org = None
     if 'organization_id' in request.session:
         org = get_object_or_404(Organization, id=request.session['organization_id'])
@@ -740,22 +1064,42 @@ def organization_applicant(request):
         org = request.user.organization
     
     if not org:
-        # Redirect or handle error if organization cannot be determined
-        return redirect('some_error_page')
+        # Redirect to an error page if no organization is found
+        return redirect('error_page')  # Replace with the actual error page
 
-    # Fetch applications related to this organization, grouped by internship
-    applications = Application.objects.filter(internship__organization=org).select_related('internship', 'student')
-    
-    # Group applications by internship
+    # Fetch applications related to this organization
+    applications = Application.objects.filter(
+        internship__organization=org
+    ).select_related('internship', 'student')
+
+    # Group applications by internship and annotate details
     grouped_applications = {}
     for application in applications:
-        if application.internship not in grouped_applications:
-            grouped_applications[application.internship] = []
-        grouped_applications[application.internship].append(application)
+        # Check if the student is hired and get the hiring organization
+        hired_application = Application.objects.filter(
+            student=application.student, status="Hired"
+        ).select_related('internship__organization').first()
+        
+        application.is_hired = bool(hired_application)
+        application.hiring_organization = hired_application.internship.organization if hired_application else None
+
+        # Calculate similarity score (ensure this function handles exceptions)
+        try:
+            student = application.student
+            internship = application.internship
+            application.similarity_score = calculate_cosine_similarity(student, internship) or 0
+        except Exception as e:
+            application.similarity_score = 0  # Fallback in case of error
+            print(f"Error calculating similarity: {e}")
+
+        # Group applications by internship
+        if internship not in grouped_applications:
+            grouped_applications[internship] = []
+        grouped_applications[internship].append(application)
 
     context = {
         'grouped_applications': grouped_applications,
-        'org': org,
+        'organization': org,
     }
     return render(request, 'organization_pages/organization_applicants.html', context)
 
@@ -763,27 +1107,119 @@ def organization_applicant(request):
 def view_application(request, application_id):
     application = get_object_or_404(Application, id=application_id, organization_id=request.session['organization_id'])
 
-    # Define the stages for the application process
-    stages = ["Applied", "In Review", "Interview Scheduled", "Offer Extended", "Completed"]
-    completed_stages = stages[:stages.index(application.status) + 1]
+    stages = ["Pending", "In Review", "Interview Scheduled", "Confirmation", "Hired"]
+    if application.status == "Hired":
+        stages[-1] = "Hired"
+    elif application.status == "Rejected":
+        stages[-1] = "Rejected"
+
+    completed_stages = stages[:stages.index(application.status) + 1] if application.status in stages else []
+    status_messages = {
+        "Hired": "Congratulations! You have been hired for the position.",
+        "Rejected": "We regret to inform you that your application has been rejected.",
+    }
+    status_message = status_messages.get(application.status, f"Your application is currently in the '{application.status}' stage.")
 
     if request.method == "POST":
-        # Get the selected status from the form
         new_status = request.POST.get("status")
-        if new_status in stages:
-            # Update the application status and save it
+
+        if new_status == "Hired":
+            start_date = request.POST.get('start_date')
+            end_date = request.POST.get('end_date')
+
+            if start_date and end_date:
+                application.status = "Hired"
+                application.final_decision = "approved"
+                application.save()
+
+                # Save internship dates in the OrganizationIntern model
+                OrganizationIntern.objects.create(
+                    organization_id=request.session['organization_id'],
+                    student=application.student,
+                    start_date=start_date,
+                    end_date=end_date,
+                    internship=application.internship  # Linking the specific internship
+                )
+
+                messages.success(request, f"The student {application.student.first_name} {application.student.last_name} has been approved and marked as hired.")
+                messages.success(request, "Internship dates have been saved.")
+
+                # Send email to the student about approval
+                subject = "Congratulations! You have been hired"
+                message = (
+                    f"Dear {application.student.first_name},\n\n"
+                    f"We are pleased to inform you that you have been hired for '{application.internship.title}' position, by {application.organization.company_name}.\n\n"
+                    f"Your internship will take place from {start_date} to {end_date}.\n\n"
+                    f"Best regards,\n"
+                    f"{application.organization.company_name}\n"
+                    f"{application.organization.company_email}"
+                )
+                recipient = application.student.email
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [recipient])
+            else:
+                messages.error(request, "Please provide both start and end dates for the internship.")
+
+        elif new_status == "Rejected":
+            application.status = "Rejected"
+            application.final_decision = "declined"
+            application.save()
+
+            messages.success(request, f"The student {application.student.first_name} {application.student.last_name} has been declined.")
+
+            # Send email to the student about rejection
+            subject = "Application Status: Rejected"
+            message = (
+                f"Dear {application.student.first_name},\n\n"
+                f"We regret to inform you that your application has been rejected by {application.organization.company_name}. "
+                f"We wish you the best in your future endeavors.\n\n"
+                f"Best regards,\n"
+                f"{application.organization.company_name}"
+            )
+            recipient = application.student.email
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [recipient])
+
+        elif new_status in stages:
             application.status = new_status
             application.save()
             messages.success(request, "Application status updated successfully.")
-            return redirect(reverse('view_application', args=[application_id]))
 
-    # Prepare context data for rendering
+        return redirect(reverse('view_application', args=[application_id]))
+
+    def is_pdf(file_url):
+        mime_type, _ = guess_type(file_url)
+        return mime_type == "application/pdf"
+
+    file_details = {
+        'resume': {
+            'url': application.resume.url if application.resume else None,
+            'is_pdf': is_pdf(application.resume.url) if application.resume else False,
+        },
+        'application_letter': {
+            'url': application.application_letter.url if application.application_letter else None,
+            'is_pdf': is_pdf(application.application_letter.url) if application.application_letter else False,
+        },
+    }
+
     context = {
         'application': application,
+        'status_details': {
+            "status": application.status,
+            "review_stage": application.review_stage,
+            "submission_date": application.applied_at,
+            "comments": application.comments,
+            "completed_stages": completed_stages,
+            "status_message": status_message,
+        },
         'stages': stages,
         'completed_stages': completed_stages,
+        'file_details': file_details,
     }
     return render(request, 'organization_pages/view_application.html', context)
+
+
+
+
+
 
 # View for updating the application status by organization
 @organization_login_required
@@ -820,6 +1256,7 @@ def about_us_org(request):
 @cache_control(no_cache=True, no_store=True, must_revalidate=True)
 @organization_login_required
 def org_dashboard(request):
+    
     organization_id = request.session.get('organization_id')
     
     if organization_id:
@@ -879,6 +1316,42 @@ def org_dashboard(request):
 
 
 # * Ajax Functions
+def send_interview_email(request, application_id):
+    if request.method == 'POST':
+        application = get_object_or_404(Application, id=application_id)
+        student_email = application.student.email  # Ensure your Application model has a reference to the Student
+        organization_name = application.organization.company_name  # Get organization name
+        organization_email = application.organization.company_email  # Get organization email
+        email_message = request.POST.get('emailMessage', '')
+
+        # Prepare the email message
+        message = f"""
+        Dear {application.student.first_name} {application.student.last_name},
+
+        {email_message}
+
+        This message is from {organization_name} ({organization_email}).
+        Please reach out to the organization for further queries.
+
+        Best regards,
+        PSU InternPal Team
+        """
+
+        subject = f"Interview Invitation for {application.internship.title}"
+        from_email = 'psuinterpal@gmail.com'  # Fixed email sender
+        recipient_list = [student_email]
+
+        try:
+            send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            messages.success(request, "Interview invitation email sent successfully to the student.")
+        except Exception as e:
+            messages.error(request, f"Failed to send email: {e}")
+        
+        return redirect('view_application', application_id=application_id)  # Redirect back to the application view
+    
+    return HttpResponse("Invalid request method.", status=405)
+    
+
 def get_applications(request):
     applications = Application.objects.all()  # Fetch the applications
     data = [{
@@ -894,20 +1367,30 @@ def get_applications(request):
 
 
 # * Admin Dashboard
+@login_required(login_url='login')
 def admin_dashboard(request):
     # Check if the logged-in user is an admin
     if not request.user.is_admin:
         messages.error(request, "You do not have permission to access this page.")
         return redirect('login')  # Redirect to login or another page if not an admin
 
-    # Fetch all students and organizations
+    # Fetch data for statistics
+    total_users = CustomUser.objects.filter(is_active=True).count()  # Count active users
+    total_organizations = Organization.objects.count()  # Count total organizations
+    total_internships = Internship.objects.count()  # Count confirmed internships
+
+    # Fetch data for tables
     users = CustomUser.objects.all()
     organizations = Organization.objects.all()
 
     context = {
+        'total_users': total_users,
+        'total_organizations': total_organizations,
+        'total_internships': total_internships,
         'users': users,
         'organizations': organizations,
     }
+
     return render(request, 'admin_folder/admin_dashboard.html', context)
 
 
@@ -983,3 +1466,216 @@ def admin_delete_organization(request, id):
     organization.delete()
     messages.success(request, 'Organization deleted successfully.')
     return redirect('admin_dashboard')
+
+
+
+# Admin Contents
+
+@login_required(login_url='login')
+def admin_base(request):
+    return render(request, 'admin_folder/admin_dashboard.html')
+
+@login_required(login_url='login')
+def admin_departments(request):
+    organizations = Organization.objects.all()  # Fetch all organizations
+    return render(request, 'admin_folder/admin_departments.html', {'organizations': organizations})
+
+@login_required(login_url='login')
+def admin_advisors(request):
+    return render(request, 'admin_folder/admin_advisors.html')
+
+@login_required(login_url='login')
+# Internship Dates View
+def admin_internship_dates(request):
+    return render(request, 'admin_folder/admin_internship_dates.html')
+
+@login_required(login_url='login')
+def admin_account_approve(request):
+    # Fetch pending student and organization accounts
+    pending_student_accounts = AccountApproval.objects.filter(is_approved=False)
+    pending_organization_accounts = OrganizationApproval.objects.filter(is_approved=False)
+    
+    if request.method == 'POST':
+        # Determine if the request is for a student or organization
+        user_id = request.POST.get('user_id')  # For students
+        org_id = request.POST.get('org_id')   # For organizations
+        action = request.POST.get('action')
+
+        if user_id:  # Handle student account approval/decline
+            try:
+                account = AccountApproval.objects.get(user_id=user_id)
+                if action == 'approve':
+                    account.is_approved = True
+                    account.save()
+                    # Send approval email
+                    send_mail(
+                    'Congratulations! Your Student Account Has Been Approved',
+                    (
+                        'Dear Student,\n\n'
+                        'We are pleased to inform you that your student account has been approved. '
+                        'You can now access your account and explore all the resources available to you.\n\n'
+                        'To log in, please visit: http://127.0.0.1:8000/login\n\n'
+                        'If you encounter any issues or have any questions, please feel free to contact our support team.\n\n'
+                        'Best regards,\n'
+                        'The InternPal Team'
+                    ),
+                    'admin@example.com',
+                    [account.email],  # Assuming AccountApproval has an `email` field
+                    fail_silently=False,
+                    )
+                    messages.success(request, "Student account approved and email sent.")
+                elif action == 'decline':
+                    account.is_approved = False
+                    account.save()
+                    # Send decline email
+                    send_mail(
+                        'Important: Your Student Account Application Status',
+                        (
+                            'Dear Student,\n\n'
+                            'We regret to inform you that your student account application has been declined. '
+                            'This decision may be due to incomplete information or not meeting the eligibility criteria.\n\n'
+                            'If you believe this is an error or would like more information, please contact our support team for assistance.\n\n'
+                            'Website: http://127.0.0.1:8000\n\n'
+                            'Thank you for your understanding.\n\n'
+                            'Best regards,\n'
+                            'The InternPal Team'
+                        ),
+                        'admin@example.com',
+                        [account.email],  # Assuming AccountApproval has an `email` field
+                        fail_silently=False,
+                    )
+                    messages.success(request, "Student account declined and email sent.")
+                return redirect('admin_account_approve')
+            except AccountApproval.DoesNotExist:
+                messages.error(request, "Student account not found.")
+        
+        elif org_id:  # Handle organization account approval/decline
+            try:
+                organization = OrganizationApproval.objects.get(organization_id=org_id)
+                if action == 'approve':
+                    organization.is_approved = True
+                    organization.save()
+                    # Send approval email
+                    send_mail(
+                        'Congratulations! Your Organization Account Has Been Approved',
+                        (
+                            'Dear Organization Representative,\n\n'
+                            'We are excited to inform you that your organization account has been approved. '
+                            'You can now log in and start exploring the platform to connect with talented interns.\n\n'
+                            'To log in, please visit: http://127.0.0.1:8000/login\n\n'
+                            'If you have any questions or need support, please reach out to us.\n\n'
+                            'Best regards,\n'
+                            'The InternPal Team'
+                        ),
+                        'admin@example.com',
+                        [organization.email],  # Assuming OrganizationApproval has an `email` field
+                        fail_silently=False,
+                    )
+                    messages.success(request, "Organization account approved and email sent.")
+                elif action == 'decline':
+                    organization.is_approved = False
+                    organization.save()
+                    # Send decline email
+                    send_mail(
+                        'Important: Your Organization Account Application Status',
+                        (
+                            'Dear Organization Representative,\n\n'
+                            'We regret to inform you that your organization account application has been declined. '
+                            'This decision may be due to incomplete details or other eligibility issues.\n\n'
+                            'If you believe this decision is incorrect or wish to reapply, please contact our support team for guidance.\n\n'
+                            'Website: http://127.0.0.1:8000\n\n'
+                            'Thank you for considering our platform.\n\n'
+                            'Best regards,\n'
+                            'The InternPal Team'
+                        ),
+                        'admin@example.com',
+                        [organization.email],  # Assuming OrganizationApproval has an `email` field
+                        fail_silently=False,
+                    )
+                    messages.success(request, "Organization account declined and email sent.")
+                return redirect('admin_account_approve')
+            except OrganizationApproval.DoesNotExist:
+                messages.error(request, "Organization account not found.")
+    
+    # Render the admin approval template with both student and organization accounts
+    return render(request, 'admin_folder/approve_account/admin_account_approval.html', {
+        'pending_student_accounts': pending_student_accounts,
+        'pending_organization_accounts': pending_organization_accounts,
+    })
+
+@login_required(login_url='login')
+def approve_list(request):
+    approved_accounts = AccountApproval.objects.filter(is_approved=True)
+    return render(request, 'admin_folder/approve_account/approve_list.html', {
+        'approved_accounts': approved_accounts
+    })
+
+
+@login_required(login_url='login')
+def decline_list(request):
+    declined_accounts = AccountApproval.objects.filter(is_approved=False)
+    return render(request, 'admin_folder/approve_account/decline_list.html', {
+        'declined_accounts': declined_accounts
+    })
+
+
+
+
+@login_required(login_url='login')
+def admin_account_decline(request):
+    return render(request, 'admin_folder/admin_account_decline.html')
+
+# Intern Transactions View
+@login_required(login_url='login')
+def admin_intern_transactions(request):
+    return render(request, 'admin_folder/admin_intern_transactions.html')
+
+# Internship Procedures Views
+@login_required(login_url='login')
+def admin_view_internship(request):
+    return render(request, 'admin_folder/admin_view_internship.html')
+
+@login_required(login_url='login')
+def admin_confirm_internship(request):
+    return render(request, 'admin_folder/admin_confirm_internship.html')
+
+
+def admin_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, email=email, password=password)
+        
+        if user is not None and user.is_admin:
+            login(request, user)
+            return redirect('admin_dashboard')
+        else:
+            messages.error(request, 'Invalid login credentials or not an admin.')
+
+    return render(request, 'admin_folder/admin_login.html')
+
+def internship_procedures_view(request):
+    return render(request, 'admin_folder/admin_internship_procedures.html')
+
+
+# # Example for deleting a user
+# def delete_user(request, user_id):
+#     user = get_object_or_404(User, id=user_id)
+#     user.delete()
+#     return redirect('dashboard')
+
+# # Example for viewing user details
+# def view_user_details(request, user_id):
+#     user = get_object_or_404(User, id=user_id)
+#     return render(request, 'admin_folder/view_user_details.html', {'user': user})
+
+# # Example for editing a user
+# def edit_user(request, user_id):
+#     user = get_object_or_404(User, id=user_id)
+#     if request.method == 'POST':
+#         # Update user details
+#         user.first_name = request.POST['first_name']
+#         user.last_name = request.POST['last_name']
+#         user.save()
+#         return redirect('dashboard')
+#     return render(request, 'admin_folder/edit_user.html', {'user': user})

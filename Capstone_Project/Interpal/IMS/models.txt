@@ -3,7 +3,7 @@ from django.db import models
 from django.conf import settings  # This will allow us to reference the CustomUser model
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
-
+from cloudinary.models import CloudinaryField
 # Custom User Manager
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
@@ -30,7 +30,6 @@ class CustomUserManager(BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
-
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(verbose_name='email', max_length=60, unique=True)
     first_name = models.CharField(max_length=30)
@@ -48,29 +47,30 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False)
     reset_token = models.CharField(max_length=32, null=True, blank=True)
     reset_otp = models.IntegerField(blank=True, null=True)
-
-    # One-to-one relationship with Organization (optional)
+    cor_picture = CloudinaryField('image', blank=True, null=True)
+    profile_picture = CloudinaryField('image', blank=True, null=True)
     organization = models.OneToOneField(
         'Organization', 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True,
-        related_name='user'  # Reverse relation name
+        related_name='user'
     )
+    skills = models.TextField(help_text="Comma-separated skills", blank=True, null=True)
+    experience = models.IntegerField(help_text="Years of experience", default=0)
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'date_of_birth']
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_number', 'date_of_birth', 'cor_picture']
 
     def __str__(self):
         return self.email
 
-    def has_perm(self, perm, obj=None):
-        return self.is_admin
+    def skills_list(self):
+        """Return a list of skills."""
+        return [skill.strip().lower() for skill in self.skills.split(",") if skill.strip()]
 
-    def has_module_perms(self, app_label):
-        return True
 
 
 class UserVisit(models.Model):
@@ -108,6 +108,7 @@ class OrganizationManager(BaseUserManager):
         return organization
 
 class Organization(models.Model):
+    
     company_name = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -134,11 +135,10 @@ class Organization(models.Model):
     def __str__(self):
         return self.company_name
 
-
 class Internship(models.Model):
     title = models.CharField(max_length=200, null=True)
     organization = models.ForeignKey(
-        Organization, 
+        'Organization', 
         on_delete=models.SET_NULL, 
         null=True, 
         related_name='internships'
@@ -148,9 +148,71 @@ class Internship(models.Model):
     requirements = models.TextField()
     application_process = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    max_applicants = models.PositiveIntegerField(default=1) 
+    required_skills = models.TextField(help_text="Comma-separated skills", null=True)
+    desired_experience = models.IntegerField(help_text="Years of experience", default=0)
 
     def __str__(self):
         return self.title
 
     def get_applications(self):
         return self.applications.all()
+
+    def required_skills_list(self):
+        """Return a list of required skills."""
+        return [skill.strip().lower() for skill in self.required_skills.split(",") if skill.strip()]
+
+    
+class Application(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('In Review', 'In Review'),
+        ('Interview Scheduled', 'Interview Scheduled'),
+        ('Offer Extended', 'Offer Extended'),
+        ('Completed', 'Completed')
+    ]
+
+    internship = models.ForeignKey(
+        'Internship',
+        on_delete=models.CASCADE,
+        related_name='applications'
+    )
+    organization = models.ForeignKey(
+        'Organization',
+        on_delete=models.CASCADE,
+        related_name='applications'
+    )
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='applications',
+        null=True
+    )
+    student_first_name = models.CharField(max_length=255, null=True)
+    student_last_name = models.CharField(max_length=255, null=True)
+    student_college = models.CharField(max_length=255, null=True)
+    student_course = models.CharField(max_length=255, null=True)
+    resume = CloudinaryField('resume', folder="resumes/", null=True)
+    application_letter = CloudinaryField('application_letter', folder="application_letters/", null=True)
+    applied_at = models.DateTimeField(default=timezone.now)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    
+    review_stage = models.CharField(max_length=100, default="Under Review")
+    comments = models.TextField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only set on creation
+            self.organization = self.internship.organization
+            self.student_first_name = self.student.first_name
+            self.student_last_name = self.student.last_name
+            self.student_college = self.student.college
+            self.student_course = self.student.course
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.student_first_name} {self.student_last_name} - {self.internship.title}"
+
+    def get_student_profile_picture(self):
+        if self.student.profile_picture:
+            return self.student.profile_picture.url
+        return None

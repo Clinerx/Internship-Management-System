@@ -1,66 +1,83 @@
 {% extends 'organization_pages/organization_base.html' %}
 
-{% block title %}Organization || Dashboard{% endblock %}
+{% block title %}Dashboard | Organization{% endblock %}
+{% load static %}
 
 {% block content %}
-<!-- Main Container Section -->
-<div class="container mt-5 custom-container">
+<div class="container py-5">
+    <!-- Profile Section -->
     <div class="row">
-        <!-- Counting Box Section -->
-        <div class="col-12 mb-5">
-            <div class="row text-center">
-                <div class="col-md-4 mb-4">
-                    <div class="counting_box shadow-sm p-4 bg-gradient rounded">
-                        <i class='bx bx-building text-primary'></i>
-                        <h5 class="mt-2">Registered Organizations</h5>
-                        <p class="display-6 text-primary">{{ org_count }}</p>
-                        <a href="#" class="btn btn-outline-primary btn-sm mt-2">View Details</a>
+        <div class="col-md-12 mb-4">
+            <div class="card profile-card shadow-sm">
+                <div class="d-flex align-items-center">
+                    <!-- Profile Picture -->
+                    <div class="profile-img-container">
+                        <img 
+                            src="{% if org.profile_picture %}{{ org.profile_picture.url }}{% else %}{% static 'img/default_profile.jpg' %}{% endif %}" 
+                            alt="Profile Picture" 
+                            class="profile-img">
                     </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="counting_box shadow-sm p-4 bg-gradient rounded">
-                        <i class='bx bx-user text-success'></i>
-                        <h5 class="mt-2">Registered Students</h5>
-                        <p class="display-6 text-success">{{ user_count }}</p>
-                        <a href="#" class="btn btn-outline-success btn-sm mt-2">View Details</a>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="counting_box shadow-sm p-4 bg-gradient rounded">
-                        <i class='bx bx-file text-info'></i>
-                        <h5 class="mt-2">Applicants</h5>
-                        <p class="display-6 text-info">{{ student_applicants }}</p>
-                        <a href="#" class="btn btn-outline-info btn-sm mt-2">View Details</a>
+                    <!-- Profile Content -->
+                    <div class="profile-content ms-4">
+                        <h5 class="fw-bold mb-1">{{ org.first_name }} {{ org.last_name }}</h5>
+                        <p class="text-muted mb-1">{{ org.company_name }}</p>
+                        <p class="text-muted mb-1">{{ org.location}}</p>
+                        <p class="small text-secondary mb-3">{{ org.company_email }}</p>
+                        <a href="{% url 'edit_profile_org' %}" class="btn btn-primary btn-sm">Edit Profile</a>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Charts Section -->
-        <div class="col-12">
-            <section class="charts_section py-5">
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="charts-container shadow-sm p-4 bg-white rounded">
-                            <h3 class="text-center">User Charts</h3>
-                            <canvas id="barChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="charts-container shadow-sm p-4 bg-white rounded">
-                            <h3 class="text-center">Internship Distribution</h3>
-                            <canvas id="lineChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
+
+
+
+    <!-- Stats Section -->
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="stat-card shadow">
+                <i class="bx bx-building text-primary icon"></i>
+                <h6>Registered Organizations</h6>
+                <p class="stat-number text-primary">{{ org_count }}</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="stat-card shadow">
+                <i class="bx bx-user text-primary icon"></i>
+                <h6>Registered Students</h6>
+                <p class="stat-number text-primary">{{ user_count }}</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="stat-card shadow">
+                <i class="bx bx-file text-primary icon"></i>
+                <h6>Applicants</h6>
+                <p class="stat-number text-primary">{{ student_applicants }}</p>
+            </div>
         </div>
     </div>
-</div>
+    
 
-<!-- Button Section -->
-<div class="text-center my-5">
-    <a href="{% url 'admin_view' %}" class="btn btn-primary btn-lg">Check Account</a>
+    <!-- Charts Section -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card chart-card shadow-sm">
+                <div class="card-header text-center">User Statistics</div>
+                <div class="card-body">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card chart-card shadow-sm">
+                <div class="card-header text-center">Internship Trends</div>
+                <div class="card-body">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% block scripts %}
@@ -140,56 +157,105 @@
         --dark-gradient: linear-gradient(145deg, #1c1c1c, #2a2a2a);
     }
 
-    /* General Reset */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Poppins', sans-serif; background-color: #f9f9f9; }
-
-    /* Counting Box Styles */
-    .counting_box {
-        background: linear-gradient(135deg, #ffffff, #e9f2fb);
-        transition: transform 0.3s;
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f9f9f9;
+    }
+    .profile-card {
+        margin-top: 90px;
+        width: 100%;
+        background-color: #fff;
         border-radius: 10px;
-        margin-top: 100px;
+        overflow: hidden;
+        padding: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-    .counting_box:hover {
+    
+    .profile-img-container {
+        flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 20px;
+    }
+    
+    .profile-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid #007bff;
+        object-fit: cover;
+    }
+    
+    .profile-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .profile-content h5 {
+        font-size: 1.5rem;
+    }
+    
+    .profile-content p {
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    
+    .profile-content a {
+        margin-top: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-card {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+    
+        .profile-img-container {
+            margin-right: 0;
+            margin-bottom: 20px;
+        }
+    
+        .profile-content {
+            align-items: center;
+        }
+    }
+    
+    
+    .stat-card {
+        background: linear-gradient(145deg, #ffffff, #f3f3f3);
+        border-radius: 10px;
+        padding: 20px;
+        transition: transform 0.3s;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+    .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
-    .counting_box i {
+    .stat-card .icon {
         font-size: 2rem;
         margin-bottom: 10px;
     }
-    .counting_box h5, .counting_box p {
-        margin: 0;
-        font-weight: 500;
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
     }
-
-    /* Chart Container Styles */
-    .charts-container {
+    .chart-card {
         border-radius: 10px;
-        transition: transform 0.3s;
+        background-color: #fff;
     }
-    .charts-container:hover {
-        transform: scale(1.02);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Button */
-    .btn-primary {
-        transition: background-color 0.3s ease;
-    }
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
-
-    /* Media Queries */
-    @media (max-width: 768px) {
-        .counting_box {
-            margin-bottom: 15px;
-        }
-        .charts_section .charts-container {
-            margin-bottom: 20px;
-        }
+    .chart-card .card-header {
+        background-color: #007bff;
+        color: #fff;
+        border-radius: 10px 10px 0 0;
+        text-align: center;
+        padding: 10px;
     }
 </style>
 {% endblock %}

@@ -4,6 +4,50 @@
 {% block header %}Internships Status{% endblock %}
 {% block content %}
 
+<!-- Delete Confirmation Modal (Single Application) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Are you sure you want to delete this application?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="POST" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete All Applications Confirmation Modal -->
+<div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAllModalLabel">Confirm Delete All</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete all selected applications?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteAllForm" method="POST" action="{% url 'delete_selected_applications' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Delete All</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelDeleteAllButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container mt-5">
     <div class="text-center mb-4">
         <h2>Check your internship status, <span class="user-name">{{ user.first_name }}</span>!</h2>
@@ -41,7 +85,7 @@
     <!-- Internship Table -->
     <form method="POST" action="{% url 'delete_selected_applications' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger mb-3 delete-selected-btn" style="display: none;">Delete Selected</button>
+        <button type="button" class="btn btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#deleteAllModal" style="display: none;" id="deleteSelectedBtn">Delete Selected</button>
         
         <div class="table-responsive">
             <table class="table table-bordered align-middle text-center">
@@ -64,16 +108,22 @@
                         <td>{{ application.applied_at|date:"F d, Y" }}</td>
                         <td>
                             <span class="badge 
-                                {% if application.status == 'Approved' %}bg-success
+                                {% if application.status == 'Hired' %}bg-success
                                 {% elif application.status == 'Rejected' %}bg-danger
                                 {% else %}bg-warning{% endif %}">
                                 {{ application.status|default:"In Progress" }}
                             </span>
                         </td>
                         <td>
-                            <a href="{% url 'delete_application_confirm' application.id %}" class="btn btn-sm btn-danger">
+                            <button 
+                                type="button" 
+                                class="btn btn-sm btn-danger delete-button" 
+                                data-application-id="{{ application.id }}" 
+                                data-internship-title="{{ application.internship.title }}" 
+                                data-organization-name="{{ application.internship.organization.company_name }}" 
+                                data-delete-url="{% url 'delete_application_confirm' application.id %}">
                                 <i class="bx bx-trash"></i> Delete
-                            </a>
+                            </button>
                             <a href="{% url 'view_status' application.id %}" class="btn btn-sm btn-info">
                                 <i class="bx bx-info-circle"></i> View Status
                             </a>
@@ -92,15 +142,33 @@
 
 <style>
     /* General Body Styling */
-.container{
-    margin-bottom: 200px;
-}
-body {
-    font-family: 'Poppins', sans-serif;
-    color: #2b2b2b;
-    font-size: 15px;
-    background-color: #f7f8fa;
-}
+    .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* General Container Styling */
+    .container {
+        margin-bottom: 200px;
+        
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        color: #2b2b2b;
+        font-size: 15px;
+        background-color: #f7f8fa;
+    }
 
 .container h2 {
     color: #4e73df;
@@ -173,13 +241,13 @@ body {
 }
 .table th, .table td {
     padding: 12px;
-    vertical-align: middle;
     text-align: center;
     font-weight: 500;
 }
 .table thead {
     background-color: #4e73df;
     color: white;
+    text-align: center;
 }
 .table tbody tr:nth-child(odd) {
     background-color: #f7f8fa;
@@ -233,12 +301,14 @@ body {
     }
     
     .search-form input {
+        border: 1px solid ;
         width: 100%;
         margin-bottom: 10px;
     }
 
     .search-form button {
-        width: 85%;
+        width: 40%;
+        font-size: 14px;
         margin-top: 10px;
     }
 
@@ -247,11 +317,10 @@ body {
     }
 
     .table th, .table td {
-        font-size: 11px;
+        font-size: 14px;
     }
-
-    .pagination {
-        flex-direction: column;
+    .pagination{
+        text-align: left;
     }
 
     .btn {
@@ -260,7 +329,6 @@ body {
 }
 
 </style>
-
 <script>
     window.onload = function() {
         const notification = document.getElementById('notification');
@@ -278,14 +346,12 @@ body {
     document.addEventListener("DOMContentLoaded", function() {
         const selectAllCheckbox = document.getElementById('select-all');
         const checkboxes = document.querySelectorAll('.application-checkbox');
-        const deleteSelectedButton = document.querySelector('.delete-selected-btn');
+        const deleteSelectedButton = document.getElementById('deleteSelectedBtn');
     
         function toggleDeleteButton() {
-            // Show the delete button if any checkbox is checked
             deleteSelectedButton.style.display = Array.from(checkboxes).some(checkbox => checkbox.checked) ? 'block' : 'none';
         }
     
-        // Toggle checkboxes when "Select All" is clicked
         selectAllCheckbox.addEventListener('change', function() {
             checkboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
@@ -293,10 +359,38 @@ body {
             toggleDeleteButton();
         });
     
-        // Toggle the delete button when individual checkboxes are clicked
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', toggleDeleteButton);
-        })
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const deleteAllModal = new bootstrap.Modal(document.getElementById('deleteAllModal'));
+        const modalMessage = document.getElementById('modalMessage');
+        const deleteForm = document.getElementById('deleteForm');
+    
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', function () {
+                const internshipTitle = this.dataset.internshipTitle;
+                const organizationName = this.dataset.organizationName;
+                const deleteUrl = this.dataset.deleteUrl;
+    
+                modalMessage.innerHTML = `Are you sure you want to delete your application for <strong>${internshipTitle}</strong> at <strong>${organizationName}</strong>?`;
+                deleteForm.action = deleteUrl;
+                deleteModal.show();
+            });
+        });
+    
+        // Close modal when cancel button is clicked
+        document.getElementById('cancelDeleteButton').addEventListener('click', function () {
+            deleteModal.hide();
+        });
+    
+        // Close modal for deleting all applications
+        document.getElementById('cancelDeleteAllButton').addEventListener('click', function () {
+            deleteAllModal.hide();
+        });
     });
 </script>
 {% endblock %}

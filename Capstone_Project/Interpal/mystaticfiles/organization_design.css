@@ -243,3 +243,6 @@ body.dark-mode .footer__bar {
   body.dark-mode .footer__col h4 {
     color: var(--dark-text);
   }
+  body.dark-mode .navbar-toggler i {
+    background-color: var(--dark-text);
+  }

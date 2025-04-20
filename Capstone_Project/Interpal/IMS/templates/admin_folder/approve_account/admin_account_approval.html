@@ -1,0 +1,152 @@
+{% extends 'admin_folder/admin_base.html' %}
+{% block content %}
+<div class="section-card">
+  <h3>Account Approval</h3>
+  <p>Approve or decline accounts (students and organizations).</p>
+
+  <!-- Student Accounts -->
+  <h4>Pending Student Accounts</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Program</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account in pending_student_accounts %}
+        <tr>
+          <td>{{ account.user.id }}</td>
+          <td>{{ account.user.first_name }} {{ account.user.last_name }}</td>
+          <td>{{ account.user.course }}</td>
+          <td>{{ account.user.email }}</td>
+          <td>
+            <button class="btn btn-success btn-sm approval-btn" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#confirmationModal" 
+                    data-action="approve" 
+                    data-id="{{ account.user.id }}" 
+                    data-type="student" 
+                    data-message="Are you sure you want to approve this student?">
+              Approve
+            </button>
+            <button class="btn btn-danger btn-sm approval-btn" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#confirmationModal" 
+                    data-action="decline" 
+                    data-id="{{ account.user.id }}" 
+                    data-type="student" 
+                    data-message="Are you sure you want to decline this student?">
+              Decline
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Organization Accounts -->
+  <h4>Pending Organization Accounts</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Organization Name</th>
+        <th>Email</th>
+        <th>Approval Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for approval in pending_organization_accounts %}
+        <tr>
+          <td>{{ approval.organization.company_name }}</td>
+          <td>{{ approval.organization.company_email }}</td>
+          <td>{{ 'Pending' }}</td>
+          <td>
+            <button class="btn btn-success btn-sm approval-btn" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#confirmationModal" 
+                    data-action="approve" 
+                    data-id="{{ approval.organization.id }}" 
+                    data-type="organization" 
+                    data-message="Are you sure you want to approve this organization?">
+              Approve
+            </button>
+            <button class="btn btn-danger btn-sm approval-btn" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#confirmationModal" 
+                    data-action="decline" 
+                    data-id="{{ approval.organization.id }}" 
+                    data-type="organization" 
+                    data-message="Are you sure you want to decline this organization?">
+              Decline
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmationMessage">Are you sure you want to proceed?</p>
+      </div>
+      <div class="modal-footer">
+        <form method="post" id="confirmationForm">
+          {% csrf_token %}
+          <input type="hidden" name="action" id="confirmationAction">
+          <input type="hidden" name="user_id" id="confirmationUserId">
+          <input type="hidden" name="org_id" id="confirmationOrgId">
+          <button type="submit" class="btn btn-primary">Confirm</button>
+        </form>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Get the modal elements
+    const modal = document.getElementById('confirmationModal');
+    const messageElement = document.getElementById('confirmationMessage');
+    const form = document.getElementById('confirmationForm');
+    const actionInput = document.getElementById('confirmationAction');
+    const userIdInput = document.getElementById('confirmationUserId');
+    const orgIdInput = document.getElementById('confirmationOrgId');
+
+    // Listen for modal show events
+    modal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget; // Button that triggered the modal
+      const message = button.getAttribute('data-message');
+      const action = button.getAttribute('data-action');
+      const id = button.getAttribute('data-id');
+      const type = button.getAttribute('data-type');
+
+      // Update modal content
+      messageElement.textContent = message;
+      actionInput.value = action;
+
+      // Determine which ID field to populate
+      if (type === 'student') {
+        userIdInput.value = id;
+        orgIdInput.value = '';
+      } else if (type === 'organization') {
+        orgIdInput.value = id;
+        userIdInput.value = '';
+      }
+    });
+  });
+</script>
+{% endblock content %}

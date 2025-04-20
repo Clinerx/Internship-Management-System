@@ -4,80 +4,240 @@
 {% block header %}Application Status{% endblock %}
 {% block content %}
 <div class="status-container container">
-    <h2>Application Status for {{ application.internship.title }}</h2>
-    
+    <h2 class="text-primary text-center mb-4">Application Status for {{ application.internship.title }}</h2>
+
     <!-- Stepper -->
-    <div class="md-stepper-horizontal d-flex justify-content-between flex-wrap">
-        {% for stage in stages %}
-            <div class="md-step {% if stage == status_details.status %}active{% elif stage in status_details.completed_stages %}done{% endif %}">
-                <div class="md-step-circle"><span>{{ forloop.counter }}</span></div>
-                <div class="md-step-title">{{ stage }}</div>
-            </div>
-            {% if not forloop.last %}
-                <div class="md-step-line"></div>
-            {% endif %}
-        {% endfor %}
+    <div class="stepper-container d-flex flex-column align-items-center">
+        <div class="md-stepper-horizontal d-flex align-items-center w-100 position-relative">
+            {% for stage in stages %}
+                <div class="md-step d-flex flex-column align-items-center position-relative {% if stage == status_details.status %}active{% elif stage in status_details.completed_stages %}done{% endif %}">
+                    <div class="md-step-circle d-flex align-items-center justify-content-center">
+                        <span>{{ forloop.counter }}</span>
+                    </div>
+                    <div class="md-step-title text-center mt-2">{{ stage }}</div>
+                </div>
+                {% if not forloop.last %}
+                    <div class="md-step-line"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
     </div>
-    
-    <div class="status-details mt-4">
-        <p><strong>Current Status:</strong> {{ status_details.status }}</p>
-        <p><strong>Review Stage:</strong> {{ status_details.review_stage }}</p>
+
+    <div class="status-details mt-5 p-4 bg-light rounded shadow-sm">
+        <p><strong>Current Status:</strong> {{ status_details.status_message }}</p>
         <p><strong>Date of Submission:</strong> {{ status_details.submission_date|date:"F d, Y" }}</p>
-        <p><strong>Comments:</strong> {{ status_details.comments }}</p>
     </div>
 
-    <a href="{% url 'student_status' %}" class="btn back-btn mt-3">Back to Internship Status</a>
+    <a href="{% url 'student_status' %}" class="btn btn-primary mt-4 shadow">Back to Internship Status</a>
 </div>
-
 <style>
-    /* Styling for consistency with the organization view */
+    /* Container and General Styling */
     .status-container {
-        padding: 30px;
-        border: 1px solid #ddd;
+        background-color: #f8f9fa;
         border-radius: 8px;
-        background-color: #f9f9f9;
-        max-width: 100%;
-        width: 90%;
-        margin: 20px auto;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.6s ease-in-out;
+    }
+    
+    /* Stepper Container */
+    .stepper-container {
+        margin-top: 2rem;
     }
     
     .md-stepper-horizontal {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background-color: #FFFFFF;
-        box-shadow: 0 3px 8px -6px rgba(0,0,0,.50);
+        justify-content: space-around;
+        gap: 1rem;
+        padding: 1rem 0;
+        position: relative;
+        flex-wrap: wrap; /* Allow wrapping for small screens */
     }
     
-    .md-stepper-horizontal .md-step .md-step-circle {
+    /* Stepper Steps */
+    .md-step {
+        text-align: center;
+        transition: transform 0.3s, opacity 0.3s;
+        flex: 1; /* Equal spacing between steps */
+        min-width: 80px; /* Prevent circles from shrinking too much */
+    }
+    
+    .md-step.active {
+        transform: scale(1.1);
+        color: #007bff;
+        font-weight: bold;
+    }
+    
+    .md-step.done {
+        color: #28a745;
+        opacity: 0.8;
+    }
+    
+    .md-step-circle {
         width: 50px;
         height: 50px;
-        background-color: #999999;
         border-radius: 50%;
-        color: #FFFFFF;
-        text-align: center;
-        line-height: 50px;
+        background-color: #e9ecef;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-size: 18px;
         font-weight: 600;
+        border: 2px solid #dee2e6;
+        position: relative;
+        transition: background-color 0.3s, border-color 0.3s;
     }
     
-    /* Color for Active and Completed Stages */
-    .md-stepper-horizontal .md-step.active .md-step-circle,
-    .md-stepper-horizontal .md-step.done .md-step-circle {
+    
+    .md-step.active .md-step-circle {
+        background-color: #007bff;
+        color: #fff;
+        border-color: #0056b3;
+    }
+    
+    .md-step.done .md-step-circle {
+        background-color: #28a745;
+        color: #fff;
+        border-color: #218838;
+    }
+    
+    .md-step-circle hr {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        border: none;
+        height: 2px;
+        background: #fff;
+        transform: translateY(-50%);
+        width: 40%;
+    }
+    
+    .md-step-title {
+        margin-top: 0.5rem;
+        font-size: 14px;
+        color: #495057;
+    }
+    
+    /* Stepper Line */
+    .md-step-line {
+        height: 2px;
+        background-color: #dee2e6;
+        flex-grow: 1;
+        transition: background-color 0.3s;
+    }
+    
+    .md-step.active + .md-step-line {
         background-color: #007bff;
     }
     
-    .md-stepper-horizontal .md-step .md-step-title {
-        margin-top: 20px;
+    .md-step.done + .md-step-line {
+        background-color: #28a745;
+    }
+    
+    /* Status Details */
+    .status-details {
+        animation: slideUp 0.6s ease-in-out;
         font-size: 16px;
+        line-height: 1.5;
+        color: #495057;
+    }
+    
+    .status-details strong {
         font-weight: 600;
     }
     
-    .md-step-line {
-        flex-grow: 1;
-        height: 3px;
-        background-color: #007bff;
-        margin-top: 25px;
+    /* Button Styling */
+    .btn {
+        transition: all 0.3s ease-in-out;
     }
-</style>
+    
+    .btn:hover {
+        background-color: #0056b3 !important;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+
+    /* Responsive Design */
+@media (max-width: 768px) { /* Tablets and smaller devices */
+    .md-stepper-horizontal {
+        flex-direction: column; /* Stack steps vertically */
+        align-items: center;
+        gap: 2rem; /* Increase space between steps */
+    }
+
+    .md-step {
+        flex: none; /* Remove equal spacing on small screens */
+        width: 100%; /* Make each step take full width */
+    }
+
+    .md-step-line {
+        position: static; /* Inline with step */
+        width: 100%;
+        height: 2px;
+        margin: 10px 0; /* Add spacing between circles */
+    }
+
+    .status-container {
+        padding: 1.5rem; /* Adjust padding */
+    }
+
+    .status-details {
+        font-size: 14px; /* Slightly smaller text */
+        padding: 1rem;
+    }
+
+    .btn {
+        width: 100%; /* Full-width button */
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) { /* Mobile devices */
+    .md-step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 16px; /* Smaller font size */
+    }
+
+    .md-step-title {
+        font-size: 12px; /* Smaller step title */
+    }
+
+    .status-container {
+        padding: 1rem; /* Further reduce padding */
+    }
+
+    .status-details {
+        font-size: 13px; /* Smaller details text */
+    }
+
+    .btn {
+        font-size: 14px; /* Adjust button text size */
+    }
+}
+    </style>
+    
 {% endblock %}

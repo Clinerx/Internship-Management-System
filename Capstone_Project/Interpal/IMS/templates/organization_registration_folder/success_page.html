@@ -1,12 +1,122 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Success</title>
+
+    <!-- Google Fonts Link for Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* General reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Full-screen centered layout */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* Container styling */
+        .success-container {
+            text-align: center;
+            padding: 2.5rem 2rem;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        /* Icon styling */
+        .success-icon {
+            font-size: 3.5rem;
+            color: #3a8ef6;
+            margin-bottom: 1rem;
+            animation: pop-scale 0.5s ease-out;
+        }
+
+        /* Animation for the success icon */
+        @keyframes pop-scale {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Headline and text styling */
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #222;
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Button styling */
+        a {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: #3a8ef6;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 25px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        a:hover {
+            background-color: #0056d2;
+            transform: translateY(-3px);
+        }
+
+        /* Responsive design for small screens */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            p {
+                font-size: 0.9rem;
+            }
+
+            a {
+                font-size: 0.9rem;
+                padding: 0.6rem 1.8rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Registration Successful!</h1>
-    <p>Your organization has been successfully registered.</p>
-    <a href="/">Go to Homepage</a>
+    <div class="success-container">
+        <div class="success-icon">✔️</div>
+        <h1>Registration Successful</h1>
+        <p>Your organization has been successfully registered. Please wait a moment for the admin to approve your registration.</p>
+        <a href="{% url 'organization_login' %}">Go to Login</a>
+    </div>
 </body>
 </html>

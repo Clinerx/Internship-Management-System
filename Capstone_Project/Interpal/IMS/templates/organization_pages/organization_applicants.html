@@ -1,6 +1,7 @@
 {% extends 'organization_pages/organization_base.html' %}
 {% block title %}Organization || Applicants{% endblock title %}
 {% load static %}
+
 {% block content %}
 
 <div class="line_design"><p></p></div>
@@ -10,50 +11,79 @@
 
     {% comment %} Loop through the grouped applications by internship {% endcomment %}
     {% for internship, apps in grouped_applications.items %}
-        <div class="internship-folder">
-            <h3>{{ internship.title }}</h3>
-            
-            <table class="application-table">
-                <thead>
+    <div class="internship-folder">
+        <h3>{{ internship.title }}</h3>
+        
+        <table class="application-table">
+            <thead>
+                <tr>
+                    <th>Applicant</th>
+                    <th>Course</th>
+                    <th>College</th>
+                    <th>Score</th>
+                    <th>Applied On</th>
+                    <th>Status</th>
+                    <th>Already Hired</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in apps %}
                     <tr>
-                        <th>Applicant Name</th>
-                        <th>Course</th>
-                        <th>College</th>
-                        <th>Applied On</th>
-                        <th>Actions</th>
+                        <td>
+                            {% if application.student.profile_picture %}
+                                <img src="{{ application.student.profile_picture.url }}" alt="Profile Picture" class="profile-img">
+                            {% else %}
+                                <img src="{% static 'default_profile_picture.jpg' %}" class="profile-img">
+                            {% endif %}
+                            {{ application.student.first_name }} {{ application.student.last_name }}
+                        </td>
+                        <td>{{ application.student.course }}</td>
+                        <td>{{ application.student.college }}</td>
+                        <td>
+                            <span class="badge 
+                            {% if application.similarity_score > 79 %}badge-high
+                            {% elif application.similarity_score > 50 %}badge-medium
+                            {% else %}badge-low{% endif %}">
+                                {{ application.similarity_score }}%
+                            </span>
+                        </td>
+                        <td>{{ application.applied_at|date:"F d, Y" }}</td>
+                        <td>
+                            <span class="badge 
+                            {% if application.status == 'Approved' %}status-approved
+                            {% elif application.status == 'Rejected' %}status-rejected
+                            {% else %}status-pending{% endif %}">
+                            {{ application.status|default:"In Progress" }}
+                        </span>
+                        </td>
+                        <td>
+                            {% if application.is_hired %}
+                                <span class="badge badge-hired">Already Hired</span>
+                            {% else %}
+                                <span class="badge badge-not-hired">Not Hired</span>
+                            {% endif %}
+                        </td>
+                        <td class="applicant-actions">
+                            <a href="{% url 'view_application' application.id %}" class="btn btn-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <button type="button" class="btn btn-danger" onclick="openModal('{% url 'delete_application' application.id %}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for application in apps %}
-                        <tr>
-                            <td>
-                                <!-- Display student's profile picture -->
-                                {% if application.student.profile_picture %}
-                                    <img src="{{ application.student.profile_picture.url }}" alt="Profile Picture" style="width: 40px; height: 40px; border-radius: 50%;">
-                                {% else %}
-                                    <img src="{% static 'default_profile_picture.jpg' %}" alt="Default Profile Picture" style="width: 40px; height: 40px; border-radius: 50%;">
-                                {% endif %}
-                                {{ application.student.first_name }} {{ application.student.last_name }}
-                            </td>
-                            <td>{{ application.student.course }}</td>
-                            <td>{{ application.student.college }}</td>
-                            <td>{{ application.applied_at|date:"F d, Y" }}</td>
-                            <td class="applicant-actions">
-                                <a href="{% url 'view_application' application.id %}" class="btn btn-primary">View</a>
-                                <button type="button" class="btn btn-danger" onclick="openModal('{% url 'delete_application' application.id %}')">
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="5">No applications available at this time.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                {% empty %}
+                    <tr>
+                        <td colspan="7">No applications available at this time.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            
+        </table>
+    </div>
     {% endfor %}
+
 </section>
 
 <!-- Delete Confirmation Modal -->
@@ -77,154 +107,226 @@
 
         // Set the form action URL dynamically
         deleteForm.action = deleteUrl;
+
+        // Show the modal with a fade-in effect
         modal.style.display = "block";
+        modal.style.opacity = "1";
     }
 
     function closeModal() {
         const modal = document.getElementById("deleteModal");
-        modal.style.display = "none";
+
+        // Hide the modal with a fade-out effect
+        modal.style.opacity = "0";
+        setTimeout(() => {
+            modal.style.display = "none";
+        }, 300); // Match the transition duration
     }
 
     // Close the modal if user clicks outside of it
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const modal = document.getElementById("deleteModal");
         if (event.target === modal) {
-            modal.style.display = "none";
+            closeModal();
         }
-    }
+    };
 </script>
 
 <style>
-    /* Container for the internship folder */
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .badge-high {
+        background-color: #28a745; /* Green for high scores */
+        color: #fff;
+    }
+    
+    .badge-medium {
+        background-color: #ffc107; /* Yellow for medium scores */
+        color: #000;
+    }
+    
+    .badge-low {
+        background-color: #dc3545; /* Red for low scores */
+        color: #fff;
+    }
+    
+    .application-list h2 {
+        font-size: 2.5em; /* Larger, more prominent font size */
+        font-weight: bold; /* Make it stand out */
+        color: #0056b3; /* A strong, professional color */
+        text-align: center; /* Center align for visual impact */
+        margin-bottom: 20px; /* Add space below */
+        margin-top: 130px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    }
+    
     .internship-folder {
         margin-bottom: 30px;
-        background-color: #f9f9f9;
         border: 1px solid #ddd;
-        border-radius: 8px;
         padding: 20px;
+        margin-inline: 30px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow-y: auto; /* Enables vertical scrolling */
+        max-height: 400px; /* Limit the height for better visibility */
+        overflow-x: auto; /* Enables horizontal scrolling */
     }
-
-    /* Table styling */
+    
     .application-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 15px;
+        margin-top: 10px;
+    }
+    
+    .application-table th, .application-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .application-table th {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .table-disabled {
+        background-color: #f0f0f0;
+        color: #999;
+    }
+    
+    .badge {
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+    }
+    
+    .badge-hired {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .badge-not-hired {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .applicant-actions .btn {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        width: 100%;
+        padding: 5px 10px;
+        margin-top: 5px;
+        text-align: left;
+        border-radius: 4px;
+        text-decoration: none;
+        color: white;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .btn-danger {
+        background-color: #e74c3c;
+        border: none;
+    }
+    
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+    
+    .profile-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+    
+    
+
+    @keyframes modal-show {
+        from {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Design */
+@media (max-width: 768px) {
+    .internship-folder {
+        margin-inline: 10px;
+        padding: 10px;
+    }
+
+    .application-list h3 {
+        font-size: 20px; /* Adjusted header font size */
+    }
+    
+    .application-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
     }
 
     .application-table th, .application-table td {
-        padding: 12px;
-        text-align: left;
-        border: 1px solid #ddd;
+        font-size: 12px;
+        padding: 8px;
     }
 
-    .application-table th {
-        background-color: #3498db;
-        color: white;
+    .application-list h2 {
+        font-size: 1.5rem;
     }
 
-    .application-table td {
-        background-color: #f9f9f9;
+    .profile-img {
+        width: 30px;
+        height: 30px;
     }
 
-    .application-table tr:nth-child(even) td {
-        background-color: #f2f2f2;
+    .badge {
+        font-size: 10px;
+        padding: 3px 5px;
     }
 
-    .application-table tr:hover td {
-        background-color: #e9ecef;
+    .btn {
+        font-size: 12px;
+        padding: 5px;
     }
 
-    /* Action buttons in table */
-    .applicant-actions .btn {
-        padding: 8px 16px;
-        font-size: 14px;
-        border-radius: 5px;
-        margin-right: 10px;
+    .modal-content {
+        width: 90%;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .application-list h2 {
+        font-size: 1.2rem;
     }
 
-    .applicant-actions .btn-primary {
-        background-color: #3498db;
-        color: white;
-        border: none;
+    .btn {
+        font-size: 10px;
+        padding: 4px;
     }
 
-    .applicant-actions .btn-primary:hover {
-        background-color: #2980b9;
+    .profile-img {
+        width: 25px;
+        height: 25px;
     }
-
-    .applicant-actions .btn-danger {
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-    }
-
-    .applicant-actions .btn-danger:hover {
-        background-color: #c0392b;
-    }
-
-    <style>
-        /* Modal Background */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-    
-        /* Modal Content */
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 8px;
-            text-align: center;
-        }
-    
-        /* Close Button */
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-    
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    
-        /* Buttons in the modal */
-        .modal-content .btn {
-            padding: 10px 20px;
-            margin: 10px;
-            border-radius: 5px;
-        }
-    
-        .modal-content .btn-secondary {
-            background-color: #ddd;
-            color: #333;
-        }
-    
-        .modal-content .btn-danger {
-            background-color: #e74c3c;
-            color: white;
-        }
-    
-        .modal-content .btn-danger:hover {
-            background-color: #c0392b;
-        }
-    </style>
-    
+}
 </style>
 
 {% endblock content %}

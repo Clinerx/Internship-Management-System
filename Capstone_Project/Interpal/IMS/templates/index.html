@@ -9,9 +9,284 @@
   <link rel="stylesheet" href="{% static 'styles.css' %}">
   <link rel="stylesheet" href="{% static 'blob.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
   
   <title>InternPal | Web-based OJT Management System</title>
+  <style>
+    body{
+      font-family: 'Poppins', sans-serif;
+    }
+    .menu-toggle-icon {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+  }
   
+  @media (max-width: 768px) {
+      .nav__links {
+          display: none;
+          flex-direction: column;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background-color: #fff;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          padding: 1rem;
+      }
+  
+      .nav__links.active {
+          display: flex;
+      }
+  
+      .menu-toggle-icon {
+          display: block;
+      }
+      .btn, #modeToggle  {
+        display: none; /* Hide by default on mobile */
+        margin-top: 1rem;
+    }
+    .nav__links .btn {
+        display: block; /* Display inline when nav__links is active */
+    }
+  }
+
+/* Mobile Responsive Media Queries */
+@media (max-width: 768px) {
+  /* For Tablets and smaller devices */
+  body{
+    padding: 0;
+    margin: 0;
+  }
+  .destination__grid, .trip__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer__col {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+  .header-image{
+    margin-top: 50px;
+  }
+
+  .destination__nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .destination__title, .destination__subtitle {
+    font-size: 14px;
+  }
+
+  .section__title {
+    font-size: 22px;
+  }
+
+  .section__subtitle {
+    font-size: 16px;
+  }
+
+  .trip__details p {
+    font-size: 14px;
+  }
+
+  .trip__card {
+    padding: 15px;
+  }
+
+  .subscribe__container {
+    padding: 20px;
+  }
+
+  .footer__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .footer__socials i {
+    font-size: 20px;
+    margin: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* For Mobile Phones */
+  .destination__grid, .trip__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .destination__card, .trip__card {
+    margin: 10px 0;
+  }
+
+  .destination__nav {
+    display: none; /* Hide navigation arrows for small screens */
+  }
+
+  .footer__col {
+    text-align: center;
+    padding: 10px;
+  }
+
+  .section__container {
+    padding: 10px;
+  }
+
+  .btn {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .footer__socials i {
+    font-size: 18px;
+    margin: 0 8px;
+  }
+
+  .trip__details p {
+    font-size: 12px;
+  }
+
+  .section__header {
+    text-align: center;
+    
+  }
+  
+
+  .section__header .destination__nav {
+    justify-content: center;
+  }
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  overflow: auto;
+}
+
+.modal-content {
+  background: #ffffff;
+  margin: 5% auto;
+  padding: 20px;
+  width: 80%;
+  max-width: 800px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-title {
+  font-size: 2rem;
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+
+.modal-body {
+  font-size: 1rem;
+  color: #4a4a4a;
+  line-height: 1.8;
+  font-family: 'Roboto', sans-serif;
+  text-align: justify;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.modal-body h3 {
+  font-size: 1.3rem;
+  color: #3498db;
+  margin-top: 20px;
+}
+
+.modal-body h4 {
+  font-size: 1.1rem;
+  margin-top: 10px;
+  color: #2c3e50;
+}
+
+.modal-body ul {
+  list-style: disc;
+  margin: 10px 0 10px 20px;
+}
+
+.modal-body hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 20px 0;
+}
+
+.modal-footer {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #e74c3c;
+}
+
+.btn-close {
+  background: #3498db;
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-close:hover {
+  background: #2980b9;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .modal-content {
+    width: 90%;
+    padding: 15px;
+  }
+  .modal-title {
+    font-size: 1.8rem;
+  }
+  .modal-body {
+    font-size: 0.95rem;
+  }
+}
+
+
+  </style>
 </head>
 <body>
   <!-- Blob Animition -->
@@ -23,20 +298,22 @@
   
   <nav>
     <div class="nav__logo"><span>I</span>nternPal<span>.</span></div>
+    <button id="menuToggle" class="menu-toggle-icon">
+        <i class="ri-menu-line"></i>
+    </button>
     <ul class="nav__links">
-      <li class="link"><a href="#home">Home</a></li>
-      <li class="link"><a href="#companies">Companies</a></li>
-      <li class="link"><a href="#internships">Internships</a></li>
-      <li class="link"><a href="#gallery">Gallery</a></li>
-      <li class="link"><a href="#about-us">About Us</a></li>
+        <li class="link"><a href="#home">Home</a></li>
+        <li class="link"><a href="#companies">Companies</a></li>
+        <li class="link"><a href="#internships">Internships</a></li>
+        <li class="link"><a href="#about-us">About Us</a></li>
     </ul>
     <button id="modeToggle" class="mode-toggle-icon">
-      <i class="ri-sun-line"></i>
+        <i class="ri-sun-line"></i>
     </button>
     <a href="{% url 'login' %}" class="btn" target="#">Login</a>
     <a href="{% url 'initial_registration' %}" class="btn" target="#">Register</a>
-    
-  </nav>
+</nav>
+
 
   <header id="home">
     <div class="section__container header__container">
@@ -81,28 +358,28 @@
       <div class="destination__card">
         <img src="" alt="destination" />
         <div class="destination__details">
-          <p class="destination__title">SM</p>
+          <p class="destination__title"></p>
           <p class="destination__subtitle">Puerto Princesa</p>
         </div>
       </div>
       <div class="destination__card">
         <img src="" alt="destination" />
         <div class="destination__details">
-          <p class="destination__title">Robinson</p>
+          <p class="destination__title"></p>
           <p class="destination__subtitle">Puerto Princesa</p>
         </div>
       </div>
       <div class="destination__card">
         <img src="" alt="destination" />
         <div class="destination__details">
-          <p class="destination__title">Ace Medical Hospital</p>
+          <p class="destination__title"></p>
           <p class="destination__subtitle">Puerto Princesa</p>
         </div>
       </div>
       <div class="destination__card">
         <img src="" alt="destination" />
         <div class="destination__details">
-          <p class="destination__title">Sitel</p>
+          <p class="destination__title"></p>
           <p class="destination__subtitle">Puerto Princesa</p>
         </div>
       </div>
@@ -113,87 +390,62 @@
     <div class="section__container trip__container">
       <h2 class="section__title">Explore Companies Internships</h2>
       <p class="section__subtitle">
-        Explore your suitable and dream job within Palawan. Here you
-        can find your right and suitable companies for your skills to train with.
+        Explore your suitable and dream job within Palawan. Here you can find your right and suitable companies for your skills to train with.
       </p>
-      <div class="trip__grid">
-        <div class="trip__card">
-          <img src="" alt="" />
-          <div class="trip__details">
-            <p>SM Puerto Princesa</p>
-            <div class="booking__price">
-              <button class="book__now">Apply Now</button>
-              <button class="book__now">Visit</button>
+      <div class="trip__grid row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div class="col">
+          <div class="trip__card">
+            <img src="" alt="" class="img-fluid" />
+            <div class="trip__details">
+              <p>SM Puerto Princesa</p>
+              <div class="booking__price">
+                <button class="book__now"href="{% url 'login'%}">Apply Now</button>
+                <button class="book__now"href="{% url 'login'%}">Visit</button>
+              </div>
             </div>
           </div>
         </div>
-        <div class="trip__card trip__card--down">
-          <div class="trip__details">
-            <p>Robinson, Palawan</p>
-            <div class="booking__price">
-              <button class="book__now">Apply Now</button>
-              <button class="book__now">Visit</button>
+        <div class="col">
+          <div class="trip__card trip__card--down">
+            <div class="trip__details">
+              <p>Robinson, Palawan</p>
+              <div class="booking__price">
+                <button class="book__now"href="{% url 'login'%}">Apply Now</button>
+                <button class="book__now"href="{% url 'login'%}">Visit</button>
+              </div>
             </div>
           </div>
         </div>
-        <div class="trip__card">
-          <img src="" alt="" />
-          <div class="trip__details">
-            <p>Sitel, Puerto Princesa City</p>
-          c  <div class="booking__price">
-              <button class="book__now">Apply Now</button>
-              <button class="book__now">Visit</button>
+        <div class="col">
+          <div class="trip__card">
+            <img src="" alt="" class="img-fluid" />
+            <div class="trip__details">
+              <p>Sitel, Puerto Princesa City</p>
+              <div class="booking__price">
+                <button class="book__now" href="{% url 'login'%}">Apply Now</button>
+                <button class="book__now" href="{% url 'login'%}">Visit</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="view__all">
-        <button class="btn">View All</button>
+      <div class="view__all text-center mt-3">
+        <button class="btn" href="{% url 'login'%}">View All</button>
       </div>
     </div>
   </section>
-
-  <section class="gallary" id="gallery">
-    <div class="section__container gallary__container">
-      <div class="image__gallary">
-        <div class="gallary__col">
-          <img src="" alt="gallary" />
-        </div>
-        <div class="gallary__col">
-          <img src="" alt="gallary" />
-          <img src="" alt="gallary" />
-        </div>
-      </div>
-      <div class="gallary__content">
-        <div>
-          <h2 class="section__title">
-            Our trip gallary that will inspire you
-          </h2>
-          <p class="section__subtitle">
-            Explore your suitable and dream internships within Palawan. Here you
-          can find your right destination.
-          </p>
-          <button class="btn">View All</button>
-        </div>
-      </div>
-    </div>
-  </section>
+  
 
   <section class="section__container about__us" id="about-us">
-    <div class="section__headers">
-      <div class="header__contents">
-        <h2 class="section__titles">About Us</h2>
-        <p class="section__subtitles">
-          <button class="btn-learn-more">Learn more</button>
-        </p>
-      </div>
+    <div class="section__headers text-center">
+      <h2 class="section__titles">About Us</h2>
     </div>
     <div class="section__contents">
       <p>
         InternPal is a dynamic initiative designed to revolutionize the internship landscape in Palawan,
         providing valuable hands-on experience and networking opportunities essential for career growth.
         Our platform facilitates seamless connections between aspiring professionals and a wide array of internship opportunities 
-        across various industries. 
+        across various industries.
       </p>
       <p>
         By bridging the gap between students and organizations, InternPal is committed to fostering collaboration, 
@@ -201,23 +453,25 @@
       </p>
     </div>
   </section>
-
+  
   <section class="subscribe">
-    <div class="section__container subscribe__container">
+    <div class="section__container subscribe__container text-center">
       <div class="subscribe__content">
-        <h2 class="section__title">Need help? Contact us!</h2>
+        <h2 class="section__title">Need Help? Contact Us!</h2>
         <p class="section__subtitle">
-          Explore your suitable and dream internships within Palawan. Here you
-          can find your right destination.
+          Explore your suitable and dream internships within Palawan. Here you can find your right destination.
+        </p>
       </div>
       <div class="subscribe__form">
         <form>
-          <input type="email" placeholder="Your email here" />
-          <button class="btn" type="submit">Send</button>
+          <input type="email" placeholder="Your email here" class="form-control" />
+          <button class="btn mt-2" type="submit">Send</button>
         </form>
       </div>
     </div>
   </section>
+  
+  
 
   <footer class="footer">
     <div class="section__container footer__container">
@@ -238,7 +492,7 @@
         <h4>Address</h4>
         <p><span>Address:</span> Sta. Monica, NHA Ville, Puerto Princesa City</p>
         <p><span>Email:</span> psuinterpal@gmail.com</p>
-        <p><span>Phone:</span> 09123456789</p>
+        <p><span>Phone:</span> 0909-608-7338</p>
       </div>
       <div class="footer__col">
         <h4>Follow Us</h4>
@@ -256,19 +510,178 @@
   <div id="privacyPolicyModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal('privacyPolicyModal')">&times;</span>
-      <h2>Privacy Policy</h2>
-      <p>Your privacy policy content goes here.</p>
+      <h2 class="modal-title">Privacy Policy</h2>
+      <div class="modal-body">
+        <section>
+          <p>
+            At <strong>InternPal</strong>, your privacy is a priority. This Privacy Policy outlines how we collect, use, disclose, and safeguard your information when you use our platform.
+          </p>
+        </section>
+  
+        <hr>
+  
+        <section>
+          <h3>Information We Collect</h3>
+          <h4>Personal Information</h4>
+          <p>We may collect the following personal details:</p>
+          <ul>
+            <li>Full Name</li>
+            <li>Email Address</li>
+            <li>Contact Information</li>
+            <li>Organization Name (for agency users)</li>
+            <li>Internship Preferences (e.g., skills, career goals)</li>
+          </ul>
+  
+          <h4>Usage Data</h4>
+          <p>We collect information about your interactions with the platform, including:</p>
+          <ul>
+            <li>Internship applications submitted</li>
+            <li>Intern profiles reviewed by organizations</li>
+          </ul>
+  
+          <h4>Technical Data</h4>
+          <p>We may collect technical details like:</p>
+          <ul>
+            <li>Browser type and version</li>
+            <li>Device information (e.g., operating system)</li>
+            <li>IP address</li>
+          </ul>
+        </section>
+  
+        <hr>
+  
+        <section>
+          <h3>How We Use Your Information</h3>
+          <p>We use your data to:</p>
+          <ul>
+            <li>Enable students to find internships and organizations to post opportunities.</li>
+            <li>Enhance user experience and improve functionality.</li>
+            <li>Send notifications, updates, and responses to inquiries.</li>
+            <li>Maintain security and prevent unauthorized access.</li>
+            <li>Meet legal obligations and conduct anonymized research.</li>
+          </ul>
+        </section>
+  
+        <hr>
+  
+        <section>
+          <h3>How We Share Your Information</h3>
+          <p>We do not sell your personal data. Information may be shared with:</p>
+          <ul>
+            <li><strong>Service Providers:</strong> For data storage, hosting, and communication services.</li>
+            <li><strong>Legal Obligations:</strong> To comply with laws or respond to lawful requests.</li>
+            <li><strong>Aggregated Data:</strong> For research, analysis, or reporting purposes.</li>
+          </ul>
+        </section>
+  
+        <hr>
+  
+        <section>
+          <h3>Your Rights</h3>
+          <p>As a user, you can:</p>
+          <ul>
+            <li>Access and correct your data.</li>
+            <li>Request deletion of your data.</li>
+            <li>Withdraw consent for data processing.</li>
+          </ul>
+          <p>Contact us at <a href="mailto:psuinternpal@gmail.com">psuinternpal@gmail.com</a> to exercise these rights.</p>
+        </section>
+  
+        <hr>
+  
+        <section>
+          <h3>Contact Us</h3>
+          <p>If you have any questions, please contact us:</p>
+          <ul>
+            <li><strong>Email:</strong> <a href="mailto: psuinternpal@gmail.com">psuinternpal@gmail.com</a></li>
+            <li><strong>Phone:</strong> 0909-608-7338</li>
+          </ul>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-close" onclick="closeModal('privacyPolicyModal')">Close</button>
+      </div>
     </div>
   </div>
+  
 
   <!-- Terms & Conditions Modal -->
   <div id="termsConditionsModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal('termsConditionsModal')">&times;</span>
-      <h2>Terms & Conditions</h2>
-      <p>Your terms & conditions content goes here.</p>
+      <div class="modal-header">
+        <h2>Terms & Conditions</h2>
+      </div>
+      <div class="modal-body">
+        <p>Welcome to <strong>InternPal</strong>!</p>
+
+        <p>
+          We're delighted to welcome you to our platform connecting students with exciting internship opportunities. Below, you'll find our Terms of Service ("Terms") that explain how we operate and what you can expect from us. By using InternPal's website (the "Website") and its services (the "Services"), you agree to these Terms. If you have any questions or concerns, please reach out to us at <a href="mailto: psuinternpal@gmail.com">psunternpal@gmail.com</a>.
+        </p>
+        <h3>1. Getting Started</h3>
+        <ul>
+          <li><strong>Definitions:</strong></li>
+          <ul>
+            <li><strong>Student:</strong> Bright minds seeking internship opportunities.</li>
+            <li><strong>Internship:</strong> A chance to gain valuable experience and skills in your chosen field.</li>
+            <li><strong>Content:</strong> Anything you share on our platform, like information, data, text, graphics, and more.</li>
+          </ul>
+        </ul>
+  
+        <h3>2. Your Use of InternPal</h3>
+        <p>
+          You can use our platform to explore internship opportunities, view details, and choose the right internship that matches your interests and goals. By doing so, you agree to:
+        </p>
+        <ul>
+          <li>Keep your content respectful and legal.</li>
+          <li>Use the platform for its intended purpose, not for unauthorized or commercial activities.</li>
+          <li>Be yourself and avoid impersonation.</li>
+          <li>Maintain platform integrity by not disrupting operations.</li>
+        </ul>
+  
+        <h3>3. Your Account</h3>
+        <p>
+          You may need to create an account to access certain features. Keep your login details secure, as you're responsible for activities on your account.
+        </p>
+  
+        <h3>4. Your Content</h3>
+        <p>
+          You retain ownership of the content you share on InternPal but grant us permission to use it. We are not liable for the accuracy or quality of user-submitted content.
+        </p>
+  
+        <h3>5. Our Promise</h3>
+        <p>
+          We aim to provide a great experience. However, the Website and Services are provided "as-is," and we do not guarantee uninterrupted or error-free services.
+        </p>
+  
+        <h3>6. Limitation of Liability</h3>
+        <p>
+          InternPal cannot be held accountable for issues beyond the scope of its platform.
+        </p>
+  
+        <h3>7. Ending Things</h3>
+        <p>
+          We reserve the right to terminate access to InternPal if necessary, but we strive to notify users in advance unless circumstances prevent it.
+        </p>
+  
+        <h3>8. Data Handling</h3>
+        <p>
+          Your privacy matters. We handle your data responsibly in line with our <a href="#privacyPolicyModal">Privacy Policy</a>.
+        </p>
+  
+        <h3>9. Changes</h3>
+        <p>
+          We may update these Terms periodically. Updates will be posted on the Website, and continued use of InternPal signifies acceptance.
+        </p>
+  
+        <h3>10. Need Help?</h3>
+        <p>
+          If you have any questions, contact us at <a href="mailto: psunternpal@gmail.com">psuinternpal@gmail.com</a>.
+        </p>
+      </div>
     </div>
   </div>
+  
 
   <script>
 
@@ -355,9 +768,23 @@ if (sectionPosition < screenPosition) {
 });
 
 
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.querySelector('.nav__links');
+const loginButton = document.querySelector('.btn[href="{% url 'login' %}"]');
+const registerButton = document.querySelector('.btn[href="{% url 'initial_registration' %}"]');
 
-
-
+menuToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+    
+    // Show login and register buttons when navLinks are active
+    if (navLinks.classList.contains('active')) {
+        loginButton.style.display = 'block';
+        registerButton.style.display = 'block';
+    } else {
+        loginButton.style.display = 'none';
+        registerButton.style.display = 'none';
+    }
+});
   </script>
 </body>
 </html>

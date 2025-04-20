@@ -21,6 +21,7 @@ urlpatterns = [
     # path('org_details', views.org_details, name='org_details'),  
     path('organization_details', views.organization_registration, name='organization_details'),
     path('success/', views.success_view, name='success'),  # Add this line if not already present
+    path('success_student/', views.success_view_student, name='success_student'),  # Add this line if not already present
     
     path('organization_dashboard/', views.org_dashboard, name='organization_dashboard'),
     path('organization_post/', views.organization_post, name='organization_post'),
@@ -38,12 +39,14 @@ urlpatterns = [
     path('about_us_org/', views.about_us_org, name='about_us_org'),
     path('about_us/', views.about_us, name='about_us'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('organization/edit-profile/', views.edit_profile_org, name='edit_profile_org'),
     
     # * <<<<====================>>>>
     # ^ Student Dashboard
      
     path('home/', views.home, name='home'),
     path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
+    
     
     # * <<<<====================>>>>
     # ^ Student Status
@@ -65,7 +68,9 @@ urlpatterns = [
     
     # * <<<<====================>>>>
     # ^ Ajax URL
+    path('applications/<int:application_id>/send_email/', views.send_interview_email, name='send_interview_email'),
     path('get-applications/', views.get_applications, name='get_applications'),
+    
     
     
     
@@ -90,5 +95,19 @@ urlpatterns = [
     path('admin/organization/<int:id>/edit/', views.admin_edit_organization, name='admin_edit_organization'),
     path('admin/organization/<int:id>/delete/', views.admin_delete_organization, name='admin_delete_organization'),
     
+    path('admin/login/', views.admin_login, name='admin_login'),
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('departments/', views.admin_departments, name='admin_departments'),
+    path('advisors/', views.admin_advisors, name='admin_advisors'),
+    path('internship-dates/', views.admin_internship_dates, name='admin_internship_dates'),
+    path('account-approve/', views.admin_account_approve, name='admin_account_approve'),
+    path('account-decline/', views.admin_account_decline, name='admin_account_decline'),
+    path('intern-transactions/', views.admin_intern_transactions, name='admin_intern_transactions'),
+    path('view-internship/', views.admin_view_internship, name='admin_view_internship'),
+    path('confirm-internship/', views.admin_confirm_internship, name='admin_confirm_internship'),
     
+    path('internship_procedure/', views.internship_procedures_view, name='internship_procedures_view'),
+
+    path('approve_list/', views.approve_list, name='approve_list'),
+    path('decline_list/', views.decline_list, name='decline_list'),
 ]

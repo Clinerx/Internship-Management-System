@@ -1,0 +1,46 @@
+<!-- templates/admin/internship_procedures.html -->
+{% extends 'admin_folder/admin_base.html' %}
+
+{% block content %}
+<div id="internshipProceduresContent" class="section-card">
+    <h3>Internship Procedures</h3>
+  
+    <!-- View Internship Opportunities -->
+    <h4>View Internship Opportunities</h4>
+    <table class="table table-striped" id="internshipOpportunitiesTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Internship Title</th>
+          <th>Organization</th>
+          <th>Posted Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="internship-opportunities-body">
+        <!-- Dynamic rows will be populated here -->
+      </tbody>
+    </table>
+  
+    <!-- Confirm Internship Section -->
+    <h4>Confirm Internship</h4>
+    
+    <table class="table table-striped" id="confirmInternshipTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Internship Title</th>
+          <th>Organization</th>
+          <th>Posted Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="confirm-internship-body">
+        <!-- Dynamic rows will be populated here -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock content %}

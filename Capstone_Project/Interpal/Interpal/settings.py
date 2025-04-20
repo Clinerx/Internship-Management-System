@@ -120,6 +120,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -128,7 +131,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -162,12 +164,23 @@ LOGIN_URL = '/login/'
 # settings.py
 
 # Use Gmail's SMTP server
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Temporarily switch to console for testing
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'psuinterpal@gmail.com'  
-EMAIL_HOST_PASSWORD = 'yjjw tsxg wqfm gkkv'
+EMAIL_HOST_PASSWORD = 'zviy ttlc ymjh klyo'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default session engine
+
+
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+    'IMS.authentication.ApprovalBasedAuthenticationBackend',  # Add your custom backend here
+]
+
+
+INTERNSHIP_POSTING_LIMIT = 5
